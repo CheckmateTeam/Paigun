@@ -7,6 +7,11 @@ class UserInfo extends ChangeNotifier {
   Session? session = supabase.auth.currentSession;
   User? user = supabase.auth.currentUser;
 
+  get username async =>
+      await supabase.from('profiles').select('username').eq('id', user!.id);
+
+  get phone => user!.phone;
+
   Future<void> addNewUser(String phone, String name, String password) async {
     try {
       final UserResponse res = await supabase.auth.updateUser(
@@ -24,5 +29,19 @@ class UserInfo extends ChangeNotifier {
       print(e);
     }
     notifyListeners();
+  }
+
+  Future<void> signOut(BuildContext context) async {
+    try {
+      final response = await supabase.auth.signOut();
+      Navigator.of(context).pushReplacementNamed('/');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
   }
 }

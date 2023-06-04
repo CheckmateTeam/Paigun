@@ -60,7 +60,7 @@ class _SplashPageState extends State<SplashPage>
               children: [
                 const SizedBox(),
                 Image.asset(
-                  'images/logo.png',
+                  'assets/images/logo.png',
                   width: MediaQuery.of(context).size.width * 0.8,
                   height: MediaQuery.of(context).size.width * 0.8,
                 ),

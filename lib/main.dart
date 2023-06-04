@@ -3,11 +3,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:paigun/page/authentication/login.dart';
 import 'package:paigun/page/components/loading_screen.dart';
 import 'package:paigun/page/components/splash_screen.dart';
+import 'package:paigun/page/driver/component/createroute.dart';
 import 'package:paigun/page/passenger/home.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'provider/passenger.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +21,7 @@ Future<void> main() async {
   );
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => UserInfo()),
+    ChangeNotifierProvider(create: (_) => PassDB()),
   ], child: const MainApp()));
 }
 
@@ -47,6 +51,9 @@ class MainApp extends StatelessWidget {
         '/': (context) => const SplashPage(),
         '/login': (context) => const Login(),
         '/home': (context) => const PassengerHome(),
+        '/loading': (context) => const Loading(),
+        '/driver': (context) => const Placeholder(),
+        '/driver/create': (context) => const CreateRoute(),
       },
     );
   }

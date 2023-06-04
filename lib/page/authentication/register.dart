@@ -344,8 +344,8 @@ class _VerificationState extends State<Verification> {
                     final Session? session = res.session;
                     final User? user = res.user;
                     if (session != null && user != null) {
-                      context.read<UserInfo>().addNewUser(
-                          widget.phoneNo, widget.name, widget.password);
+                      context.read<UserInfo>().addNewUser(widget.phoneNo,
+                          widget.name, encryptPassword(widget.password));
                     }
                     // ignore: use_build_context_synchronously
                     showDialog(
@@ -387,7 +387,8 @@ class _VerificationState extends State<Verification> {
                                                     .primary),
                                       ),
                                       onPressed: () {
-                                        Navigator.pushNamed(context, '/home');
+                                        Navigator.pushNamedAndRemoveUntil(
+                                            context, '/home', (route) => false);
                                       },
                                       child: const Text('Let\'s start'),
                                     ),

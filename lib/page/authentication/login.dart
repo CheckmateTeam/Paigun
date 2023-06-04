@@ -170,8 +170,11 @@ class _LoginState extends State<Login> {
                                   );
                                   final Session? session = res.session;
                                   final User? user = res.user;
-                                  Navigator.pushNamed(context, '/');
+
+                                  Navigator.pushReplacementNamed(
+                                      context, '/loading');
                                 } catch (e) {
+                                  print(e.toString());
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                           content: Text(
@@ -437,7 +440,8 @@ class _VerificationState extends State<Verification> {
                     );
                     final Session? session = res.session;
                     final User? user = res.user;
-                    Navigator.pushNamed(context, '/');
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/loading', (_) => false);
                   } on AuthException catch (error) {
                     context.showErrorSnackBar(
                       message: error.message,

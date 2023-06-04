@@ -47,6 +47,7 @@ class MainApp extends StatelessWidget {
         '/': (context) => const SplashPage(),
         '/login': (context) => const Login(),
         '/home': (context) => const PassengerHome(),
+        '/loading': (context) => const Loading(),
       },
     );
   }

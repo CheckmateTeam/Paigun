@@ -2,6 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:paigun/provider/passenger.dart';
+import 'package:provider/provider.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -11,7 +15,11 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _controller = TextEditingController();
+  // ignore: non_constant_identifier_names
+  final TextEditingController _DestinationController = TextEditingController();
+  // ignore: non_constant_identifier_names
+  final TextEditingController _CurrentController = TextEditingController();
+  String focusText = 'Destination';
   Future<void> readJson() async {
     final String response =
         await rootBundle.loadString('assets/data/provinces.json');
@@ -27,6 +35,7 @@ class _SearchPageState extends State<SearchPage> {
 
   List _province = [];
   List _showProvince = [];
+
   @override
   void initState() {
     readJson();
@@ -45,16 +54,55 @@ class _SearchPageState extends State<SearchPage> {
           foregroundColor: Colors.black,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.pop(context, _controller.text);
+            onPressed: () async {
+              if (_CurrentController.text == '' &&
+                  _DestinationController.text == '') {
+                Navigator.pop(context);
+              } else if (_CurrentController.text == '' &&
+                  _DestinationController.text != '') {
+                LatLng _currPos = context.read<PassDB>().currentPosition;
+                List<Placemark> _currAddress = await placemarkFromCoordinates(
+                    _currPos.latitude, _currPos.longitude);
+                _currAddress[0].administrativeArea.toString() ==
+                        "Krung Thep Maha Nakhon"
+                    ? Navigator.pop(context, {
+                        'Current': 'Bangkok',
+                        'Destination': _DestinationController.text
+                      })
+                    : Navigator.pop(context, {
+                        'Current':
+                            _currAddress[0].administrativeArea.toString(),
+                        'Destination': _DestinationController.text
+                      });
+              } else {
+                Navigator.pop(context, {
+                  'Current': _CurrentController.text,
+                  'Destination': _DestinationController.text
+                });
+              }
             },
           ),
           title: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              const TextField(
-                showCursor: false,
-                decoration: InputDecoration(
+              TextField(
+                controller: _CurrentController,
+                onTap: () {
+                  setState(() {
+                    focusText = 'Current';
+                  });
+                },
+                onChanged: (value) {
+                  setState(() {
+                    _showProvince = _province
+                        .where((element) => element
+                            .toString()
+                            .toLowerCase()
+                            .contains(value.toLowerCase()))
+                        .toList();
+                  });
+                },
+                decoration: const InputDecoration(
                   hintText: 'Current Location',
                   filled: true,
                   fillColor: Color.fromARGB(255, 240, 240, 240),
@@ -68,7 +116,12 @@ class _SearchPageState extends State<SearchPage> {
               ),
               const SizedBox(height: 10),
               TextField(
-                controller: _controller,
+                controller: _DestinationController,
+                onTap: () {
+                  setState(() {
+                    focusText = 'Destination';
+                  });
+                },
                 onChanged: (value) {
                   print(_province.length);
                   setState(() {
@@ -105,7 +158,13 @@ class _SearchPageState extends State<SearchPage> {
                   itemBuilder: (context, index) {
                     return ListTile(
                       onTap: () {
-                        _controller.text = _showProvince[index].toString();
+                        if (focusText == 'Destination') {
+                          _DestinationController.text =
+                              _showProvince[index].toString();
+                        } else {
+                          _CurrentController.text =
+                              _showProvince[index].toString();
+                        }
                       },
                       title: Text(_showProvince[index].toString()),
                     );

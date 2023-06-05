@@ -19,32 +19,37 @@ class _HomeDrawerState extends State<HomeDrawer> {
     {
       'icon': Icons.home,
       'name': 'Home',
-      'path': '/home',
+      'path': 'home',
     },
     {
       'icon': Icons.chat_outlined,
       'name': 'Chat',
-      'path': '/chat',
+      'path': 'chat',
     },
     {
       'icon': Icons.history,
       'name': 'History',
-      'path': '/history',
+      'path': 'history',
     },
     {
       'icon': Icons.notifications_none_outlined,
       'name': 'Notification',
-      'path': '/notification',
+      'path': 'notification',
+    },
+    {
+      'icon': Icons.dashboard_outlined,
+      'name': 'Journey board',
+      'path': 'journeyboard',
     },
     {
       'icon': Icons.car_repair_outlined,
       'name': 'Driver mode',
-      'path': '/driver',
+      'path': 'driver',
     },
     {
       'icon': Icons.info_outline,
       'name': 'How to use?',
-      'path': '/howtouse',
+      'path': 'howtouse',
     }
   ];
 

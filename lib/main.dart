@@ -4,6 +4,7 @@ import 'package:paigun/page/authentication/login.dart';
 import 'package:paigun/page/components/loading_screen.dart';
 import 'package:paigun/page/components/splash_screen.dart';
 import 'package:paigun/page/driver/component/createroute.dart';
+import 'package:paigun/page/passenger/components/journeyboard.dart';
 import 'package:paigun/page/passenger/home.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
@@ -51,6 +52,7 @@ class MainApp extends StatelessWidget {
         '/': (context) => const SplashPage(),
         '/login': (context) => const Login(),
         '/home': (context) => const PassengerHome(),
+        '/journeyboard': (context) => const Journeyboard(),
         '/loading': (context) => const Loading(),
         '/driver': (context) => const Placeholder(),
         '/driver/create': (context) => const CreateRoute(),

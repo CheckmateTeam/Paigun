@@ -17,8 +17,8 @@ PreferredSize SizeAppbar(
           ],
           color: Colors.white,
           borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20))),
+              bottomLeft: Radius.circular(10),
+              bottomRight: Radius.circular(10))),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

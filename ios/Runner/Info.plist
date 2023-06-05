@@ -52,6 +52,9 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to location when in the background.</string>
 	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
-	
+	<string>
+		
+	</string>
+	<key>NSPhotoLibraryUsageDescription </key>
 </dict>
 </plist>

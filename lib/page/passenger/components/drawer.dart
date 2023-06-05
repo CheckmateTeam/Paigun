@@ -12,7 +12,7 @@ class HomeDrawer extends StatefulWidget {
 }
 
 class _HomeDrawerState extends State<HomeDrawer> {
-  bool _isVerified = false;
+  bool _isVerified = true;
   var faker = Faker();
 
   final List<Map<String, dynamic>> _items = [
@@ -223,7 +223,6 @@ Widget menuTile(Icon icon, String title, String path, BuildContext context,
                 ));
       },
     );
-    ;
   }
   return ListTile(
     title: Row(

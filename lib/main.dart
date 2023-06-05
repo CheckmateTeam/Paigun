@@ -5,12 +5,14 @@ import 'package:paigun/page/components/loading_screen.dart';
 import 'package:paigun/page/components/splash_screen.dart';
 import 'package:paigun/page/driver/component/createroute.dart';
 import 'package:paigun/page/passenger/components/journeyboard.dart';
+import 'package:paigun/page/driver/home.dart';
 import 'package:paigun/page/passenger/home.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'provider/driver.dart';
 import 'provider/passenger.dart';
 
 Future<void> main() async {
@@ -23,6 +25,7 @@ Future<void> main() async {
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => UserInfo()),
     ChangeNotifierProvider(create: (_) => PassDB()),
+    ChangeNotifierProvider(create: (_) => DriveDB()),
   ], child: const MainApp()));
 }
 
@@ -54,7 +57,7 @@ class MainApp extends StatelessWidget {
         '/home': (context) => const PassengerHome(),
         '/journeyboard': (context) => const Journeyboard(),
         '/loading': (context) => const Loading(),
-        '/driver': (context) => const Placeholder(),
+        '/driver': (context) => const DriverHome(),
         '/driver/create': (context) => const CreateRoute(),
       },
     );

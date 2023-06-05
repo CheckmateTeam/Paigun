@@ -12,39 +12,39 @@ class HomeDrawer extends StatefulWidget {
 }
 
 class _HomeDrawerState extends State<HomeDrawer> {
-  bool _isVerified = false;
+  bool _isVerified = true;
   var faker = Faker();
 
   final List<Map<String, dynamic>> _items = [
     {
       'icon': Icons.home,
       'name': 'Home',
-      'path': '/home',
+      'path': 'home',
     },
     {
       'icon': Icons.chat_outlined,
       'name': 'Chat',
-      'path': '/chat',
+      'path': 'chat',
     },
     {
       'icon': Icons.history,
       'name': 'History',
-      'path': '/history',
+      'path': 'history',
     },
     {
       'icon': Icons.notifications_none_outlined,
       'name': 'Notification',
-      'path': '/notification',
+      'path': 'notification',
     },
     {
       'icon': Icons.car_repair_outlined,
       'name': 'Driver mode',
-      'path': '/driver',
+      'path': 'driver',
     },
     {
       'icon': Icons.info_outline,
       'name': 'How to use?',
-      'path': '/howtouse',
+      'path': 'howtouse',
     }
   ];
 
@@ -218,7 +218,6 @@ Widget menuTile(Icon icon, String title, String path, BuildContext context,
                 ));
       },
     );
-    ;
   }
   return ListTile(
     title: Row(

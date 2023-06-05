@@ -73,8 +73,8 @@ class _PassengerHomeState extends State<PassengerHome> {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary,
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(40),
-                    topRight: Radius.circular(40),
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -93,7 +93,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                       const Icon(Icons.drag_handle_rounded,
                           color: Colors.black45, size: 30),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -148,7 +148,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 10),
+                              vertical: 5, horizontal: 15),
                           child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.white,

@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 
 import '../../components/sizeappbar.dart';
 
-class Journeyboard extends StatelessWidget {
-  const Journeyboard({super.key});
+class JourneyBoard extends StatelessWidget {
+  const JourneyBoard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -109,78 +109,85 @@ class Journeyboard extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/journeyboard/create');
+        },
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }
 
 Widget journeyTile(
     String origin, String destination, DateTime date, String status) {
-  return 
-      Container(
-          width: 170,
-          height: 170,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 6,
-                offset: Offset(0, 0), // Shadow position
+  return Container(
+      width: 170,
+      height: 170,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 6,
+            offset: Offset(0, 0), // Shadow position
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Container(
+              width: 50,
+              height: 50,
+              child: Image.asset("assets/images/journeyboardmock.png")),
+          Row(
+            children: [
+              const Icon(Icons.location_on_sharp),
+              Expanded(
+                child: Text(
+                  origin,
+                  style: GoogleFonts.nunito(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800]),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Row(
             children: [
-              Container(
-                  width: 50,
-                  height: 50,
-                  child: Image.asset("assets/images/journeyboardmock.png")),
-              Row(
-                children: [
-                  const Icon(Icons.location_on_sharp),
-                  Expanded(
-                    child: Text(
-                      origin,
-                      style: GoogleFonts.nunito(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[800]),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  const Icon(Icons.flag_rounded),
-                  Expanded(
-                    child: Text(
-                      destination,
-                      style: GoogleFonts.nunito(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                DateFormat('D MMMM dd yyyy').format(date),
-                style: GoogleFonts.nunito(
+              const Icon(Icons.flag_rounded),
+              Expanded(
+                child: Text(
+                  destination,
+                  style: GoogleFonts.nunito(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[500]),
+                    color: Colors.grey[800],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
-          ));
-    
-  
+          ),
+          Text(
+            DateFormat('D MMMM dd yyyy').format(date),
+            style: GoogleFonts.nunito(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[500]),
+          ),
+        ],
+      ));
 }

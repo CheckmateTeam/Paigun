@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'page/passenger/components/createjourney.dart';
 import 'provider/driver.dart';
 import 'provider/passenger.dart';
 
@@ -55,7 +56,8 @@ class MainApp extends StatelessWidget {
         '/': (context) => const SplashPage(),
         '/login': (context) => const Login(),
         '/home': (context) => const PassengerHome(),
-        '/journeyboard': (context) => const Journeyboard(),
+        '/journeyboard': (context) => const JourneyBoard(),
+        '/journeyboard/create': (context) => const CreateJourney(),
         '/loading': (context) => const Loading(),
         '/driver': (context) => const DriverHome(),
         '/driver/create': (context) => const CreateRoute(),

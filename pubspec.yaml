@@ -10,7 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   google_maps_flutter: ^2.2.8
-  geolocator: ^9.0.2
+  google_maps_flutter_web: ^0.5.0
+  place_picker: ^0.10.0
+  location: ^4.4.0
   geocoding: ^2.1.0
   custom_info_window: ^1.0.1
   supabase_flutter: ^1.10.1
@@ -23,7 +25,7 @@ dependencies:
   intl: ^0.18.1
   snapping_sheet: ^3.1.0
   progress_state_button: ^1.0.4
-  google_fonts: ^5.0.0
+  google_fonts: ^4.0.4
   intl_phone_field: ^3.1.0
 
 dev_dependencies:

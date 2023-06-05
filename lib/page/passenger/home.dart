@@ -5,11 +5,12 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:location/location.dart';
 import 'package:paigun/page/passenger/components/drawer.dart';
+import 'package:paigun/provider/passenger.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
@@ -31,7 +32,7 @@ class _PassengerHomeState extends State<PassengerHome> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final Set<Marker> _markers = {};
   final TextEditingController _searchController = TextEditingController();
-  String destination = '';
+  Map destination = {};
   @override
   void initState() {
     super.initState();
@@ -67,14 +68,10 @@ class _PassengerHomeState extends State<PassengerHome> {
                 grabbingContentOffset: GrabbingContentOffset.bottom,
               ),
             ],
-            grabbingHeight: MediaQuery.of(context).size.height * 0.08,
+            grabbingHeight: MediaQuery.of(context).size.height * 0.1,
             grabbing: Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary,
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 1,
-                  ),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(40),
                     topRight: Radius.circular(40),
@@ -95,12 +92,41 @@ class _PassengerHomeState extends State<PassengerHome> {
                     children: [
                       const Icon(Icons.drag_handle_rounded,
                           color: Colors.black45, size: 30),
-                      Text(
-                        'Nearby routes',
-                        style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.12,
+                            ),
+                            Text(
+                              'Nearby routes',
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.05,
+                              width: MediaQuery.of(context).size.width * 0.12,
+                              child: FloatingActionButton(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.white,
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                      context, '/driver/create');
+                                },
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 30,
+                                ),
+                              ),
+                            )
+                          ],
                         ),
                       ),
                     ],
@@ -232,8 +258,9 @@ class _PassengerHomeState extends State<PassengerHome> {
                                   builder: (context) => const SearchPage()),
                             );
                             // ignore: use_build_context_synchronously
-
-                            _searchController.text = destination;
+                            print(destination['Current']);
+                            print(destination['Destination']);
+                            _searchController.text = destination['Destination'];
                           },
                           textAlign: TextAlign.center,
                           textAlignVertical: TextAlignVertical.center,
@@ -290,7 +317,20 @@ class _MapComponentState extends State<MapComponent> {
   LatLng _currentLocation = const LatLng(0, 0);
   BitmapDescriptor markerIcon1 = BitmapDescriptor.defaultMarker;
   BitmapDescriptor markerIcon2 = BitmapDescriptor.defaultMarker;
+  String _GpsError = '';
 
+  //realtime gps tracking
+  // final LocationSettings locationSettings = LocationSettings(
+  //   accuracy: LocationAccuracy.high,
+  //   distanceFilter: 100,
+  // );
+  // StreamSubscription<Position> positionStream =
+  //     Geolocator.getPositionStream(locationSettings: locationSettings)
+  //         .listen((Position? position) {
+  //   print(position == null
+  //       ? 'Unknown'
+  //       : '${position.latitude.toString()}, ${position.longitude.toString()}');
+  // });
   void _addCustomMarker1() async {
     final ByteData bytes = await rootBundle.load('assets/images/marker1.png');
     final Uint8List list = bytes.buffer.asUint8List();
@@ -313,41 +353,45 @@ class _MapComponentState extends State<MapComponent> {
     markerIcon2 = BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
 
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
+  //location tracking
+  void _determinePosition() async {
+    bool _serviceEnabled;
+    PermissionStatus _permission;
+    Location location = Location();
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        _GpsError = 'Please enable GPS';
+        return;
       }
     }
 
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+    _permission = await location.hasPermission();
+    if (_permission == PermissionStatus.denied) {
+      _permission = await location.requestPermission();
+      if (_permission != PermissionStatus.granted) {
+        _GpsError = 'Please allow GPS permission';
+        return;
+      }
     }
 
-    return await Geolocator.getCurrentPosition();
+    location.onLocationChanged.listen((LocationData currentLocation) {
+      // Use current location
+      setState(() {
+        _currentLocation = LatLng(
+            currentLocation.latitude ?? 0, currentLocation.longitude ?? 0);
+        Provider.of<PassDB>(context, listen: false)
+            .updatePosition(_currentLocation);
+      });
+    });
   }
 
   @override
   void initState() {
     _addCustomMarker1();
     _addCustomMarker2();
-    _determinePosition().then((value) {
-      setState(() {
-        _currentLocation = LatLng(value.latitude, value.longitude);
-      });
-    }).catchError((e) {
-      print(e);
-    });
+    _determinePosition();
     super.initState();
   }
 
@@ -356,7 +400,7 @@ class _MapComponentState extends State<MapComponent> {
     return _currentLocation == const LatLng(0, 0)
         ? loadingGPS()
         : GoogleMap(
-            mapType: MapType.normal,
+            mapType: MapType.terrain,
             onMapCreated: (GoogleMapController controller) {
               controller.showMarkerInfoWindow(const MarkerId('current'));
               _MapController.complete(controller);
@@ -366,15 +410,6 @@ class _MapComponentState extends State<MapComponent> {
               zoom: 15,
             ),
             myLocationButtonEnabled: true,
-            // circles: {
-            //   Circle(
-            //       circleId: const CircleId('current'),
-            //       center: _currentLocation,
-            //       radius: 200,
-            //       fillColor: Colors.blue.withOpacity(0.1),
-            //       strokeColor: Colors.blue,
-            //       strokeWidth: 1)
-            // },
             markers: {
               //Current Location marker
               Marker(
@@ -407,12 +442,22 @@ class _MapComponentState extends State<MapComponent> {
               height: 20,
             ),
             Text(
-              'Waiting for GPS...',
+              _GpsError == '' ? "Waiting for GPS..." : _GpsError,
               style: GoogleFonts.nunito(
                   color: Theme.of(context).primaryColor,
                   fontSize: 20,
                   fontWeight: FontWeight.bold),
             ),
+            const SizedBox(
+              height: 20,
+            ),
+            IconButton.filled(
+              color: Theme.of(context).primaryColor,
+              icon: const Icon(Icons.refresh, color: Colors.white),
+              onPressed: () {
+                _determinePosition();
+              },
+            )
           ],
         ),
       ));

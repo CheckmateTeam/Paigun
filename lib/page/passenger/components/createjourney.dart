@@ -25,7 +25,7 @@ class _CreateJourneyState extends State<CreateJourney> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: SizeAppbar(context, 'Create journey',
-          () => Navigator.pushReplacementNamed(context, '/home')),
+          () => Navigator.pop(context)),
       body: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(

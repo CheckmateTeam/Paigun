@@ -21,6 +21,30 @@ class _JourneyBoardState extends State<JourneyBoard> {
   TextEditingController _DateController = TextEditingController();
   DateTime _routeDate = DateTime.now();
   Map selected = {};
+  List jsonData = [
+    {"name": "Bangkok", "age": 25, "city": "New York"},
+    {"name": "Jane", "age": 30, "city": "London"},
+    {"name": "Tom", "age": 35, "city": "Paris"},
+    {"name": "Emily", "age": 27, "city": "Tokyo"},
+    {"name": "Michael", "age": 32, "city": "Berlin"}
+  ];
+
+  Future<void> readJson() async {
+    setState(() async {
+      _journey = jsonData;
+      _showJourney = _journey;
+    });
+  }
+
+  List _journey = [];
+  List _showJourney = [];
+
+  @override
+  void initState() {
+    super.initState();
+    readJson();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +69,18 @@ class _JourneyBoardState extends State<JourneyBoard> {
                         MaterialPageRoute(
                             builder: (context) => const SearchPage()),
                       );
-                      _CurrentController.text = selected['selectedProvince'];
+                      _CurrentController.text =
+                          await selected['selectedProvince'];
+                      setState(() {
+                        _showJourney = _journey
+                            .where((element) => element['name']
+                                .toString()
+                                .toLowerCase()
+                                .contains(
+                                  _CurrentController.text.toLowerCase(),
+                                ))
+                            .toList();
+                      });
                     },
                     controller: _CurrentController,
                     showCursor: false,
@@ -75,6 +110,16 @@ class _JourneyBoardState extends State<JourneyBoard> {
                       );
                       _DestinationController.text =
                           selected['selectedProvince'];
+                      setState(() {
+                        _showJourney = _journey
+                            .where((element) => element['city']
+                                .toString()
+                                .toLowerCase()
+                                .contains(
+                                  _CurrentController.text.toLowerCase(),
+                                ))
+                            .toList();
+                      });
                     },
                     controller: _DestinationController,
                     decoration: const InputDecoration(
@@ -143,19 +188,22 @@ class _JourneyBoardState extends State<JourneyBoard> {
               ],
             ),
             const Divider(),
+            _showJourney.isNotEmpty? 
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
-                children: List.generate(5, (index) {
+                children: _showJourney.map((item) {
                   return Center(
                       child: journeyTile(
-                          faker.address.city(),
-                          faker.address.city(),
+                          item['name'].toString(),
+                          item['city'].toString(),
                           faker.date.dateTime(),
                           'close'));
-                }),
+                }).toList(),
               ),
-            ),
+            )
+            :
+            Center(child: Text("Not found"))
           ],
         ),
       ),
@@ -194,7 +242,7 @@ Widget journeyTile(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Container(
+          SizedBox(
               width: 50,
               height: 50,
               child: Image.asset("assets/images/journeyboardmock.png")),

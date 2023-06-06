@@ -69,8 +69,17 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
     if (_FromController.text.isNotEmpty && _ToController.text.isNotEmpty) {
       if (polylineCoordinates.isNotEmpty) {
         polylineCoordinates.clear();
+        _markers.clear();
       }
 
+      _markers.add(Marker(
+          markerId: const MarkerId('From'),
+          position: _FromPosition,
+          infoWindow: InfoWindow(title: _FromFull, snippet: _FromPlace)));
+      _markers.add(Marker(
+          markerId: const MarkerId('To'),
+          position: _ToPosition,
+          infoWindow: InfoWindow(title: _ToFull, snippet: _ToPlace)));
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         dotenv.env['GOOGLEMAP_KEY'] ?? '',
         PointLatLng(_FromPosition.latitude, _FromPosition.longitude),

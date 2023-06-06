@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'page/passenger/components/createjourney.dart';
+import 'page/passenger/components/routedetail.dart';
 import 'provider/driver.dart';
 import 'provider/passenger.dart';
 
@@ -59,6 +60,9 @@ class MainApp extends StatelessWidget {
         '/journeyboard': (context) => const JourneyBoard(),
         '/journeyboard/create': (context) => const CreateJourney(),
         '/loading': (context) => const Loading(),
+        '/passenger/routedetail': (context) => const RouteDetail(
+              routeid: '',
+            ),
         '/driver': (context) => const DriverHome(),
         '/driver/create': (context) => const CreateRoute(),
       },

@@ -36,6 +36,7 @@ class _PassengerHomeState extends State<PassengerHome> {
   @override
   void initState() {
     super.initState();
+    Provider.of<UserInfo>(context, listen: false).getUserInfo();
   }
 
   @override

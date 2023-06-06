@@ -52,9 +52,16 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to location when in the background.</string>
 	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
-	<string>
-		
-	</string>
+	<dict>
+		<key>NSLocationTemporaryUsageDescriptionDictionaryKey</key>
+		<string>This app needs access to location when open.</string>
+	</dict>
+
 	<key>NSPhotoLibraryUsageDescription </key>
+	<string>Need to photo library access</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Need to camera access</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Need to microphone access</string>
 </dict>
 </plist>

@@ -155,11 +155,17 @@ class _UserProfileState extends State<UserProfile> {
                   borderRadius: BorderRadius.circular(50),
                   child: Container(
                     color: Colors.grey[300],
-                    child: Image.network(
-                      context.watch<UserInfo>().userinfo['avatar_url'],
-                      width: 100,
-                      height: 100,
-                    ),
+                    child: context.read<UserInfo>().userinfo['avatar_url'] == ""
+                        ? Image.asset(
+                            'assets/images/avatarmock.png',
+                            width: 100,
+                            height: 100,
+                          )
+                        : Image.network(
+                            context.watch<UserInfo>().userinfo['avatar_url'],
+                            width: 100,
+                            height: 100,
+                          ),
                   ),
                 ),
               ),

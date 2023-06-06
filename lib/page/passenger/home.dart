@@ -10,6 +10,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:paigun/page/passenger/components/drawer.dart';
+import 'package:paigun/page/passenger/components/routedetail.dart';
 import 'package:paigun/provider/passenger.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +37,7 @@ class _PassengerHomeState extends State<PassengerHome> {
   @override
   void initState() {
     super.initState();
+    Provider.of<UserInfo>(context, listen: false).getUserInfo();
   }
 
   @override
@@ -133,7 +135,6 @@ class _PassengerHomeState extends State<PassengerHome> {
                   ),
                 )),
             sheetBelow: SnappingSheetContent(
-              childScrollController: _myScrollController,
               draggable: true,
               child: ListView(
                 reverse: false,
@@ -164,7 +165,13 @@ class _PassengerHomeState extends State<PassengerHome> {
                                 ],
                               ),
                               child: ListTile(
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.push(context,
+                                      MaterialPageRoute(builder: (context) {
+                                    return RouteDetail(
+                                        routeid: faker.guid.guid());
+                                  }));
+                                },
                                 leading: const Icon(Icons.call_split_rounded),
                                 title: Row(
                                   mainAxisAlignment:
@@ -318,19 +325,8 @@ class _MapComponentState extends State<MapComponent> {
   BitmapDescriptor markerIcon1 = BitmapDescriptor.defaultMarker;
   BitmapDescriptor markerIcon2 = BitmapDescriptor.defaultMarker;
   String _GpsError = '';
+  MapType _currentMapType = MapType.normal;
 
-  //realtime gps tracking
-  // final LocationSettings locationSettings = LocationSettings(
-  //   accuracy: LocationAccuracy.high,
-  //   distanceFilter: 100,
-  // );
-  // StreamSubscription<Position> positionStream =
-  //     Geolocator.getPositionStream(locationSettings: locationSettings)
-  //         .listen((Position? position) {
-  //   print(position == null
-  //       ? 'Unknown'
-  //       : '${position.latitude.toString()}, ${position.longitude.toString()}');
-  // });
   void _addCustomMarker1() async {
     final ByteData bytes = await rootBundle.load('assets/images/marker1.png');
     final Uint8List list = bytes.buffer.asUint8List();
@@ -387,6 +383,32 @@ class _MapComponentState extends State<MapComponent> {
     });
   }
 
+  Future<void> _goToCurrent() async {
+    final GoogleMapController controller = await _MapController.future;
+    await controller.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: _currentLocation,
+        zoom: 15,
+      ),
+    ));
+  }
+
+  Future<void> _changeTerrain() async {
+    final GoogleMapController controller = await _MapController.future;
+    setState(() {
+      if (_currentMapType == MapType.normal) {
+        _currentMapType = MapType.satellite;
+      } else
+        _currentMapType = MapType.normal;
+    });
+    await controller.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: _currentLocation,
+        zoom: 16,
+      ),
+    ));
+  }
+
   @override
   void initState() {
     _addCustomMarker1();
@@ -399,29 +421,81 @@ class _MapComponentState extends State<MapComponent> {
   Widget build(BuildContext context) {
     return _currentLocation == const LatLng(0, 0)
         ? loadingGPS()
-        : GoogleMap(
-            mapType: MapType.terrain,
-            onMapCreated: (GoogleMapController controller) {
-              controller.showMarkerInfoWindow(const MarkerId('current'));
-              _MapController.complete(controller);
-            },
-            initialCameraPosition: CameraPosition(
-              target: _currentLocation,
-              zoom: 15,
-            ),
-            myLocationButtonEnabled: true,
-            markers: {
-              //Current Location marker
-              Marker(
-                icon: markerIcon1,
-                markerId: const MarkerId('current'),
-                position: _currentLocation,
-                infoWindow: const InfoWindow(title: 'My location'),
+        : Stack(children: <Widget>[
+            GoogleMap(
+              mapType: _currentMapType,
+              onMapCreated: (GoogleMapController controller) {
+                _MapController.complete(controller);
+                controller.showMarkerInfoWindow(const MarkerId('current'));
+              },
+              initialCameraPosition: CameraPosition(
+                target: _currentLocation,
+                zoom: 15,
               ),
+              myLocationButtonEnabled: true,
+              markers: {
+                //Current Location marker
+                Marker(
+                  icon: markerIcon1,
+                  markerId: const MarkerId('current'),
+                  position: _currentLocation,
+                  infoWindow: const InfoWindow(title: 'My location'),
+                ),
 
-              //Other markers
-            },
-          );
+                //Other markers
+              },
+            ),
+            Positioned(
+              top: MediaQuery.of(context).size.height * 0.15,
+              right: 20,
+              child: Container(
+                width: 50,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          _changeTerrain();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Icon(
+                            Icons.traffic_outlined,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      Divider(),
+                      GestureDetector(
+                        onTap: () {
+                          _goToCurrent();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Icon(
+                            Icons.my_location,
+                            color: Colors.black,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            )
+          ]);
   }
 
   Widget loadingGPS() => SizedBox(

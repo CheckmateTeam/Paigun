@@ -35,6 +35,11 @@ class _HomeDrawerState extends State<HomeDrawer> {
       'path': 'notification',
     },
     {
+      'icon': Icons.dashboard_outlined,
+      'name': 'Journey board',
+      'path': 'journeyboard',
+    },
+    {
       'icon': Icons.car_repair_outlined,
       'name': 'Driver mode',
       'path': 'driver',

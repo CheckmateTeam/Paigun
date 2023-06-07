@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../function/show_snackbar.dart';
+import '../../provider/userinfo.dart';
 
 class Loading extends StatefulWidget {
   const Loading({super.key});
@@ -40,6 +42,7 @@ class _LoadingState extends State<Loading> with SingleTickerProviderStateMixin {
 
     _redirectCalled = true;
     final session = supabase.auth.currentSession;
+    await Provider.of<UserInfo>(context, listen: false).getUserInfo();
     if (session != null) {
       Navigator.of(context).popAndPushNamed('/home');
     } else {

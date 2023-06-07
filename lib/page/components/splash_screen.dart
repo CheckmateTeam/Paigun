@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../function/show_snackbar.dart';
+import '../../provider/userinfo.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -42,6 +44,7 @@ class _SplashPageState extends State<SplashPage>
 
     _redirectCalled = true;
     final session = supabase.auth.currentSession;
+    await Provider.of<UserInfo>(context, listen: false).getUserInfo();
     if (session != null) {
       Navigator.of(context).pushReplacementNamed('/home');
     } else {

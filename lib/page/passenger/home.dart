@@ -37,7 +37,6 @@ class _PassengerHomeState extends State<PassengerHome> {
   @override
   void initState() {
     super.initState();
-    Provider.of<UserInfo>(context, listen: false).getUserInfo();
   }
 
   @override
@@ -351,35 +350,36 @@ class _MapComponentState extends State<MapComponent> {
 
   //location tracking
   void _determinePosition() async {
-    bool _serviceEnabled;
-    PermissionStatus _permission;
+    bool serviceEnabled;
+    PermissionStatus permission;
     Location location = Location();
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
         _GpsError = 'Please enable GPS';
         return;
       }
     }
 
-    _permission = await location.hasPermission();
-    if (_permission == PermissionStatus.denied) {
-      _permission = await location.requestPermission();
-      if (_permission != PermissionStatus.granted) {
+    permission = await location.hasPermission();
+    if (permission == PermissionStatus.denied) {
+      permission = await location.requestPermission();
+      if (permission != PermissionStatus.granted) {
         _GpsError = 'Please allow GPS permission';
         return;
       }
     }
 
     location.onLocationChanged.listen((LocationData currentLocation) {
-      // Use current location
-      setState(() {
-        _currentLocation = LatLng(
-            currentLocation.latitude ?? 0, currentLocation.longitude ?? 0);
-        Provider.of<PassDB>(context, listen: false)
-            .updatePosition(_currentLocation);
-      });
+      if (mounted) {
+        super.setState(() {
+          _currentLocation = LatLng(
+              currentLocation.latitude ?? 0, currentLocation.longitude ?? 0);
+          Provider.of<PassDB>(context, listen: false)
+              .updatePosition(_currentLocation);
+        });
+      }
     });
   }
 
@@ -411,10 +411,16 @@ class _MapComponentState extends State<MapComponent> {
 
   @override
   void initState() {
+    super.initState();
     _addCustomMarker1();
     _addCustomMarker2();
     _determinePosition();
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override

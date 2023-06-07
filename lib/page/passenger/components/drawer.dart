@@ -2,6 +2,7 @@ import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
 
@@ -97,6 +98,7 @@ class _UserProfileState extends State<UserProfile> {
   bool _isVerified = true;
   TextEditingController _firstname = TextEditingController();
   TextEditingController _lastname = TextEditingController();
+  bool _imageLoading = false;
   var faker = Faker();
   @override
   Widget build(BuildContext context) {
@@ -124,12 +126,23 @@ class _UserProfileState extends State<UserProfile> {
                                 onTap: () async {
                                   final XFile? image = await imgPicker
                                       .pickImage(source: ImageSource.camera);
+
                                   if (image != null) {
+                                    setState(() {
+                                      _imageLoading = true;
+                                    });
+                                    // ignore: use_build_context_synchronously
+                                    loadingDialog(context, _imageLoading,
+                                        'Uploading image');
                                     await context
                                         .read<UserInfo>()
                                         .updateProfileImage(image.path);
+                                    setState(() {
+                                      _imageLoading = false;
+                                    });
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
                                   }
-                                  Navigator.of(context).pop();
                                 },
                               ),
                               ListTile(
@@ -139,11 +152,23 @@ class _UserProfileState extends State<UserProfile> {
                                   final XFile? image = await imgPicker
                                       .pickImage(source: ImageSource.gallery);
                                   if (image != null) {
+                                    setState(() {
+                                      _imageLoading = true;
+                                    });
+
+                                    // ignore: use_build_context_synchronously
+                                    loadingDialog(context, _imageLoading,
+                                        'Uploading image');
                                     await context
                                         .read<UserInfo>()
                                         .updateProfileImage(image.path);
+
+                                    setState(() {
+                                      _imageLoading = false;
+                                    });
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
                                   }
-                                  Navigator.of(context).pop();
                                 },
                               )
                             ],
@@ -155,7 +180,10 @@ class _UserProfileState extends State<UserProfile> {
                   borderRadius: BorderRadius.circular(50),
                   child: Container(
                     color: Colors.grey[300],
-                    child: context.read<UserInfo>().userinfo['avatar_url'] == ""
+                    child: [
+                      '',
+                      null,
+                    ].contains(context.read<UserInfo>().userinfo['avatar_url'])
                         ? Image.asset(
                             'assets/images/avatarmock.png',
                             width: 100,
@@ -264,10 +292,10 @@ class _UserProfileState extends State<UserProfile> {
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
+                          const Row(
                             children: [
                               Icon(Icons.info_outline),
-                              const SizedBox(
+                              SizedBox(
                                 width: 10,
                               ),
                               Column(

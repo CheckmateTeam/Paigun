@@ -1,12 +1,49 @@
+import 'dart:convert';
+
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../components/sizeappbar.dart';
 
-class JourneyBoard extends StatelessWidget {
+class JourneyBoard extends StatefulWidget {
   const JourneyBoard({super.key});
+
+  @override
+  State<JourneyBoard> createState() => _JourneyBoardState();
+}
+
+class _JourneyBoardState extends State<JourneyBoard> {
+  TextEditingController _CurrentController = TextEditingController();
+  TextEditingController _DestinationController = TextEditingController();
+  TextEditingController _DateController = TextEditingController();
+  DateTime _routeDate = DateTime.now();
+  Map selected = {};
+  List jsonData = [
+    {"name": "Bangkok", "age": 25, "city": "New York"},
+    {"name": "Jane", "age": 30, "city": "London"},
+    {"name": "Tom", "age": 35, "city": "Paris"},
+    {"name": "Emily", "age": 27, "city": "Tokyo"},
+    {"name": "Michael", "age": 32, "city": "Berlin"}
+  ];
+
+  Future<void> readJson() async {
+    setState(() async {
+      _journey = jsonData;
+      _showJourney = _journey;
+    });
+  }
+
+  List _journey = [];
+  List _showJourney = [];
+
+  @override
+  void initState() {
+    super.initState();
+    readJson();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +61,30 @@ class JourneyBoard extends StatelessWidget {
               children: [
                 Container(
                   margin: const EdgeInsets.all(5.0),
-                  child: const TextField(
+                  child: TextField(
+                    readOnly: true,
+                    onTap: () async {
+                      selected = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SearchPage()),
+                      );
+                      _CurrentController.text =
+                          await selected['selectedProvince'];
+                      setState(() {
+                        _showJourney = _journey
+                            .where((element) => element['name']
+                                .toString()
+                                .toLowerCase()
+                                .contains(
+                                  _CurrentController.text.toLowerCase(),
+                                ))
+                            .toList();
+                      });
+                    },
+                    controller: _CurrentController,
                     showCursor: false,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 11),
                       hintText: 'Current Location',
                       filled: true,
@@ -42,20 +100,29 @@ class JourneyBoard extends StatelessWidget {
                 ),
                 Container(
                   margin: const EdgeInsets.all(5.0),
-                  child: const TextField(
-                    // controller: _controller,
-                    // onChanged: (value) {
-                    //   print(_province.length);
-                    //   setState(() {
-                    //     _showProvince = _province
-                    //         .where((element) => element
-                    //             .toString()
-                    //             .toLowerCase()
-                    //             .contains(value.toLowerCase()))
-                    //         .toList();
-                    //   });
-                    // },
-                    decoration: InputDecoration(
+                  child: TextField(
+                    readOnly: true,
+                    onTap: () async {
+                      selected = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SearchPage()),
+                      );
+                      _DestinationController.text =
+                          selected['selectedProvince'];
+                      setState(() {
+                        _showJourney = _journey
+                            .where((element) => element['city']
+                                .toString()
+                                .toLowerCase()
+                                .contains(
+                                  _CurrentController.text.toLowerCase(),
+                                ))
+                            .toList();
+                      });
+                    },
+                    controller: _DestinationController,
+                    decoration: const InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 11),
                       hintText: 'Destination',
                       filled: true,
@@ -74,11 +141,39 @@ class JourneyBoard extends StatelessWidget {
                 ),
                 Container(
                   margin: const EdgeInsets.all(5.0),
-                  child: const TextField(
+                  child: TextField(
+                    readOnly: true,
+                    controller: _DateController,
+                    onTap: () async {
+                      DateTime? selectDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate:
+                              DateTime.now().subtract(const Duration(days: 1)),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 365)));
+                      if (selectDate != null) {
+                        // ignore: use_build_context_synchronously
+                        TimeOfDay? selectTime = await showTimePicker(
+                            context: context, initialTime: TimeOfDay.now());
+                        if (selectTime != null) {
+                          DateTime dateTime = DateTime(
+                              selectDate.year,
+                              selectDate.month,
+                              selectDate.day,
+                              selectTime.hour,
+                              selectTime.minute);
+                          _routeDate = dateTime;
+                          _DateController.text =
+                              DateFormat('E, d MMMM yyyy HH:mm a')
+                                  .format(dateTime);
+                        }
+                      }
+                    },
                     showCursor: false,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 11),
-                      hintText: 'Current Location',
+                      hintText: 'Date and time',
                       filled: true,
                       fillColor: Color.fromARGB(255, 240, 240, 240),
                       border: OutlineInputBorder(
@@ -93,19 +188,22 @@ class JourneyBoard extends StatelessWidget {
               ],
             ),
             const Divider(),
+            _showJourney.isNotEmpty? 
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
-                children: List.generate(5, (index) {
+                children: _showJourney.map((item) {
                   return Center(
                       child: journeyTile(
-                          faker.address.city(),
-                          faker.address.city(),
+                          item['name'].toString(),
+                          item['city'].toString(),
                           faker.date.dateTime(),
                           'close'));
-                }),
+                }).toList(),
               ),
-            ),
+            )
+            :
+            Center(child: Text("Not found"))
           ],
         ),
       ),
@@ -144,7 +242,7 @@ Widget journeyTile(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Container(
+          SizedBox(
               width: 50,
               height: 50,
               child: Image.asset("assets/images/journeyboardmock.png")),
@@ -190,4 +288,97 @@ Widget journeyTile(
           ),
         ],
       ));
+}
+
+class SearchPage extends StatefulWidget {
+  const SearchPage({super.key});
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  // ignore: non_constant_identifier_names
+  final TextEditingController _SelectedController = TextEditingController();
+  Future<void> readJson() async {
+    final String response =
+        await rootBundle.loadString('assets/data/provinces.json');
+    final data = await json.decode(response);
+    setState(() {
+      _province = data;
+      _province = _province.map((e) {
+        return e['provinceNameEn'];
+      }).toList();
+      _showProvince = _province;
+    });
+  }
+
+  List _province = [];
+  List _showProvince = [];
+
+  @override
+  void initState() {
+    readJson();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+          elevation: 0.8,
+          bottomOpacity: 0.1,
+          shadowColor: const Color.fromARGB(255, 255, 255, 255),
+          foregroundColor: Colors.black,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () async {
+              Navigator.pop(context);
+            },
+          ),
+          title: TextField(
+            controller: _SelectedController,
+            onChanged: (value) {
+              setState(() {
+                _showProvince = _province
+                    .where((element) => element
+                        .toString()
+                        .toLowerCase()
+                        .contains(value.toLowerCase()))
+                    .toList();
+              });
+            },
+            decoration: const InputDecoration(
+              hintText: 'Find the province',
+              filled: true,
+              fillColor: Color.fromARGB(255, 240, 240, 240),
+              border: OutlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              prefixIcon: Icon(Icons.location_pin, color: Colors.blueAccent),
+            ),
+          ),
+        ),
+        body: Container(
+          child: _showProvince.isNotEmpty
+              ? ListView.builder(
+                  itemCount: _showProvince.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      onTap: () {
+                        _SelectedController.text =
+                            _showProvince[index].toString();
+                        Navigator.pop(context,
+                            {'selectedProvince': _SelectedController.text});
+                      },
+                      title: Text(_showProvince[index].toString()),
+                    );
+                  },
+                )
+              : Container(),
+        ));
+  }
 }

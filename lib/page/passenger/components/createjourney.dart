@@ -3,6 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 
 import '../../components/sizeappbar.dart';
+import 'journeyboard.dart';
 
 class CreateJourney extends StatefulWidget {
   const CreateJourney({super.key});
@@ -18,12 +19,13 @@ class _CreateJourneyState extends State<CreateJourney> {
   TextEditingController _NoteController = TextEditingController();
   bool _submitLoading = false;
   DateTime _routeDate = DateTime.now();
+  Map selected = {};
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: SizeAppbar(context, 'Create journey',
-          () => Navigator.pushReplacementNamed(context, '/home')),
+          () => Navigator.pop(context)),
       body: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -35,6 +37,15 @@ class _CreateJourneyState extends State<CreateJourney> {
                     Expanded(
                       child: TextField(
                         controller: _FromController,
+                        readOnly: true,
+                        onTap: () async {
+                          selected = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const SearchPage()),
+                          );
+                          _FromController.text = selected['selectedProvince'];
+                        },
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'From',
@@ -49,6 +60,15 @@ class _CreateJourneyState extends State<CreateJourney> {
                     Expanded(
                       child: TextField(
                         controller: _ToController,
+                        readOnly: true,
+                        onTap: () async {
+                          selected = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const SearchPage()),
+                          );
+                          _ToController.text = selected['selectedProvince'];
+                        },
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'To',

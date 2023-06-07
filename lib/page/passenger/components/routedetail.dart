@@ -1,20 +1,24 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:paigun/page/components/sizeappbar.dart';
+import 'package:intl/intl.dart';
+
 import 'package:paigun/page/components/styledialog.dart';
-import 'package:paigun/provider/userinfo.dart';
-import 'package:provider/provider.dart';
 
 class RouteDetail extends StatefulWidget {
-  const RouteDetail({super.key, required String routeid});
+  final String driverid;
+  final Map info;
+  const RouteDetail({
+    Key? key,
+    required this.driverid,
+    required this.info,
+  }) : super(key: key);
 
   @override
   State<RouteDetail> createState() => _RouteDetailState();
@@ -33,8 +37,10 @@ class _RouteDetailState extends State<RouteDetail> {
   void createRoutePoint() async {
     PolylinePoints polylinePoints = PolylinePoints();
 
-    LatLng _FromPosition = const LatLng(13.736717, 100.523186);
-    LatLng _ToPosition = const LatLng(20.736717, 105.523186);
+    LatLng _FromPosition = LatLng(double.parse(widget.info['origin_lat']),
+        double.parse(widget.info['origin_lng']));
+    LatLng _ToPosition = LatLng(double.parse(widget.info['destination_lat']),
+        double.parse(widget.info['destination_lng']));
 
     _markers.add(Marker(
       markerId: const MarkerId('From'),
@@ -228,7 +234,7 @@ class _RouteDetailState extends State<RouteDetail> {
                                       fontWeight: FontWeight.w500,
                                       color: Colors.grey[600],
                                     )),
-                                Text('Bangkok',
+                                Text(widget.info['origin_province'],
                                     style: GoogleFonts.nunito(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -253,7 +259,14 @@ class _RouteDetailState extends State<RouteDetail> {
                                       fontWeight: FontWeight.w500,
                                       color: Colors.grey[600],
                                     )),
-                                Text('Chiang Mai',
+                                Text(
+                                    widget.info['destination_province']
+                                            .toString()
+                                            .contains("Chang Wat")
+                                        ? widget.info['destination_province']
+                                            .toString()
+                                            .split("Chang Wat ")[1]
+                                        : widget.info['destination_province'],
                                     style: GoogleFonts.nunito(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -283,7 +296,10 @@ class _RouteDetailState extends State<RouteDetail> {
                                 ),
                               ],
                             ),
-                            Text('Saturday, 20 March 2021, 10:00 AM',
+                            Text(
+                                DateFormat("EEEE, dd MMMM yyyy, HH:mm")
+                                    .format(DateTime.parse(widget.info['date']))
+                                    .toString(),
                                 style: GoogleFonts.nunito(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -318,7 +334,9 @@ class _RouteDetailState extends State<RouteDetail> {
                                         ),
                                       ],
                                     ),
-                                    Text('4',
+                                    Text(
+                                        widget.info['available_seat']
+                                            .toString(),
                                         style: GoogleFonts.nunito(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
@@ -346,7 +364,7 @@ class _RouteDetailState extends State<RouteDetail> {
                                         ),
                                       ],
                                     ),
-                                    Text('Honda',
+                                    Text(widget.info['car_brand'],
                                         style: GoogleFonts.nunito(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
@@ -380,7 +398,7 @@ class _RouteDetailState extends State<RouteDetail> {
                                         ),
                                       ],
                                     ),
-                                    Text('200 baht',
+                                    Text(widget.info['price_seat'].toString(),
                                         style: GoogleFonts.nunito(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
@@ -408,7 +426,7 @@ class _RouteDetailState extends State<RouteDetail> {
                                         ),
                                       ],
                                     ),
-                                    Text('Civic',
+                                    Text(widget.info['car_model'],
                                         style: GoogleFonts.nunito(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,

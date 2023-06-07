@@ -191,6 +191,12 @@ class _UserProfileState extends State<UserProfile> {
                           )
                         : Image.network(
                             context.watch<UserInfo>().userinfo['avatar_url'],
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
                             width: 100,
                             height: 100,
                           ),

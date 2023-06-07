@@ -11,24 +11,27 @@ class DriveDB extends ChangeNotifier {
 
   Future<dynamic> CreateRoute(Journey journey) async {
     try {
-      print(journey.time);
-      // final response = await supabase.from('journeys').insert([
-      //   {
-      //     'start': journey.start,
-      //     'end': journey.end,
-      //     'time': journey.time,
-      //     'seat': journey.seat,
-      //     'price': journey.price,
-      //     'car_brand': journey.carBrand,
-      //     'car_model': journey.carModel,
-      //     'note': journey.note,
-      //   }
-      // ]);
-      // return response;
-      return "success";
+      final response = await supabase.from('journey').insert([
+        {
+          'owner': user!.id,
+          'origin_lat': journey.start.latitude,
+          'destination_lat': journey.end.latitude,
+          'origin_lng': journey.start.longitude,
+          'destination_lng': journey.end.longitude,
+          'origin_province': journey.startProvince,
+          'destination_province': journey.endProvince,
+          'date': journey.time.toIso8601String(),
+          'available_seat': journey.seat,
+          'price_seat': journey.price,
+          'car_brand': journey.carBrand,
+          'car_model': journey.carModel,
+          'status': "available",
+          'note': journey.note,
+        }
+      ]);
+      return 'success';
     } catch (e) {
-      print(e);
+      return 'failed';
     }
-    notifyListeners();
   }
 }

@@ -144,7 +144,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                     ),
                     height: MediaQuery.of(context).size.height,
                     child: ListView.builder(
-                      itemCount: 30,
+                      itemCount: context.watch<PassDB>().journey.length,
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(
@@ -168,7 +168,12 @@ class _PassengerHomeState extends State<PassengerHome> {
                                   Navigator.push(context,
                                       MaterialPageRoute(builder: (context) {
                                     return RouteDetail(
-                                        routeid: faker.guid.guid());
+                                      driverid: context
+                                          .read<PassDB>()
+                                          .journey[index]['owner'],
+                                      info:
+                                          context.read<PassDB>().journey[index],
+                                    );
                                   }));
                                 },
                                 leading: const Icon(Icons.call_split_rounded),
@@ -177,7 +182,20 @@ class _PassengerHomeState extends State<PassengerHome> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     Text(
-                                      faker.address.country(),
+                                      context
+                                              .read<PassDB>()
+                                              .journey[index]['origin_province']
+                                              .toString()
+                                              .contains('Chang Wat')
+                                          ? context
+                                              .read<PassDB>()
+                                              .journey[index]['origin_province']
+                                              .toString()
+                                              .split("Chang Wat ")[1]
+                                          : context
+                                              .read<PassDB>()
+                                              .journey[index]['origin_province']
+                                              .toString(),
                                       style: GoogleFonts.nunito(
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold,
@@ -187,7 +205,23 @@ class _PassengerHomeState extends State<PassengerHome> {
                                     Icon(Icons.arrow_right_alt_rounded,
                                         color: Colors.black),
                                     Text(
-                                      faker.address.country(),
+                                      context
+                                              .read<PassDB>()
+                                              .journey[index]
+                                                  ['destination_province']
+                                              .toString()
+                                              .contains('Chang Wat')
+                                          ? context
+                                              .read<PassDB>()
+                                              .journey[index]
+                                                  ['destination_province']
+                                              .toString()
+                                              .split("Chang Wat ")[1]
+                                          : context
+                                              .read<PassDB>()
+                                              .journey[index]
+                                                  ['destination_province']
+                                              .toString(),
                                       style: GoogleFonts.nunito(
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold,
@@ -198,8 +232,10 @@ class _PassengerHomeState extends State<PassengerHome> {
                                 ),
                                 subtitle: Center(
                                   child: Text(
-                                    DateFormat('dd/MM/yyyy hh:mm a')
-                                        .format(faker.date.dateTime()),
+                                    DateFormat('dd/MM/yyyy hh:mm a').format(
+                                        DateTime.parse(context
+                                            .read<PassDB>()
+                                            .journey[index]['date'])),
                                     style: GoogleFonts.nunito(
                                       color:
                                           ui.Color.fromARGB(255, 138, 138, 138),
@@ -409,12 +445,18 @@ class _MapComponentState extends State<MapComponent> {
     ));
   }
 
+  Future<void> _fetchRoute() async {
+    await Provider.of<PassDB>(context, listen: false).getJourney(1000);
+    print(Provider.of<PassDB>(context, listen: false).journey);
+  }
+
   @override
   void initState() {
     super.initState();
     _addCustomMarker1();
     _addCustomMarker2();
     _determinePosition();
+    _fetchRoute();
   }
 
   @override

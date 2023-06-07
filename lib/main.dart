@@ -60,9 +60,8 @@ class MainApp extends StatelessWidget {
         '/journeyboard': (context) => const JourneyBoard(),
         '/journeyboard/create': (context) => const CreateJourney(),
         '/loading': (context) => const Loading(),
-        '/passenger/routedetail': (context) => const RouteDetail(
-              routeid: '',
-            ),
+        // '/passenger/routedetail': (context) => const RouteDetail(,
+        //     ),
         '/driver': (context) => const DriverHome(),
         '/driver/create': (context) => const CreateRoute(),
       },

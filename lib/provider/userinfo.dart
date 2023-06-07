@@ -39,10 +39,11 @@ class UserInfo extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getUserInfo() async {
+  Future<dynamic> getUserInfo() async {
     try {
       final res = await supabase.from('profile').select().eq('id', user!.id);
       _userinfo = res[0];
+      return res[0];
     } catch (e) {
       print(e);
     }
@@ -92,7 +93,8 @@ class UserInfo extends ChangeNotifier {
         'username': supabase.auth.currentUser!.phone!,
         'avatar_url': signedUrl,
       });
-      getUserInfo();
+      _userinfo['avatar_url'] = signedUrl;
+      notifyListeners();
     } catch (e) {
       print(e);
     }

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:paigun/provider/passenger.dart';
+import 'package:provider/provider.dart';
 
 import '../../components/sizeappbar.dart';
 
@@ -21,28 +23,37 @@ class _JourneyBoardState extends State<JourneyBoard> {
   TextEditingController _DateController = TextEditingController();
   DateTime _routeDate = DateTime.now();
   Map selected = {};
-  List jsonData = [
-    {"name": "Bangkok", "age": 25, "city": "New York"},
-    {"name": "Jane", "age": 30, "city": "London"},
-    {"name": "Tom", "age": 35, "city": "Paris"},
-    {"name": "Emily", "age": 27, "city": "Tokyo"},
-    {"name": "Michael", "age": 32, "city": "Berlin"}
-  ];
+  List data = [];
+  // List jsonData = [
+  //   {"name": "Bangkok", "age": 25, "city": "New York"},
+  //   {"name": "Jane", "age": 30, "city": "London"},
+  //   {"name": "Tom", "age": 35, "city": "Paris"},
+  //   {"name": "Emily", "age": 27, "city": "Tokyo"},
+  //   {"name": "Michael", "age": 32, "city": "Berlin"}
+  // ];
 
-  Future<void> readJson() async {
-    setState(() async {
-      _journey = jsonData;
-      _showJourney = _journey;
-    });
-  }
+  // Future<void> readJson() async {
+  //   setState(() async {
+  //     _journey = jsonData;
+  //     _showJourney = _journey;
+  //   });
+  // }
 
   List _journey = [];
   List _showJourney = [];
-
+  bool isLoading = true;
   @override
   void initState() {
     super.initState();
-    readJson();
+    //readJson();
+    getBoard();
+  }
+
+  void getBoard() async {
+    _journey = await context.read<PassDB>().getBoard();
+    _showJourney = _journey;
+    isLoading = false;
+    setState(() {});
   }
 
   @override
@@ -73,7 +84,7 @@ class _JourneyBoardState extends State<JourneyBoard> {
                           await selected['selectedProvince'];
                       setState(() {
                         _showJourney = _journey
-                            .where((element) => element['name']
+                            .where((element) => element['origin']
                                 .toString()
                                 .toLowerCase()
                                 .contains(
@@ -112,11 +123,11 @@ class _JourneyBoardState extends State<JourneyBoard> {
                           selected['selectedProvince'];
                       setState(() {
                         _showJourney = _journey
-                            .where((element) => element['city']
+                            .where((element) => element['destination']
                                 .toString()
                                 .toLowerCase()
                                 .contains(
-                                  _CurrentController.text.toLowerCase(),
+                                  _DestinationController.text.toLowerCase(),
                                 ))
                             .toList();
                       });
@@ -185,25 +196,52 @@ class _JourneyBoardState extends State<JourneyBoard> {
                     ),
                   ),
                 ),
+                Center(
+                  child: ElevatedButton(
+                      onPressed: () => {
+                            setState(() {
+                              _showJourney = _journey;
+                              _CurrentController.text = '';
+                              _DestinationController.text = '';
+                              _DateController.text = '';
+                            })
+                          },
+                      child: const Text("Clear filter")),
+                )
               ],
             ),
             const Divider(),
-            _showJourney.isNotEmpty? 
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                children: _showJourney.map((item) {
-                  return Center(
-                      child: journeyTile(
-                          item['name'].toString(),
-                          item['city'].toString(),
-                          faker.date.dateTime(),
-                          'close'));
-                }).toList(),
-              ),
-            )
-            :
-            Center(child: Text("Not found"))
+            isLoading == true
+                ? const SizedBox(
+                    height: 400,
+                    child: Center(
+                      child: SizedBox(
+                          height: 50,
+                          width: 50,
+                          child: CircularProgressIndicator()),
+                    ),
+                  )
+                : _showJourney.isNotEmpty
+                    ? Expanded(
+                        child: GridView.count(
+                          crossAxisCount: 2,
+                          children: _showJourney.map((item) {
+                            return Center(
+                                child: journeyTile(item['origin'],
+                                    item['destination'], item['date'], item['profile']['avatar_url']));
+                          }).toList(),
+                        ),
+                      )
+                    : const Column(
+                        children: [
+                          SizedBox(
+                            height: 200,
+                          ),
+                          Center(
+                            child: Text("Not found"),
+                          )
+                        ],
+                      )
           ],
         ),
       ),
@@ -221,8 +259,7 @@ class _JourneyBoardState extends State<JourneyBoard> {
   }
 }
 
-Widget journeyTile(
-    String origin, String destination, DateTime date, String status) {
+Widget journeyTile(String origin, String destination, String date, String avatar) {
   return Container(
       width: 170,
       height: 170,
@@ -245,7 +282,7 @@ Widget journeyTile(
           SizedBox(
               width: 50,
               height: 50,
-              child: Image.asset("assets/images/journeyboardmock.png")),
+              child: Image.network(avatar)),
           Row(
             children: [
               const Icon(Icons.location_on_sharp),
@@ -280,7 +317,7 @@ Widget journeyTile(
             ],
           ),
           Text(
-            DateFormat('D MMMM dd yyyy').format(date),
+            date,
             style: GoogleFonts.nunito(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'package:faker/faker.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -9,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
+import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/page/passenger/components/drawer.dart';
 import 'package:paigun/page/passenger/components/routedetail.dart';
 import 'package:paigun/provider/passenger.dart';
@@ -33,6 +36,7 @@ class _PassengerHomeState extends State<PassengerHome> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final Set<Marker> _markers = {};
   final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
   Map destination = {};
   @override
   void initState() {
@@ -299,10 +303,46 @@ class _PassengerHomeState extends State<PassengerHome> {
                               MaterialPageRoute(
                                   builder: (context) => const SearchPage()),
                             );
-                            // ignore: use_build_context_synchronously
-                            print(destination['Current']);
-                            print(destination['Destination']);
+                            print(destination['Current'] +
+                                ' ' +
+                                destination['Destination']);
                             _searchController.text = destination['Destination'];
+                            if (destination['Current'] != '' &&
+                                destination['Destination'] != '') {
+                              setState(() {
+                                _isSearching = true;
+                              });
+                              loadingDialog(context, _isSearching, 'Searching');
+                              final res = await context
+                                  .read<PassDB>()
+                                  .getJourneyByProvince(destination['Current'],
+                                      destination['Destination']);
+                              if (res == null) {
+                                setState(() {
+                                  _isSearching = false;
+                                });
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'No available journey for this route'),
+                                  ),
+                                );
+                              } else {
+                                setState(() {
+                                  _isSearching = false;
+                                });
+                                Navigator.pop(context);
+                              }
+                            } else {
+                              setState(() {
+                                _isSearching = true;
+                              });
+                              loadingDialog(context, _isSearching, 'Searching');
+                              final res =
+                                  await context.read<PassDB>().getJourney(1000);
+                              Navigator.pop(context);
+                            }
                           },
                           textAlign: TextAlign.center,
                           textAlignVertical: TextAlignVertical.center,

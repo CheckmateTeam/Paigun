@@ -16,6 +16,7 @@ class PassDB extends ChangeNotifier {
   LatLng get currentPosition => _currentPosition;
   List get journey => _journey;
   List _journey = [];
+  List<Marker> _journeyMarker = [];
 
   double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
@@ -54,7 +55,7 @@ class PassDB extends ChangeNotifier {
             .round();
         if (distance <= fetchDistance) {
           _journey.add({
-            'journey_id': i['id'],
+            'journey_id': i['journey_id'],
             'owner': i['owner'],
             'origin_lat': i['origin_lat'],
             'destination_lat': i['destination_lat'],
@@ -70,8 +71,28 @@ class PassDB extends ChangeNotifier {
             'status': i['status'],
             'note': i['note'],
           });
+          _journeyMarker.add(Marker(
+              markerId: MarkerId(i['journey_id']),
+              position: LatLng(double.parse(i['origin_lat']),
+                  double.parse(i['origin_lng']))));
         }
       }
+      return response;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<dynamic> getJourneyByProvince(
+      String oriProvince, String destProvince) async {
+    try {
+      final response = await supabase.from('journey').select().match({
+        'origin_province': oriProvince,
+        'destination_province': destProvince,
+        'status': 'available'
+      }).neq('owner', user!.id);
+      _journey.clear();
+      _journey.addAll(response);
       return response;
     } catch (e) {
       print(e);

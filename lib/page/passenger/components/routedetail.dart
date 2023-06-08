@@ -234,7 +234,14 @@ class _RouteDetailState extends State<RouteDetail> {
                                       fontWeight: FontWeight.w500,
                                       color: Colors.grey[600],
                                     )),
-                                Text(widget.info['origin_province'],
+                                Text(
+                                    widget.info['origin_province']
+                                            .toString()
+                                            .contains("Chang Wat")
+                                        ? widget.info['origin_province']
+                                            .toString()
+                                            .split("Chang Wat ")[1]
+                                        : widget.info['origin_province'],
                                     style: GoogleFonts.nunito(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,

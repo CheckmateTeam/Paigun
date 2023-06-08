@@ -529,6 +529,12 @@ class _MapComponentState extends State<MapComponent> {
                   position: _currentLocation,
                   infoWindow: const InfoWindow(title: 'My location'),
                 ),
+                for (var marker in Provider.of<PassDB>(context).journeyMarker)
+                  Marker(
+                      icon: markerIcon2,
+                      markerId: marker['markerId'],
+                      position: marker['position'],
+                      infoWindow: marker['infoWindow'])
 
                 //Other markers
               },

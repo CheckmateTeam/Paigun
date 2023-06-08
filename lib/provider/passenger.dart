@@ -15,8 +15,9 @@ class PassDB extends ChangeNotifier {
 
   LatLng get currentPosition => _currentPosition;
   List get journey => _journey;
+  List get journeyMarker => _journeyMarker;
   List _journey = [];
-  List<Marker> _journeyMarker = [];
+  List _journeyMarker = [];
 
   double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
@@ -44,7 +45,8 @@ class PassDB extends ChangeNotifier {
           .from('journey')
           .select()
           .eq('status', 'available')
-          .neq('owner', user!.id);
+          .neq('owner', user!.id)
+          .gt('available_seat', 0);
       _journey.clear();
       for (var i in response) {
         int distance = calculateDistance(
@@ -71,10 +73,14 @@ class PassDB extends ChangeNotifier {
             'status': i['status'],
             'note': i['note'],
           });
-          _journeyMarker.add(Marker(
-              markerId: MarkerId(i['journey_id']),
-              position: LatLng(double.parse(i['origin_lat']),
-                  double.parse(i['origin_lng']))));
+          _journeyMarker.add({
+            'markerId': MarkerId(i['journey_id']),
+            'position': LatLng(
+                double.parse(i['origin_lat']), double.parse(i['origin_lng'])),
+            'infoWindow': InfoWindow(
+                title: i['destination_province'],
+                snippet: i['date'].toString().substring(0, 10)),
+          });
         }
       }
       return response;
@@ -86,13 +92,73 @@ class PassDB extends ChangeNotifier {
   Future<dynamic> getJourneyByProvince(
       String oriProvince, String destProvince) async {
     try {
-      final response = await supabase.from('journey').select().match({
-        'origin_province': oriProvince,
-        'destination_province': destProvince,
-        'status': 'available'
-      }).neq('owner', user!.id);
+      final response = await supabase
+          .from('journey')
+          .select()
+          .match({
+            'origin_province': oriProvince,
+            'destination_province': destProvince,
+            'status': 'available'
+          })
+          .neq('owner', user!.id)
+          .gt('available_seat', 0);
       _journey.clear();
+      _journeyMarker.clear();
       _journey.addAll(response);
+      for (var i in response) {
+        _journeyMarker.add({
+          'markerId': MarkerId(i['journey_id']),
+          'position': LatLng(
+              double.parse(i['origin_lat']), double.parse(i['origin_lng'])),
+          'infoWindow': InfoWindow(
+              title: i['destination_province'],
+              snippet: i['date'].toString().substring(0, 10)),
+        });
+      }
+      return response;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<dynamic> getJourneyDriver(String id) async {
+    try {
+      final response = await supabase.from('profile').select().eq('id', id);
+      return response;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<dynamic> setUserRequest(String type, String journeyId) async {
+    try {
+      if (type == "join") {
+        final response = await supabase.from('user_journey').upsert({
+          'journey_id': journeyId,
+          'user_id': user!.id,
+          'status': "pending"
+        });
+        return response;
+      } else if (type == "cancel") {
+        final response = await supabase
+            .from('user_journey')
+            .delete()
+            .eq('journey_id', journeyId)
+            .eq('user_id', user!.id);
+        return response;
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<dynamic> getUserJourneyStatus(String type, String journeyId) async {
+    try {
+      final response = await supabase
+          .from('user_journey')
+          .select()
+          .eq('journey_id', journeyId)
+          .eq('user_id', user!.id);
       return response;
     } catch (e) {
       print(e);

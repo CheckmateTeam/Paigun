@@ -8,8 +8,11 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:paigun/page/components/loadingdialog.dart';
 
 import 'package:paigun/page/components/styledialog.dart';
+import 'package:paigun/provider/passenger.dart';
+import 'package:provider/provider.dart';
 
 class RouteDetail extends StatefulWidget {
   final String driverid;
@@ -29,11 +32,12 @@ class _RouteDetailState extends State<RouteDetail> {
       Completer<GoogleMapController>();
   final Set<Marker> _markers = {};
   List<LatLng> polylineCoordinates = [];
+  bool _isLoading = false;
   bool _isRequest = false;
   bool _isDriverConfirm = false;
   bool _isPay = false;
   bool _isComplete = false;
-
+  Map _driverProfile = {};
   void createRoutePoint() async {
     PolylinePoints polylinePoints = PolylinePoints();
 
@@ -83,11 +87,18 @@ class _RouteDetailState extends State<RouteDetail> {
     setState(() {});
   }
 
+  void getDriverProfile() async {
+    final res = await Provider.of<PassDB>(context, listen: false)
+        .getJourneyDriver(widget.info['owner']);
+    _driverProfile = res[0];
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     createRoutePoint();
+    getDriverProfile();
   }
 
   @override
@@ -159,13 +170,34 @@ class _RouteDetailState extends State<RouteDetail> {
                                   BorderRadius.all(Radius.circular(20)),
                             ),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                Image.asset(
-                                  'assets/images/avatarmock.png',
-                                  width: 80,
-                                  height: 80,
-                                ),
+                                _driverProfile.isEmpty
+                                    ? Image.asset(
+                                        'assets/images/avatarmock.png',
+                                        width: 80,
+                                        height: 80,
+                                      )
+                                    : _driverProfile['avatar_url'] == ''
+                                        ? Image.asset(
+                                            'assets/images/avatarmock.png',
+                                            width: 80,
+                                            height: 80,
+                                          )
+                                        : Image.network(
+                                            _driverProfile['avatar_url'] ?? '',
+                                            loadingBuilder: (context, child,
+                                                loadingProgress) {
+                                              if (loadingProgress == null)
+                                                return child;
+                                              return const Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              );
+                                            },
+                                            width: 80,
+                                            height: 80,
+                                          ),
                                 const SizedBox(
                                   width: 20,
                                 ),
@@ -175,7 +207,10 @@ class _RouteDetailState extends State<RouteDetail> {
                                     Row(
                                       children: [
                                         Text(
-                                          'Driver name',
+                                          _driverProfile.isEmpty
+                                              ? 'Loading...'
+                                              : _driverProfile['full_name'] ??
+                                                  '',
                                           style: GoogleFonts.nunito(
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
@@ -192,7 +227,9 @@ class _RouteDetailState extends State<RouteDetail> {
                                       ],
                                     ),
                                     Text(
-                                      'Tel: Driver phone',
+                                      _driverProfile.isEmpty
+                                          ? 'Loading...'
+                                          : 'Tel: 0${_driverProfile['username'].toString().substring(2) ?? ''}',
                                       style: GoogleFonts.nunito(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
@@ -595,7 +632,71 @@ class _RouteDetailState extends State<RouteDetail> {
                                                 borderRadius:
                                                     BorderRadius.circular(15)),
                                           ),
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: const Text(
+                                                        'Cancle Request'),
+                                                    content: const Text(
+                                                        'Are you sure you want to cancel request to join this trip?'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        child:
+                                                            const Text('Back'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () async {
+                                                          setState(() {
+                                                            _isLoading = true;
+                                                          });
+                                                          loadingDialog(
+                                                              context,
+                                                              _isLoading,
+                                                              'Sending request...');
+                                                          await context
+                                                              .read<PassDB>()
+                                                              .setUserRequest(
+                                                                "cancel",
+                                                                widget.info[
+                                                                    'journey_id'],
+                                                              );
+                                                          setState(() {
+                                                            _isLoading = false;
+                                                            _isRequest = false;
+                                                          });
+                                                          // ignore: use_build_context_synchronously
+                                                          await showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (BuildContext
+                                                                      context) {
+                                                                return StyleDialog(
+                                                                    context,
+                                                                    'Cancle Succes',
+                                                                    'You have cancel request to join this trip.',
+                                                                    'Done', () {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                });
+                                                              });
+                                                        },
+                                                        child: Text('Confirm'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                });
+                                          },
                                           child: Container(
                                             width: double.infinity,
                                             alignment: Alignment.center,
@@ -639,11 +740,23 @@ class _RouteDetailState extends State<RouteDetail> {
                                             ),
                                             TextButton(
                                               onPressed: () async {
-                                                // await Future.delayed(
-                                                //     const Duration(seconds: 2), () {
-
-                                                // });
-
+                                                setState(() {
+                                                  _isLoading = true;
+                                                });
+                                                loadingDialog(
+                                                    context,
+                                                    _isLoading,
+                                                    'Sending request...');
+                                                await context
+                                                    .read<PassDB>()
+                                                    .setUserRequest(
+                                                      "join",
+                                                      widget.info['journey_id'],
+                                                    );
+                                                setState(() {
+                                                  _isRequest = true;
+                                                  _isLoading = false;
+                                                });
                                                 // ignore: use_build_context_synchronously
                                                 await showDialog(
                                                     context: context,
@@ -654,6 +767,7 @@ class _RouteDetailState extends State<RouteDetail> {
                                                           'Request sent',
                                                           'You will get a notification when the driver accepts your request',
                                                           'Done', () {
+                                                        Navigator.pop(context);
                                                         Navigator.pop(context);
                                                         Navigator.pop(context);
                                                       });

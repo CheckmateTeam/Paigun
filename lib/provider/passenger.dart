@@ -18,7 +18,8 @@ class PassDB extends ChangeNotifier {
   List get journeyMarker => _journeyMarker;
   List _journey = [];
   List _journeyMarker = [];
-
+  List _board = [];
+  List get board => _board;
   double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var a = 0.5 -

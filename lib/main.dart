@@ -67,7 +67,7 @@ class MainApp extends StatelessWidget {
             ),
         '/driver': (context) => const DriverHome(),
         '/notification' : (context) => const PaiNotification(),
-        'chat' : (context) => const DriverChat(),
+        '/chat' : (context) => const DriverChat(),
         '/driver/create': (context) => const CreateRoute(),
       },
     );

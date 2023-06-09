@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart';
 
 import '../../components/sizeappbar.dart';
 
@@ -15,6 +13,8 @@ class _DriverChat extends State<DriverChat> {
   
   @override
   int currentChat = 1;
+
+  
   List chatList = [
     {"Name":"Bobo","Message":"The question is in a way meaningless, she knows, but one must ask. Love in such situations is rarely real. Sex is the engine, exalting and ruining people, sex and frustration. Love is what people believe is worth the path of devastation."},
     {"Name":"Putang","Message":"Detail2"},
@@ -33,6 +33,7 @@ class _DriverChat extends State<DriverChat> {
   ];
 
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: SizeAppbar(context, "Chat",
@@ -41,7 +42,7 @@ class _DriverChat extends State<DriverChat> {
         padding: EdgeInsets.all(10.0),
         child: Column(
           children: [
-            SizedBox(
+            const SizedBox(
               height: 15,
             ),
             Container(

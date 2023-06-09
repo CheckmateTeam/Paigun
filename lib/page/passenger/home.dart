@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'package:faker/faker.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -9,8 +11,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
+import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/page/passenger/components/drawer.dart';
 import 'package:paigun/page/passenger/components/routedetail.dart';
+import 'package:paigun/provider/driver.dart';
 import 'package:paigun/provider/passenger.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
@@ -33,10 +37,13 @@ class _PassengerHomeState extends State<PassengerHome> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final Set<Marker> _markers = {};
   final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
+  bool _profileLoading = false;
   Map destination = {};
   @override
   void initState() {
     super.initState();
+    // Provider.of<DriveDB>(context, listen: false).getDriverJourney();
   }
 
   @override
@@ -164,15 +171,40 @@ class _PassengerHomeState extends State<PassengerHome> {
                                 ],
                               ),
                               child: ListTile(
-                                onTap: () {
+                                onTap: () async {
+                                  setState(() {
+                                    _profileLoading = true;
+                                  });
+                                  loadingDialog(
+                                      context, _profileLoading, 'Loading...');
+                                  final res = await Provider.of<PassDB>(context,
+                                          listen: false)
+                                      .getJourneyDriver(context
+                                          .read<PassDB>()
+                                          .journey[index]['owner']);
+                                  String status = 'no';
+                                  final ress = await Provider.of<PassDB>(
+                                          context,
+                                          listen: false)
+                                      .getUserJourneyStatus(context
+                                          .read<PassDB>()
+                                          .journey[index]['journey_id']);
+                                  if (ress[0]['status'] == 'pending') {
+                                    status = 'pending';
+                                  } else if (ress[0]['status'] == 'paid') {
+                                    status = 'paid';
+                                  }
+                                  setState(() {
+                                    _profileLoading = false;
+                                  });
+                                  Navigator.pop(context);
                                   Navigator.push(context,
                                       MaterialPageRoute(builder: (context) {
                                     return RouteDetail(
-                                      driverid: context
-                                          .read<PassDB>()
-                                          .journey[index]['owner'],
+                                      driver: res[0],
                                       info:
                                           context.read<PassDB>().journey[index],
+                                      status: status,
                                     );
                                   }));
                                 },
@@ -299,10 +331,46 @@ class _PassengerHomeState extends State<PassengerHome> {
                               MaterialPageRoute(
                                   builder: (context) => const SearchPage()),
                             );
-                            // ignore: use_build_context_synchronously
-                            print(destination['Current']);
-                            print(destination['Destination']);
+                            print(destination['Current'] +
+                                ' ' +
+                                destination['Destination']);
                             _searchController.text = destination['Destination'];
+                            if (destination['Current'] != '' &&
+                                destination['Destination'] != '') {
+                              setState(() {
+                                _isSearching = true;
+                              });
+                              loadingDialog(context, _isSearching, 'Searching');
+                              final res = await context
+                                  .read<PassDB>()
+                                  .getJourneyByProvince(destination['Current'],
+                                      destination['Destination']);
+                              if (res == null) {
+                                setState(() {
+                                  _isSearching = false;
+                                });
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'No available journey for this route'),
+                                  ),
+                                );
+                              } else {
+                                setState(() {
+                                  _isSearching = false;
+                                });
+                                Navigator.pop(context);
+                              }
+                            } else {
+                              setState(() {
+                                _isSearching = true;
+                              });
+                              loadingDialog(context, _isSearching, 'Searching');
+                              final res =
+                                  await context.read<PassDB>().getJourney(1000);
+                              Navigator.pop(context);
+                            }
                           },
                           textAlign: TextAlign.center,
                           textAlignVertical: TextAlignVertical.center,
@@ -453,10 +521,12 @@ class _MapComponentState extends State<MapComponent> {
   @override
   void initState() {
     super.initState();
-    _addCustomMarker1();
-    _addCustomMarker2();
-    _determinePosition();
-    _fetchRoute();
+    if (mounted) {
+      _addCustomMarker1();
+      _addCustomMarker2();
+      _determinePosition();
+      _fetchRoute();
+    }
   }
 
   @override
@@ -489,6 +559,12 @@ class _MapComponentState extends State<MapComponent> {
                   position: _currentLocation,
                   infoWindow: const InfoWindow(title: 'My location'),
                 ),
+                for (var marker in Provider.of<PassDB>(context).journeyMarker)
+                  Marker(
+                      icon: markerIcon2,
+                      markerId: marker['markerId'],
+                      position: marker['position'],
+                      infoWindow: marker['infoWindow'])
 
                 //Other markers
               },

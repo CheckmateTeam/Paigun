@@ -21,7 +21,9 @@ dependencies:
   flutter_dotenv: ^5.1.0
   flutter_spinkit: ^5.2.0
   pinput: ^2.2.31
+  promptpay_qrcode_generate: ^1.0.1
   flutter_rating_bar: ^4.0.1
+  flutter_swiper_view: ^1.1.8
   faker: ^2.1.0
   intl: ^0.18.1
   image_picker: ^0.8.7+5

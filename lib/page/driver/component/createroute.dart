@@ -487,6 +487,15 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                                       toProvince =
                                           toAddress[0].administrativeArea!;
                                     }
+                                    //Delete chang Wat
+                                    toProvince.contains('Chang Wat')
+                                        ? toProvince = toProvince.replaceAll(
+                                            'Chang Wat ', '')
+                                        : toProvince = toProvince;
+                                    fromProvince.contains('Chang Wat')
+                                        ? fromProvince = fromProvince
+                                            .replaceAll('Chang Wat ', '')
+                                        : fromProvince = fromProvince;
 
                                     var res = await Provider.of<DriveDB>(
                                             context,

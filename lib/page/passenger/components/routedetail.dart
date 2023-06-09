@@ -8,16 +8,22 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:paigun/page/components/loadingdialog.dart';
 
 import 'package:paigun/page/components/styledialog.dart';
+import 'package:paigun/page/passenger/components/paypage.dart';
+import 'package:paigun/provider/passenger.dart';
+import 'package:provider/provider.dart';
 
 class RouteDetail extends StatefulWidget {
-  final String driverid;
+  final Map driver;
   final Map info;
+  final String status;
   const RouteDetail({
     Key? key,
-    required this.driverid,
+    required this.driver,
     required this.info,
+    required this.status,
   }) : super(key: key);
 
   @override
@@ -29,11 +35,13 @@ class _RouteDetailState extends State<RouteDetail> {
       Completer<GoogleMapController>();
   final Set<Marker> _markers = {};
   List<LatLng> polylineCoordinates = [];
+  bool _profileLoading = false;
+  bool _isLoading = false;
   bool _isRequest = false;
   bool _isDriverConfirm = false;
   bool _isPay = false;
   bool _isComplete = false;
-
+  Map _driverProfile = {};
   void createRoutePoint() async {
     PolylinePoints polylinePoints = PolylinePoints();
 
@@ -83,10 +91,25 @@ class _RouteDetailState extends State<RouteDetail> {
     setState(() {});
   }
 
+  void getStatus() async {
+    // print(widget.status);
+    if (widget.status == 'pending') {
+      setState(() {
+        _isRequest = true;
+      });
+    } else if (widget.status == 'paid') {
+      setState(() {
+        _isRequest = true;
+        _isPay = true;
+      });
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    getStatus();
     createRoutePoint();
   }
 
@@ -159,12 +182,60 @@ class _RouteDetailState extends State<RouteDetail> {
                                   BorderRadius.all(Radius.circular(20)),
                             ),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                Image.asset(
-                                  'assets/images/avatarmock.png',
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    color: Color.fromARGB(255, 224, 224, 224),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 5,
+                                      ),
+                                    ],
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(50)),
+                                  ),
                                   width: 80,
-                                  height: 80,
+                                  child: widget.driver.isEmpty
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                          child: Image.asset(
+                                            'assets/images/avatarmock.png',
+                                            width: 80,
+                                            height: 80,
+                                          ),
+                                        )
+                                      : widget.driver['avatar_url'] == ''
+                                          ? ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
+                                              child: Image.asset(
+                                                'assets/images/avatarmock.png',
+                                                width: 80,
+                                                height: 80,
+                                              ),
+                                            )
+                                          : ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
+                                              child: Image.network(
+                                                widget.driver['avatar_url'] ??
+                                                    '',
+                                                loadingBuilder: (context, child,
+                                                    loadingProgress) {
+                                                  if (loadingProgress == null)
+                                                    return child;
+                                                  return const Center(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  );
+                                                },
+                                                width: 100,
+                                                height: 80,
+                                              ),
+                                            ),
                                 ),
                                 const SizedBox(
                                   width: 20,
@@ -175,7 +246,10 @@ class _RouteDetailState extends State<RouteDetail> {
                                     Row(
                                       children: [
                                         Text(
-                                          'Driver name',
+                                          widget.driver.isEmpty
+                                              ? 'Loading...'
+                                              : widget.driver['full_name'] ??
+                                                  '',
                                           style: GoogleFonts.nunito(
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
@@ -192,7 +266,9 @@ class _RouteDetailState extends State<RouteDetail> {
                                       ],
                                     ),
                                     Text(
-                                      'Tel: Driver phone',
+                                      widget.driver.isEmpty
+                                          ? 'Loading...'
+                                          : 'Tel: 0${widget.driver['username'].toString().substring(2) ?? ''}',
                                       style: GoogleFonts.nunito(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
@@ -234,7 +310,14 @@ class _RouteDetailState extends State<RouteDetail> {
                                       fontWeight: FontWeight.w500,
                                       color: Colors.grey[600],
                                     )),
-                                Text(widget.info['origin_province'],
+                                Text(
+                                    widget.info['origin_province']
+                                            .toString()
+                                            .contains("Chang Wat")
+                                        ? widget.info['origin_province']
+                                            .toString()
+                                            .split("Chang Wat ")[1]
+                                        : widget.info['origin_province'],
                                     style: GoogleFonts.nunito(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -441,8 +524,8 @@ class _RouteDetailState extends State<RouteDetail> {
                           height: 10,
                         ),
                         _isRequest
-                            ? _isDriverConfirm
-                                ? _isPay
+                            ? _isPay
+                                ? _isDriverConfirm
                                     ? _isComplete
                                         ? Column(
                                             children: [
@@ -531,52 +614,82 @@ class _RouteDetailState extends State<RouteDetail> {
                                               ),
                                             ],
                                           )
-                                    : Column(
-                                        children: [
-                                          Text(
-                                              'Please paid to confirm your seat.',
-                                              style: GoogleFonts.nunito(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w600,
-                                                color: Colors.redAccent,
-                                              )),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                elevation: 0,
-                                                backgroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(
-                                                    side: BorderSide(
-                                                        color: Theme.of(context)
-                                                            .primaryColor,
-                                                        width: 1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            15)),
-                                              ),
-                                              onPressed: () {},
-                                              child: Container(
-                                                width: double.infinity,
-                                                alignment: Alignment.center,
-                                                height: 50,
-                                                child: Text('Pay now',
-                                                    style: GoogleFonts.nunito(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Theme.of(context)
-                                                          .primaryColor,
-                                                    )),
-                                              )),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                        ],
-                                      )
+                                    : ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          elevation: 0,
+                                          backgroundColor:
+                                              Theme.of(context).primaryColor,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(15)),
+                                        ),
+                                        onPressed: () {},
+                                        child: Container(
+                                          width: double.infinity,
+                                          alignment: Alignment.center,
+                                          height: 50,
+                                          child:
+                                              Text('Waiting for driver confirm',
+                                                  style: GoogleFonts.nunito(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.white,
+                                                  )),
+                                        ))
                                 : Column(
                                     children: [
+                                      Text('Please paid to confirm your seat.',
+                                          style: GoogleFonts.nunito(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.redAccent,
+                                          )),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            elevation: 0,
+                                            backgroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: Theme.of(context)
+                                                        .primaryColor,
+                                                    width: 1),
+                                                borderRadius:
+                                                    BorderRadius.circular(15)),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        PaymentPage(
+                                                          amount: widget.info[
+                                                              'price_seat'],
+                                                          promptPayId:
+                                                              widget.driver[
+                                                                  'username'],
+                                                          journeyId:
+                                                              widget.info[
+                                                                  'journey_id'],
+                                                        )));
+                                          },
+                                          child: Container(
+                                            width: double.infinity,
+                                            alignment: Alignment.center,
+                                            height: 50,
+                                            child: Text('Pay now',
+                                                style: GoogleFonts.nunito(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                )),
+                                          )),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
                                       ElevatedButton(
                                           style: ElevatedButton.styleFrom(
                                             elevation: 0,
@@ -588,7 +701,71 @@ class _RouteDetailState extends State<RouteDetail> {
                                                 borderRadius:
                                                     BorderRadius.circular(15)),
                                           ),
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: const Text(
+                                                        'Cancle Request'),
+                                                    content: const Text(
+                                                        'Are you sure you want to cancel request to join this trip?'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        child:
+                                                            const Text('Back'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () async {
+                                                          setState(() {
+                                                            _isLoading = true;
+                                                          });
+                                                          loadingDialog(
+                                                              context,
+                                                              _isLoading,
+                                                              'Sending request...');
+                                                          await context
+                                                              .read<PassDB>()
+                                                              .setUserRequest(
+                                                                "cancel",
+                                                                widget.info[
+                                                                    'journey_id'],
+                                                              );
+                                                          setState(() {
+                                                            _isLoading = false;
+                                                            _isRequest = false;
+                                                          });
+                                                          // ignore: use_build_context_synchronously
+                                                          await showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (BuildContext
+                                                                      context) {
+                                                                return StyleDialog(
+                                                                    context,
+                                                                    'Cancle Succes',
+                                                                    'You have cancel request to join this trip.',
+                                                                    'Done', () {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                });
+                                                              });
+                                                        },
+                                                        child: Text('Confirm'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                });
+                                          },
                                           child: Container(
                                             width: double.infinity,
                                             alignment: Alignment.center,
@@ -600,9 +777,6 @@ class _RouteDetailState extends State<RouteDetail> {
                                                   color: Colors.redAccent,
                                                 )),
                                           )),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
                                     ],
                                   )
                             :
@@ -632,11 +806,23 @@ class _RouteDetailState extends State<RouteDetail> {
                                             ),
                                             TextButton(
                                               onPressed: () async {
-                                                // await Future.delayed(
-                                                //     const Duration(seconds: 2), () {
-
-                                                // });
-
+                                                setState(() {
+                                                  _isLoading = true;
+                                                });
+                                                loadingDialog(
+                                                    context,
+                                                    _isLoading,
+                                                    'Sending request...');
+                                                await context
+                                                    .read<PassDB>()
+                                                    .setUserRequest(
+                                                      "join",
+                                                      widget.info['journey_id'],
+                                                    );
+                                                setState(() {
+                                                  _isRequest = true;
+                                                  _isLoading = false;
+                                                });
                                                 // ignore: use_build_context_synchronously
                                                 await showDialog(
                                                     context: context,
@@ -647,6 +833,7 @@ class _RouteDetailState extends State<RouteDetail> {
                                                           'Request sent',
                                                           'You will get a notification when the driver accepts your request',
                                                           'Done', () {
+                                                        Navigator.pop(context);
                                                         Navigator.pop(context);
                                                         Navigator.pop(context);
                                                       });

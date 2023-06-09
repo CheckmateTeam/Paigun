@@ -67,7 +67,7 @@ class _SplashPageState extends State<SplashPage>
                   width: MediaQuery.of(context).size.width * 0.8,
                   height: MediaQuery.of(context).size.width * 0.8,
                 ),
-                Text('WAYMATE',
+                Text('PAIGUN',
                     style: GoogleFonts.nunito(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,

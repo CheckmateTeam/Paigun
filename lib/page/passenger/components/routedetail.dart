@@ -11,16 +11,19 @@ import 'package:intl/intl.dart';
 import 'package:paigun/page/components/loadingdialog.dart';
 
 import 'package:paigun/page/components/styledialog.dart';
+import 'package:paigun/page/passenger/components/paypage.dart';
 import 'package:paigun/provider/passenger.dart';
 import 'package:provider/provider.dart';
 
 class RouteDetail extends StatefulWidget {
-  final String driverid;
+  final Map driver;
   final Map info;
+  final String status;
   const RouteDetail({
     Key? key,
-    required this.driverid,
+    required this.driver,
     required this.info,
+    required this.status,
   }) : super(key: key);
 
   @override
@@ -32,6 +35,7 @@ class _RouteDetailState extends State<RouteDetail> {
       Completer<GoogleMapController>();
   final Set<Marker> _markers = {};
   List<LatLng> polylineCoordinates = [];
+  bool _profileLoading = false;
   bool _isLoading = false;
   bool _isRequest = false;
   bool _isDriverConfirm = false;
@@ -87,18 +91,26 @@ class _RouteDetailState extends State<RouteDetail> {
     setState(() {});
   }
 
-  void getDriverProfile() async {
-    final res = await Provider.of<PassDB>(context, listen: false)
-        .getJourneyDriver(widget.info['owner']);
-    _driverProfile = res[0];
+  void getStatus() async {
+    // print(widget.status);
+    if (widget.status == 'pending') {
+      setState(() {
+        _isRequest = true;
+      });
+    } else if (widget.status == 'paid') {
+      setState(() {
+        _isRequest = true;
+        _isPay = true;
+      });
+    }
   }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    getStatus();
     createRoutePoint();
-    getDriverProfile();
   }
 
   @override
@@ -172,32 +184,59 @@ class _RouteDetailState extends State<RouteDetail> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                _driverProfile.isEmpty
-                                    ? Image.asset(
-                                        'assets/images/avatarmock.png',
-                                        width: 80,
-                                        height: 80,
-                                      )
-                                    : _driverProfile['avatar_url'] == ''
-                                        ? Image.asset(
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    color: Color.fromARGB(255, 224, 224, 224),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 5,
+                                      ),
+                                    ],
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(50)),
+                                  ),
+                                  width: 80,
+                                  child: widget.driver.isEmpty
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                          child: Image.asset(
                                             'assets/images/avatarmock.png',
                                             width: 80,
                                             height: 80,
-                                          )
-                                        : Image.network(
-                                            _driverProfile['avatar_url'] ?? '',
-                                            loadingBuilder: (context, child,
-                                                loadingProgress) {
-                                              if (loadingProgress == null)
-                                                return child;
-                                              return const Center(
-                                                child:
-                                                    CircularProgressIndicator(),
-                                              );
-                                            },
-                                            width: 80,
-                                            height: 80,
                                           ),
+                                        )
+                                      : widget.driver['avatar_url'] == ''
+                                          ? ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
+                                              child: Image.asset(
+                                                'assets/images/avatarmock.png',
+                                                width: 80,
+                                                height: 80,
+                                              ),
+                                            )
+                                          : ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
+                                              child: Image.network(
+                                                widget.driver['avatar_url'] ??
+                                                    '',
+                                                loadingBuilder: (context, child,
+                                                    loadingProgress) {
+                                                  if (loadingProgress == null)
+                                                    return child;
+                                                  return const Center(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  );
+                                                },
+                                                width: 100,
+                                                height: 80,
+                                              ),
+                                            ),
+                                ),
                                 const SizedBox(
                                   width: 20,
                                 ),
@@ -207,9 +246,9 @@ class _RouteDetailState extends State<RouteDetail> {
                                     Row(
                                       children: [
                                         Text(
-                                          _driverProfile.isEmpty
+                                          widget.driver.isEmpty
                                               ? 'Loading...'
-                                              : _driverProfile['full_name'] ??
+                                              : widget.driver['full_name'] ??
                                                   '',
                                           style: GoogleFonts.nunito(
                                             fontSize: 20,
@@ -227,9 +266,9 @@ class _RouteDetailState extends State<RouteDetail> {
                                       ],
                                     ),
                                     Text(
-                                      _driverProfile.isEmpty
+                                      widget.driver.isEmpty
                                           ? 'Loading...'
-                                          : 'Tel: 0${_driverProfile['username'].toString().substring(2) ?? ''}',
+                                          : 'Tel: 0${widget.driver['username'].toString().substring(2) ?? ''}',
                                       style: GoogleFonts.nunito(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
@@ -485,8 +524,8 @@ class _RouteDetailState extends State<RouteDetail> {
                           height: 10,
                         ),
                         _isRequest
-                            ? _isDriverConfirm
-                                ? _isPay
+                            ? _isPay
+                                ? _isDriverConfirm
                                     ? _isComplete
                                         ? Column(
                                             children: [
@@ -575,52 +614,82 @@ class _RouteDetailState extends State<RouteDetail> {
                                               ),
                                             ],
                                           )
-                                    : Column(
-                                        children: [
-                                          Text(
-                                              'Please paid to confirm your seat.',
-                                              style: GoogleFonts.nunito(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w600,
-                                                color: Colors.redAccent,
-                                              )),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                elevation: 0,
-                                                backgroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(
-                                                    side: BorderSide(
-                                                        color: Theme.of(context)
-                                                            .primaryColor,
-                                                        width: 1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            15)),
-                                              ),
-                                              onPressed: () {},
-                                              child: Container(
-                                                width: double.infinity,
-                                                alignment: Alignment.center,
-                                                height: 50,
-                                                child: Text('Pay now',
-                                                    style: GoogleFonts.nunito(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Theme.of(context)
-                                                          .primaryColor,
-                                                    )),
-                                              )),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                        ],
-                                      )
+                                    : ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          elevation: 0,
+                                          backgroundColor:
+                                              Theme.of(context).primaryColor,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(15)),
+                                        ),
+                                        onPressed: () {},
+                                        child: Container(
+                                          width: double.infinity,
+                                          alignment: Alignment.center,
+                                          height: 50,
+                                          child:
+                                              Text('Waiting for driver confirm',
+                                                  style: GoogleFonts.nunito(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.white,
+                                                  )),
+                                        ))
                                 : Column(
                                     children: [
+                                      Text('Please paid to confirm your seat.',
+                                          style: GoogleFonts.nunito(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.redAccent,
+                                          )),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            elevation: 0,
+                                            backgroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: Theme.of(context)
+                                                        .primaryColor,
+                                                    width: 1),
+                                                borderRadius:
+                                                    BorderRadius.circular(15)),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        PaymentPage(
+                                                          amount: widget.info[
+                                                              'price_seat'],
+                                                          promptPayId:
+                                                              widget.driver[
+                                                                  'username'],
+                                                          journeyId:
+                                                              widget.info[
+                                                                  'journey_id'],
+                                                        )));
+                                          },
+                                          child: Container(
+                                            width: double.infinity,
+                                            alignment: Alignment.center,
+                                            height: 50,
+                                            child: Text('Pay now',
+                                                style: GoogleFonts.nunito(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                )),
+                                          )),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
                                       ElevatedButton(
                                           style: ElevatedButton.styleFrom(
                                             elevation: 0,
@@ -708,9 +777,6 @@ class _RouteDetailState extends State<RouteDetail> {
                                                   color: Colors.redAccent,
                                                 )),
                                           )),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
                                     ],
                                   )
                             :

@@ -146,13 +146,29 @@ class PassDB extends ChangeNotifier {
             .eq('journey_id', journeyId)
             .eq('user_id', user!.id);
         return response;
+      } else if (type == "pay") {
+        final response = await supabase
+            .from('user_journey')
+            .update({'status': "paid"}).eq('journey_id', journeyId);
+        return response;
+      } else if (type == "accept") {
+        final response = await supabase
+            .from('user_journey')
+            .update({'status': "accepted"}).eq('journey_id', journeyId);
+        return response;
+      } else if (type == "decline") {
+        final response = await supabase
+            .from('user_journey')
+            .delete()
+            .eq('journey_id', journeyId);
+        return response;
       }
     } catch (e) {
       print(e);
     }
   }
 
-  Future<dynamic> getUserJourneyStatus(String type, String journeyId) async {
+  Future<dynamic> getUserJourneyStatus(String journeyId) async {
     try {
       final response = await supabase
           .from('user_journey')

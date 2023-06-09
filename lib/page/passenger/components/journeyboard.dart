@@ -9,6 +9,7 @@ import 'package:paigun/provider/passenger.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/sizeappbar.dart';
+import 'journeyDetail.dart';
 
 class JourneyBoard extends StatefulWidget {
   const JourneyBoard({super.key});
@@ -150,52 +151,53 @@ class _JourneyBoardState extends State<JourneyBoard> {
                     ),
                   ),
                 ),
-                Container(
-                  margin: const EdgeInsets.all(5.0),
-                  child: TextField(
-                    readOnly: true,
-                    controller: _DateController,
-                    onTap: () async {
-                      DateTime? selectDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate:
-                              DateTime.now().subtract(const Duration(days: 1)),
-                          lastDate:
-                              DateTime.now().add(const Duration(days: 365)));
-                      if (selectDate != null) {
-                        // ignore: use_build_context_synchronously
-                        TimeOfDay? selectTime = await showTimePicker(
-                            context: context, initialTime: TimeOfDay.now());
-                        if (selectTime != null) {
-                          DateTime dateTime = DateTime(
-                              selectDate.year,
-                              selectDate.month,
-                              selectDate.day,
-                              selectTime.hour,
-                              selectTime.minute);
-                          _routeDate = dateTime;
-                          _DateController.text =
-                              DateFormat('E, d MMMM yyyy HH:mm a')
-                                  .format(dateTime);
-                        }
-                      }
-                    },
-                    showCursor: false,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 11),
-                      hintText: 'Date and time',
-                      filled: true,
-                      fillColor: Color.fromARGB(255, 240, 240, 240),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                      ),
-                      prefixIcon:
-                          Icon(Icons.access_time_filled, color: Colors.black54),
-                    ),
-                  ),
-                ),
+                // Container(
+                //   margin: const EdgeInsets.all(5.0),
+                //   child: TextField(
+                //     readOnly: true,
+                //     controller: _DateController,
+                //     onTap: () async {
+                //       DateTime? selectDate = await showDatePicker(
+                //           context: context,
+                //           initialDate: DateTime.now(),
+                //           firstDate:
+                //               DateTime.now().subtract(const Duration(days: 1)),
+                //           lastDate:
+                //               DateTime.now().add(const Duration(days: 365)));
+                //       if (selectDate != null) {
+                //         // ignore: use_build_context_synchronously
+                //         TimeOfDay? selectTime = await showTimePicker(
+                //             context: context, initialTime: TimeOfDay.now());
+                //         if (selectTime != null) {
+                //           DateTime dateTime = DateTime(
+                //               selectDate.year,
+                //               selectDate.month,
+                //               selectDate.day,
+                //               selectTime.hour,
+                //               selectTime.minute);
+                //           _routeDate = dateTime;
+                //           _DateController.text =
+                //               DateFormat('E, d MMMM yyyy HH:mm a')
+                //                   .format(dateTime);
+                //                   print(_DateController.text);
+                //         }
+                //       }
+                //     },
+                //     showCursor: false,
+                //     decoration: const InputDecoration(
+                //       contentPadding: EdgeInsets.symmetric(vertical: 11),
+                //       hintText: 'Date and time',
+                //       filled: true,
+                //       fillColor: Color.fromARGB(255, 240, 240, 240),
+                //       border: OutlineInputBorder(
+                //         borderSide: BorderSide.none,
+                //         borderRadius: BorderRadius.all(Radius.circular(20)),
+                //       ),
+                //       prefixIcon:
+                //           Icon(Icons.access_time_filled, color: Colors.black54),
+                //     ),
+                //   ),
+                // ),
                 Center(
                   child: ElevatedButton(
                       onPressed: () => {
@@ -226,9 +228,26 @@ class _JourneyBoardState extends State<JourneyBoard> {
                         child: GridView.count(
                           crossAxisCount: 2,
                           children: _showJourney.map((item) {
-                            return Center(
-                                child: journeyTile(item['origin'],
-                                    item['destination'], item['date'], item['profile']['avatar_url']));
+                            return GestureDetector(
+                              onTap: () {
+                                showModalBottomSheet(
+                                    isScrollControlled: true,
+                                    context: context,
+                                    builder: (context) => JourneyDetail(
+                                          origin: item['origin'],
+                                          destination: item['destination'],
+                                          date: item['date'],
+                                          note: item['note'],
+                                          profile: item['profile'],
+                                        ));
+                              },
+                              child: Center(
+                                  child: journeyTile(
+                                      item['origin'],
+                                      item['destination'],
+                                      item['date'],
+                                      item['profile']['avatar_url'])),
+                            );
                           }).toList(),
                         ),
                       )
@@ -259,7 +278,8 @@ class _JourneyBoardState extends State<JourneyBoard> {
   }
 }
 
-Widget journeyTile(String origin, String destination, String date, String avatar) {
+Widget journeyTile(
+    String origin, String destination, String date, String avatar) {
   return Container(
       width: 170,
       height: 170,
@@ -282,7 +302,7 @@ Widget journeyTile(String origin, String destination, String date, String avatar
           SizedBox(
               width: 50,
               height: 50,
-              child: Image.network(avatar)),
+              child: CircleAvatar(backgroundImage: NetworkImage(avatar))),
           Row(
             children: [
               const Icon(Icons.location_on_sharp),

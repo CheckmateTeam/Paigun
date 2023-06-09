@@ -107,7 +107,7 @@ class PassDB extends ChangeNotifier {
     try {
       final response = await supabase
           .from('board')
-          .select('board_id, owner, date, origin, destination, note, profile(avatar_url)');
+          .select('board_id, owner, date, origin, destination, note, profile(id, full_name, avatar_url)');
           _board = response;
           //print(response);
       return response;

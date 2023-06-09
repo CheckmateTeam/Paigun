@@ -4,6 +4,8 @@ import 'package:paigun/page/authentication/login.dart';
 import 'package:paigun/page/components/loading_screen.dart';
 import 'package:paigun/page/components/splash_screen.dart';
 import 'package:paigun/page/driver/component/createroute.dart';
+import 'package:paigun/page/driver/component/requestpage.dart';
+import 'package:paigun/page/passenger/components/historypage.dart';
 import 'package:paigun/page/passenger/components/journeyboard.dart';
 import 'package:paigun/page/driver/home.dart';
 import 'package:paigun/page/passenger/home.dart';
@@ -60,10 +62,10 @@ class MainApp extends StatelessWidget {
         '/journeyboard': (context) => const JourneyBoard(),
         '/journeyboard/create': (context) => const CreateJourney(),
         '/loading': (context) => const Loading(),
-        // '/passenger/routedetail': (context) => const RouteDetail(,
-        //     ),
         '/driver': (context) => const DriverHome(),
         '/driver/create': (context) => const CreateRoute(),
+        '/driver/request': (context) => const RequestPage(),
+        '/history': (context) => const HistoryPage(),
       },
     );
   }

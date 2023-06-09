@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -57,21 +59,20 @@ class _SearchPageState extends State<SearchPage> {
             onPressed: () async {
               if (_CurrentController.text == '' &&
                   _DestinationController.text == '') {
-                Navigator.pop(context);
+                Navigator.pop(context, {'Current': '', 'Destination': ''});
               } else if (_CurrentController.text == '' &&
                   _DestinationController.text != '') {
                 LatLng _currPos = context.read<PassDB>().currentPosition;
-                List<Placemark> _currAddress = await placemarkFromCoordinates(
+                List<Placemark> currAddress = await placemarkFromCoordinates(
                     _currPos.latitude, _currPos.longitude);
-                _currAddress[0].administrativeArea.toString() ==
+                currAddress[0].administrativeArea.toString() ==
                         "Krung Thep Maha Nakhon"
                     ? Navigator.pop(context, {
                         'Current': 'Bangkok',
                         'Destination': _DestinationController.text
                       })
                     : Navigator.pop(context, {
-                        'Current':
-                            _currAddress[0].administrativeArea.toString(),
+                        'Current': currAddress[0].administrativeArea.toString(),
                         'Destination': _DestinationController.text
                       });
               } else {

@@ -6,6 +6,7 @@ import 'package:paigun/page/components/splash_screen.dart';
 import 'package:paigun/page/driver/component/createroute.dart';
 import 'package:paigun/page/passenger/components/journeyboard.dart';
 import 'package:paigun/page/driver/home.dart';
+import 'package:paigun/page/passenger/components/notification.dart';
 import 'package:paigun/page/passenger/home.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
@@ -64,6 +65,7 @@ class MainApp extends StatelessWidget {
               routeid: '',
             ),
         '/driver': (context) => const DriverHome(),
+        '/notification' : (context) => const PaiNotification(),
         '/driver/create': (context) => const CreateRoute(),
       },
     );

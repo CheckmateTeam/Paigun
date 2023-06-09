@@ -24,6 +24,15 @@ class _DriverChat extends State<DriverChat> {
     ];
 
 
+  List chatListP = [
+    {"Name":"Boboasdasdas","Message":"The question is in a way meaningless, she knows, but one must ask. Love in such situations is rarely real. Sex is the engine, exalting and ruining people, sex and frustration. Love is what people believe is worth the path of devastation."},
+    {"Name":"Putangasdasdasd","Message":"Detail2"},
+    {"Name":"Tango Midasdasd","Message":"Detail3"},
+    {"Name":"Anjing karaasdasd","Message":"Detail4"},
+    {"Name":"Sugarasdasd","Message":"Detail5"},
+  ];
+
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: SizeAppbar(context, "Chat",
@@ -98,7 +107,10 @@ class _DriverChat extends State<DriverChat> {
                   child: ListView.builder(
                     itemCount: chatList.length,
                     itemBuilder: (context,index){
-                      return chatBox(chatList[index]['Name'],chatList[index]['Message']);
+                      return chatBox((currentChat == 1)
+                                        ? chatList[index]['Name'] : chatListP[index]['Name'],
+                                      (currentChat == 1)
+                                        ? chatList[index]['Message'] : chatListP[index]['Message']);
                     }))
           ],
         ),
@@ -108,6 +120,7 @@ class _DriverChat extends State<DriverChat> {
 
   Widget chatBox(String name, String recentChat) {
     return 
+    InkWell(child:
     Container(
       padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
       margin: EdgeInsets.only(bottom: 10.0),
@@ -161,6 +174,6 @@ class _DriverChat extends State<DriverChat> {
           
         ],
       ),
-    );
+    ),);
   }
 }

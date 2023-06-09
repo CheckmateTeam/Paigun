@@ -585,6 +585,13 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                             ],
                           ));
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
                 child: _submitLoading
                     ? const SpinKitFadingCube(
                         color: Colors.white,
@@ -598,13 +605,6 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                           color: Colors.white,
                         ),
                       ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
               ),
             ],
           ),

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
+import 'package:paigun/model/board_model.dart';
+import 'package:paigun/provider/passenger.dart';
+import 'package:provider/provider.dart';
 
+import '../../components/loadingdialog.dart';
 import '../../components/sizeappbar.dart';
+import 'journeyboard.dart';
 
 class CreateJourney extends StatefulWidget {
   const CreateJourney({super.key});
@@ -17,13 +22,15 @@ class _CreateJourneyState extends State<CreateJourney> {
   TextEditingController _ToController = TextEditingController();
   TextEditingController _NoteController = TextEditingController();
   bool _submitLoading = false;
+  bool _createLoading = false;
   DateTime _routeDate = DateTime.now();
+  Map selected = {};
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SizeAppbar(context, 'Create journey',
-          () => Navigator.pushReplacementNamed(context, '/home')),
+      appBar:
+          SizeAppbar(context, 'Create journey', () => Navigator.pop(context)),
       body: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -35,6 +42,15 @@ class _CreateJourneyState extends State<CreateJourney> {
                     Expanded(
                       child: TextField(
                         controller: _FromController,
+                        readOnly: true,
+                        onTap: () async {
+                          selected = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const SearchPage()),
+                          );
+                          _FromController.text = selected['selectedProvince'];
+                        },
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'From',
@@ -49,6 +65,15 @@ class _CreateJourneyState extends State<CreateJourney> {
                     Expanded(
                       child: TextField(
                         controller: _ToController,
+                        readOnly: true,
+                        onTap: () async {
+                          selected = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const SearchPage()),
+                          );
+                          _ToController.text = selected['selectedProvince'];
+                        },
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'To',
@@ -130,8 +155,7 @@ class _CreateJourneyState extends State<CreateJourney> {
                 onPressed: () {
                   if (_FromController.text.isEmpty ||
                       _ToController.text.isEmpty ||
-                      _DateController.text.isEmpty ||
-                      _NoteController.text.isEmpty) {
+                      _DateController.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Please fill all field')));
                     return;
@@ -139,7 +163,120 @@ class _CreateJourneyState extends State<CreateJourney> {
                   setState(() {
                     _submitLoading = true;
                   });
+                  showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                            title: const Text(
+                              'Confirm create journey',
+                            ),
+                            content: Text(
+                                "Would you like to create a journey from ${_FromController.text} to ${_ToController.text} at ${_DateController.text} ?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _submitLoading = false;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                  onPressed: () async {
+                                    setState(() {
+                                      _createLoading = true;
+                                    });
+                                    loadingDialog(context, _createLoading,
+                                        'Creating journey...');
+
+                                    var res = await Provider.of<PassDB>(context,
+                                            listen: false)
+                                        .createBoard(Board(
+                                            date: _DateController.text,
+                                            origin: _FromController.text,
+                                            destination: _ToController.text,
+                                            note: _NoteController.text));
+                                    setState(() {
+                                      _createLoading = false;
+                                      _submitLoading = false;
+                                    });
+
+                                    if (res == null) {
+                                      // ignore: use_build_context_synchronously
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                                icon: Image.asset(
+                                                    'assets/images/marker2.png',
+                                                    width: 100,
+                                                    height: 100),
+                                                title: const Text('Oops!'),
+                                                actionsAlignment:
+                                                    MainAxisAlignment.center,
+                                                alignment: Alignment.center,
+                                                content: const Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text('Create route failed'),
+                                                  ],
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: const Text(
+                                                          'Back to create route')),
+                                                ],
+                                              ));
+                                      return;
+                                    }
+                                    // ignore: use_build_context_synchronously
+                                    showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => AlertDialog(
+                                              icon: Image.asset(
+                                                  'assets/images/marker2.png',
+                                                  width: 100,
+                                                  height: 100),
+                                              title: const Text('Hooray!'),
+                                              actionsAlignment:
+                                                  MainAxisAlignment.center,
+                                              alignment: Alignment.center,
+                                              content: const Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text('Create route success'),
+                                                ],
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                      Navigator
+                                                          .pushReplacementNamed(
+                                                              context, '/journeyboard');
+                                                    },
+                                                    child: const Text(
+                                                        'Done')),
+                                              ],
+                                            ));
+                                  },
+                                  child: const Text('Confirm')),
+                            ],
+                          ));
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
                 child: _submitLoading
                     ? const SpinKitFadingCube(
                         color: Colors.white,
@@ -153,13 +290,6 @@ class _CreateJourneyState extends State<CreateJourney> {
                           color: Colors.white,
                         ),
                       ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
               ),
             ],
           )),

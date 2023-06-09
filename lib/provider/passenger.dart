@@ -6,6 +6,7 @@ import 'package:paigun/model/journey_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../function/show_snackbar.dart';
+import '../model/board_model.dart';
 
 class PassDB extends ChangeNotifier {
   Session? session = supabase.auth.currentSession;
@@ -15,11 +16,13 @@ class PassDB extends ChangeNotifier {
 
   LatLng get currentPosition => _currentPosition;
   List get journey => _journey;
+  List get board => _board;
   List get journeyMarker => _journeyMarker;
   List _journey = [];
   List _journeyMarker = [];
   List _board = [];
-  List get board => _board;
+
+
   double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var a = 0.5 -
@@ -184,6 +187,37 @@ class PassDB extends ChangeNotifier {
 
   Future<void> updatePosition(LatLng position) async {
     _currentPosition = position;
+    notifyListeners();
+  }
+
+  Future<dynamic> createBoard(Board board) async {
+    try {
+      final response = await supabase.from('board').insert([
+        {
+          'owner': user!.id,
+          'origin': board.origin,
+          'destination': board.destination,
+          'note': board.note,
+          'date': board.date,
+        }
+      ]);
+      return 'success';
+    } catch (e) {
+      return 'failed';
+    }
+  }
+
+  Future<dynamic> getBoard() async {
+    try {
+      final response = await supabase
+          .from('board')
+          .select('board_id, owner, date, origin, destination, note, profile(avatar_url)');
+          _board = response;
+          //print(response);
+      return response;
+    } catch (e) {
+      print(e);
+    }
     notifyListeners();
   }
 }

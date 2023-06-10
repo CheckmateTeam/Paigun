@@ -184,6 +184,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
+  gallery_saver:
+    dependency: "direct main"
+    description:
+      name: gallery_saver
+      sha256: df8b7e207ca12d64c71e0710a7ee3bc48aa7206d51cc720716fedb1543a66712
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.2"
   geocoding:
     dependency: "direct main"
     description:
@@ -529,7 +537,7 @@ packages:
     source: hosted
     version: "1.8.3"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider
       sha256: "3087813781ab814e4157b172f1a11c46be20179fcc9bea043e0fba36bc0acaa2"
@@ -1005,6 +1013,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.4"
+  widgets_to_image:
+    dependency: "direct main"
+    description:
+      name: widgets_to_image
+      sha256: e32c7b77267c01d319dc97333d4f3d894e9d81c8b3a408fd33862fa7775ee398
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   win32:
     dependency: transitive
     description:

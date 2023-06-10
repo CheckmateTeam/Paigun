@@ -182,18 +182,14 @@ class _PassengerHomeState extends State<PassengerHome> {
                                       .getJourneyDriver(context
                                           .read<PassDB>()
                                           .journey[index]['owner']);
-                                  String status = 'no';
-                                  final ress = await Provider.of<PassDB>(
-                                          context,
-                                          listen: false)
-                                      .getUserJourneyStatus(context
-                                          .read<PassDB>()
-                                          .journey[index]['journey_id']);
-                                  if (ress[0]['status'] == 'pending') {
-                                    status = 'pending';
-                                  } else if (ress[0]['status'] == 'paid') {
-                                    status = 'paid';
-                                  }
+
+                                  final String status =
+                                      await Provider.of<PassDB>(context,
+                                              listen: false)
+                                          .getJourneyStatus(context
+                                              .read<PassDB>()
+                                              .journey[index]['journey_id']);
+                                  print('status: $status');
                                   setState(() {
                                     _profileLoading = false;
                                   });

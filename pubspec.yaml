@@ -27,6 +27,9 @@ dependencies:
   faker: ^2.1.0
   intl: ^0.18.1
   image_picker: ^0.8.7+5
+  gallery_saver: ^2.3.2
+  widgets_to_image: ^0.0.2
+  path_provider: ^2.0.5
   snapping_sheet: ^3.1.0
   google_fonts: ^4.0.4
   intl_phone_field: ^3.1.0

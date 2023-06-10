@@ -18,10 +18,11 @@ class PassDB extends ChangeNotifier {
   List get journey => _journey;
   List get board => _board;
   List get journeyMarker => _journeyMarker;
+  List get journeyRequest => _journeyRequest;
   List _journey = [];
   List _journeyMarker = [];
+  List _journeyRequest = [];
   List _board = [];
-
 
   double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
@@ -40,6 +41,22 @@ class PassDB extends ChangeNotifier {
       return response;
     } catch (e) {
       print(e);
+    }
+  }
+
+  Future<String> getJourneyStatus(String jid) async {
+    try {
+      final response = await supabase
+          .from('user_journey')
+          .select('status')
+          .eq('user_id', user!.id)
+          .eq('journey_id', jid)
+          .limit(1)
+          .single();
+      return response['status'];
+    } catch (e) {
+      print(e);
+      return 'failed';
     }
   }
 
@@ -134,6 +151,22 @@ class PassDB extends ChangeNotifier {
     }
   }
 
+  Future<dynamic> getReqeustJourneyHistory() async {
+    try {
+      final response = await supabase
+          .from('user_journey')
+          .select('journey_id!inner(owner!inner(*),*),status')
+          .eq('user_id', user!.id)
+          .order('create_at', ascending: false);
+      print(response);
+      _journeyRequest.clear();
+      _journeyRequest.addAll(response);
+      return response;
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Future<dynamic> setUserRequest(String type, String journeyId) async {
     try {
       if (type == "join") {
@@ -167,19 +200,6 @@ class PassDB extends ChangeNotifier {
             .eq('journey_id', journeyId);
         return response;
       }
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  Future<dynamic> getUserJourneyStatus(String journeyId) async {
-    try {
-      final response = await supabase
-          .from('user_journey')
-          .select()
-          .eq('journey_id', journeyId)
-          .eq('user_id', user!.id);
-      return response;
     } catch (e) {
       print(e);
     }

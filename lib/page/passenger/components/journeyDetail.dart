@@ -78,7 +78,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                           ],
                         ),
                         Text(
-                          'Tel: Driver phone',
+                          widget.profile['username'].replaceRange(0, 2, '0'),
                           style: GoogleFonts.nunito(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,

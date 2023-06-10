@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:paigun/page/components/loading_placeholder.dart';
 import 'package:paigun/provider/passenger.dart';
 import 'package:provider/provider.dart';
 
@@ -213,15 +214,12 @@ class _JourneyBoardState extends State<JourneyBoard> {
               ],
             ),
             const Divider(),
-            isLoading == true
-                ? const SizedBox(
-                    height: 400,
-                    child: Center(
-                      child: SizedBox(
-                          height: 50,
-                          width: 50,
-                          child: CircularProgressIndicator()),
-                    ),
+            isLoading
+                ? const Column(
+                    children: [
+                      SizedBox(height: 200),
+                      LoadingPlaceholder(),
+                    ],
                   )
                 : _showJourney.isNotEmpty
                     ? Expanded(

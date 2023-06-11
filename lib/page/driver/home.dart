@@ -1,11 +1,18 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:paigun/page/components/loading_placeholder.dart';
+import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/page/components/sizeappbar.dart';
 import 'package:paigun/page/components/styledialog.dart';
+import 'package:paigun/page/driver/component/routedetail.dart';
+import 'package:paigun/page/passenger/components/routedetail.dart';
 import 'package:paigun/provider/driver.dart';
+import 'package:paigun/provider/passenger.dart';
+import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
 
 class DriverHome extends StatefulWidget {
@@ -17,7 +24,7 @@ class DriverHome extends StatefulWidget {
 
 class _DriverHomeState extends State<DriverHome> {
   bool _isLoading = false;
-
+  bool _profileLoading = false;
   void _fetchInfo() async {
     setState(() {
       _isLoading = true;
@@ -104,22 +111,78 @@ class _DriverHomeState extends State<DriverHome> {
                             })
                             .toList()
                             .length,
-                        itemBuilder: (context, index) => journeyTile(
-                            context.read<DriveDB>().driverJourney.where((e) {
-                              return e['status'] == 'available';
-                            }).toList()[index]['origin_province'],
-                            context.read<DriveDB>().driverJourney.where((e) {
-                              return e['status'] == 'available';
-                            }).toList()[index]['destination_province'],
-                            DateFormat('dd/MM/yyyy hh:mm a').format(
-                                DateTime.parse(context
-                                    .read<DriveDB>()
-                                    .driverJourney
-                                    .where((e) {
-                              return e['status'] == 'available';
-                            }).toList()[index]['date'])),
-                            'open',
-                            context)),
+                        itemBuilder: (context, index) => GestureDetector(
+                              onTap: () async {
+                                setState(() {
+                                  _profileLoading = true;
+                                });
+                                loadingDialog(
+                                    context, _profileLoading, 'Loading...');
+                                final res = await Provider.of<UserInfo>(context,
+                                        listen: false)
+                                    .userinfo;
+
+                                final String status =
+                                    await Provider.of<DriveDB>(context,
+                                            listen: false)
+                                        .getDriverJourneyStatus(context
+                                            .read<DriveDB>()
+                                            .driverJourney
+                                            .where((e) {
+                                  return e['status'] == 'available';
+                                }).toList()[index]['journey_id']);
+                                List passenger = await Provider.of<DriveDB>(
+                                        context,
+                                        listen: false)
+                                    .getJourneyPassenger(context
+                                        .read<DriveDB>()
+                                        .driverJourney
+                                        .where((e) {
+                                  return e['status'] == 'available';
+                                }).toList()[index]['journey_id']);
+                                setState(() {
+                                  _profileLoading = false;
+                                });
+                                Navigator.pop(context);
+                                print(res);
+                                Navigator.push(context,
+                                    MaterialPageRoute(builder: (context) {
+                                  return DriverRouteDetail(
+                                    driver: res,
+                                    passenger: passenger,
+                                    info: context
+                                        .read<DriveDB>()
+                                        .driverJourney
+                                        .where((e) {
+                                      return e['status'] == 'available';
+                                    }).toList()[index],
+                                    status: status,
+                                  );
+                                }));
+                              },
+                              child: journeyTile(
+                                  context
+                                      .read<DriveDB>()
+                                      .driverJourney
+                                      .where((e) {
+                                    return e['status'] == 'available';
+                                  }).toList()[index]['origin_province'],
+                                  context
+                                      .read<DriveDB>()
+                                      .driverJourney
+                                      .where((e) {
+                                    return e['status'] == 'available';
+                                  }).toList()[index]['destination_province'],
+                                  DateFormat('dd/MM/yyyy hh:mm a').format(
+                                      DateTime.parse(context
+                                          .read<DriveDB>()
+                                          .driverJourney
+                                          .where((e) {
+                                    return e['status'] == 'available';
+                                  }).toList()[index]['date'])),
+                                  'open',
+                                  context),
+                            )),
                   ),
                   Text(
                     'Closed',

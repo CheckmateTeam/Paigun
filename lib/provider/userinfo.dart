@@ -28,7 +28,7 @@ class UserInfo extends ChangeNotifier {
         ),
       );
       final newUser = await supabase.from('profile').upsert({
-        'id': supabase.auth.currentUser!,
+        'id': supabase.auth.currentUser!.id,
         'username': phone.substring(1),
         'full_name': name,
         'avatar_url': '',

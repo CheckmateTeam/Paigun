@@ -121,7 +121,11 @@ class _DriverChat extends State<DriverChat> {
 
   Widget chatBox(String name, String recentChat) {
     return 
-    InkWell(child:
+    InkWell(
+    onTap: () => {
+      Navigator.pushNamed(context, '/chatroom/roomid')
+    },
+    child:
     Container(
       padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
       margin: EdgeInsets.only(bottom: 10.0),

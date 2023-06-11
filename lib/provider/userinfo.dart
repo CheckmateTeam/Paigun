@@ -116,4 +116,37 @@ class UserInfo extends ChangeNotifier {
       );
     }
   }
+
+  Future<void> addDocument(String path, String type) async {
+    try {
+      File image = File(path);
+      String fileName = '${user!.id}_$type';
+      String signedUrl = "";
+
+      await supabase.storage.from('document').upload(
+            fileName,
+            image,
+          );
+      signedUrl = await supabase.storage
+          .from('document')
+          .createSignedUrl(fileName, 60 * 60 * 24 * 365);
+      await supabase.from('document').upsert({
+        'owner': supabase.auth.currentUser!.id,
+        '${type}_url': signedUrl,
+      });
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+    notifyListeners();
+  }
+   Future<dynamic> getDocument() async {
+    try {
+      final res = await supabase.from('document').select().eq('owner', user!.id);
+      return res[0];
+    } catch (e) {
+      print(e);
+    }
+    notifyListeners();
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:paigun/page/chatroom/component/message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../function/show_snackbar.dart';
@@ -37,7 +38,7 @@ class DriveDB extends ChangeNotifier {
      try {
       final res = await supabase.from('message').
       insert({
-        'roomId':roomId,
+        'roomId':roomId, // How to get roomId
         'content':content,
         'profileId': user,
       });
@@ -63,7 +64,7 @@ class DriveDB extends ChangeNotifier {
   
   Future<dynamic> getMessage(String roomId) async{
      try {
-      final res = await supabase.from('message').
+      Message res = await supabase.from('message').
       select('messageId, roomId, date, created_at, content, profileId')
       .match({'roomId' : roomId});[
       ];

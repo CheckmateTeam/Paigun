@@ -344,7 +344,7 @@ class _VerificationState extends State<Verification> {
                     final Session? session = res.session;
                     final User? user = res.user;
                     if (session != null && user != null) {
-                      context.read<UserInfo>().addNewUser(widget.phoneNo,
+                      await context.read<UserInfo>().addNewUser(widget.phoneNo,
                           widget.name, encryptPassword(widget.password));
                     }
                     // ignore: use_build_context_synchronously

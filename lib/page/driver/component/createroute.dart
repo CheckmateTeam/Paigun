@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:paigun/model/journey_model.dart';
+import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/page/components/sizeappbar.dart';
 import 'package:paigun/provider/driver.dart';
 import 'package:place_picker/place_picker.dart';
@@ -63,6 +65,7 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
   TextEditingController _CarmodelController = TextEditingController();
   TextEditingController _NoteController = TextEditingController();
   bool _submitLoading = false;
+  bool _createLoading = false;
 
   void createRoutePoint() async {
     PolylinePoints polylinePoints = PolylinePoints();
@@ -454,12 +457,54 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                               ),
                               TextButton(
                                   onPressed: () async {
+                                    setState(() {
+                                      _createLoading = true;
+                                    });
+                                    loadingDialog(context, _createLoading,
+                                        'Creating route...');
+                                    List<Placemark> fromAddress =
+                                        await placemarkFromCoordinates(
+                                            _FromPosition.latitude,
+                                            _FromPosition.longitude);
+                                    List<Placemark> toAddress =
+                                        await placemarkFromCoordinates(
+                                            _ToPosition.latitude,
+                                            _ToPosition.longitude);
+                                    String fromProvince = "";
+                                    String toProvince = "";
+                                    if (fromAddress[0].administrativeArea! ==
+                                        'Krung Thep Maha Nakhon') {
+                                      fromProvince = 'Bangkok';
+                                    } else {
+                                      fromProvince =
+                                          fromAddress[0].administrativeArea!;
+                                    }
+
+                                    if (toAddress[0].administrativeArea! ==
+                                        'Krung Thep Maha Nakhon') {
+                                      toProvince = 'Bangkok';
+                                    } else {
+                                      toProvince =
+                                          toAddress[0].administrativeArea!;
+                                    }
+                                    //Delete chang Wat
+                                    toProvince.contains('Chang Wat')
+                                        ? toProvince = toProvince.replaceAll(
+                                            'Chang Wat ', '')
+                                        : toProvince = toProvince;
+                                    fromProvince.contains('Chang Wat')
+                                        ? fromProvince = fromProvince
+                                            .replaceAll('Chang Wat ', '')
+                                        : fromProvince = fromProvince;
+
                                     var res = await Provider.of<DriveDB>(
                                             context,
                                             listen: false)
                                         .CreateRoute(Journey(
                                             start: _FromPosition,
                                             end: _ToPosition,
+                                            startProvince: fromProvince,
+                                            endProvince: toProvince,
                                             time: _routeDate,
                                             seat: _AvailableController.text,
                                             price: _PriceController.text,
@@ -467,8 +512,10 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                                             carModel: _CarmodelController.text,
                                             note: _NoteController.text));
                                     setState(() {
+                                      _createLoading = false;
                                       _submitLoading = false;
                                     });
+
                                     if (res == null) {
                                       // ignore: use_build_context_synchronously
                                       showDialog(
@@ -504,6 +551,7 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                                     // ignore: use_build_context_synchronously
                                     showDialog(
                                         context: context,
+                                        barrierDismissible: false,
                                         builder: (context) => AlertDialog(
                                               icon: Image.asset(
                                                   'assets/images/marker2.png',
@@ -524,7 +572,9 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                                                 TextButton(
                                                     onPressed: () {
                                                       Navigator.pop(context);
-                                                      // Navigator.pushReplacementNamed(context, routeName)
+                                                      Navigator
+                                                          .pushReplacementNamed(
+                                                              context, '/home');
                                                     },
                                                     child: const Text(
                                                         'Back to home')),
@@ -535,6 +585,13 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                             ],
                           ));
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
                 child: _submitLoading
                     ? const SpinKitFadingCube(
                         color: Colors.white,
@@ -548,13 +605,6 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                           color: Colors.white,
                         ),
                       ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
               ),
             ],
           ),

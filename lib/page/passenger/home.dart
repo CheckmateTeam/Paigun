@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'package:faker/faker.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -9,8 +11,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
+import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/page/passenger/components/drawer.dart';
 import 'package:paigun/page/passenger/components/routedetail.dart';
+import 'package:paigun/provider/driver.dart';
 import 'package:paigun/provider/passenger.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
@@ -33,11 +37,13 @@ class _PassengerHomeState extends State<PassengerHome> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final Set<Marker> _markers = {};
   final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
+  bool _profileLoading = false;
   Map destination = {};
   @override
   void initState() {
     super.initState();
-    Provider.of<UserInfo>(context, listen: false).getUserInfo();
+    // Provider.of<DriveDB>(context, listen: false).getDriverJourney();
   }
 
   @override
@@ -145,7 +151,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                     ),
                     height: MediaQuery.of(context).size.height,
                     child: ListView.builder(
-                      itemCount: 30,
+                      itemCount: context.watch<PassDB>().journey.length,
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(
@@ -165,11 +171,41 @@ class _PassengerHomeState extends State<PassengerHome> {
                                 ],
                               ),
                               child: ListTile(
-                                onTap: () {
+                                onTap: () async {
+                                  setState(() {
+                                    _profileLoading = true;
+                                  });
+                                  loadingDialog(
+                                      context, _profileLoading, 'Loading...');
+                                  final res = await Provider.of<PassDB>(context,
+                                          listen: false)
+                                      .getJourneyDriver(context
+                                          .read<PassDB>()
+                                          .journey[index]['owner']);
+                                  String status = 'no';
+                                  final ress = await Provider.of<PassDB>(
+                                          context,
+                                          listen: false)
+                                      .getUserJourneyStatus(context
+                                          .read<PassDB>()
+                                          .journey[index]['journey_id']);
+                                  if (ress[0]['status'] == 'pending') {
+                                    status = 'pending';
+                                  } else if (ress[0]['status'] == 'paid') {
+                                    status = 'paid';
+                                  }
+                                  setState(() {
+                                    _profileLoading = false;
+                                  });
+                                  Navigator.pop(context);
                                   Navigator.push(context,
                                       MaterialPageRoute(builder: (context) {
                                     return RouteDetail(
-                                        routeid: faker.guid.guid());
+                                      driver: res[0],
+                                      info:
+                                          context.read<PassDB>().journey[index],
+                                      status: status,
+                                    );
                                   }));
                                 },
                                 leading: const Icon(Icons.call_split_rounded),
@@ -178,7 +214,20 @@ class _PassengerHomeState extends State<PassengerHome> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     Text(
-                                      faker.address.country(),
+                                      context
+                                              .read<PassDB>()
+                                              .journey[index]['origin_province']
+                                              .toString()
+                                              .contains('Chang Wat')
+                                          ? context
+                                              .read<PassDB>()
+                                              .journey[index]['origin_province']
+                                              .toString()
+                                              .split("Chang Wat ")[1]
+                                          : context
+                                              .read<PassDB>()
+                                              .journey[index]['origin_province']
+                                              .toString(),
                                       style: GoogleFonts.nunito(
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold,
@@ -188,7 +237,23 @@ class _PassengerHomeState extends State<PassengerHome> {
                                     Icon(Icons.arrow_right_alt_rounded,
                                         color: Colors.black),
                                     Text(
-                                      faker.address.country(),
+                                      context
+                                              .read<PassDB>()
+                                              .journey[index]
+                                                  ['destination_province']
+                                              .toString()
+                                              .contains('Chang Wat')
+                                          ? context
+                                              .read<PassDB>()
+                                              .journey[index]
+                                                  ['destination_province']
+                                              .toString()
+                                              .split("Chang Wat ")[1]
+                                          : context
+                                              .read<PassDB>()
+                                              .journey[index]
+                                                  ['destination_province']
+                                              .toString(),
                                       style: GoogleFonts.nunito(
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold,
@@ -199,8 +264,10 @@ class _PassengerHomeState extends State<PassengerHome> {
                                 ),
                                 subtitle: Center(
                                   child: Text(
-                                    DateFormat('dd/MM/yyyy hh:mm a')
-                                        .format(faker.date.dateTime()),
+                                    DateFormat('dd/MM/yyyy hh:mm a').format(
+                                        DateTime.parse(context
+                                            .read<PassDB>()
+                                            .journey[index]['date'])),
                                     style: GoogleFonts.nunito(
                                       color:
                                           ui.Color.fromARGB(255, 138, 138, 138),
@@ -264,10 +331,46 @@ class _PassengerHomeState extends State<PassengerHome> {
                               MaterialPageRoute(
                                   builder: (context) => const SearchPage()),
                             );
-                            // ignore: use_build_context_synchronously
-                            print(destination['Current']);
-                            print(destination['Destination']);
+                            print(destination['Current'] +
+                                ' ' +
+                                destination['Destination']);
                             _searchController.text = destination['Destination'];
+                            if (destination['Current'] != '' &&
+                                destination['Destination'] != '') {
+                              setState(() {
+                                _isSearching = true;
+                              });
+                              loadingDialog(context, _isSearching, 'Searching');
+                              final res = await context
+                                  .read<PassDB>()
+                                  .getJourneyByProvince(destination['Current'],
+                                      destination['Destination']);
+                              if (res == null) {
+                                setState(() {
+                                  _isSearching = false;
+                                });
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'No available journey for this route'),
+                                  ),
+                                );
+                              } else {
+                                setState(() {
+                                  _isSearching = false;
+                                });
+                                Navigator.pop(context);
+                              }
+                            } else {
+                              setState(() {
+                                _isSearching = true;
+                              });
+                              loadingDialog(context, _isSearching, 'Searching');
+                              final res =
+                                  await context.read<PassDB>().getJourney(1000);
+                              Navigator.pop(context);
+                            }
                           },
                           textAlign: TextAlign.center,
                           textAlignVertical: TextAlignVertical.center,
@@ -351,35 +454,36 @@ class _MapComponentState extends State<MapComponent> {
 
   //location tracking
   void _determinePosition() async {
-    bool _serviceEnabled;
-    PermissionStatus _permission;
+    bool serviceEnabled;
+    PermissionStatus permission;
     Location location = Location();
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
         _GpsError = 'Please enable GPS';
         return;
       }
     }
 
-    _permission = await location.hasPermission();
-    if (_permission == PermissionStatus.denied) {
-      _permission = await location.requestPermission();
-      if (_permission != PermissionStatus.granted) {
+    permission = await location.hasPermission();
+    if (permission == PermissionStatus.denied) {
+      permission = await location.requestPermission();
+      if (permission != PermissionStatus.granted) {
         _GpsError = 'Please allow GPS permission';
         return;
       }
     }
 
     location.onLocationChanged.listen((LocationData currentLocation) {
-      // Use current location
-      setState(() {
-        _currentLocation = LatLng(
-            currentLocation.latitude ?? 0, currentLocation.longitude ?? 0);
-        Provider.of<PassDB>(context, listen: false)
-            .updatePosition(_currentLocation);
-      });
+      if (mounted) {
+        super.setState(() {
+          _currentLocation = LatLng(
+              currentLocation.latitude ?? 0, currentLocation.longitude ?? 0);
+          Provider.of<PassDB>(context, listen: false)
+              .updatePosition(_currentLocation);
+        });
+      }
     });
   }
 
@@ -409,12 +513,26 @@ class _MapComponentState extends State<MapComponent> {
     ));
   }
 
+  Future<void> _fetchRoute() async {
+    await Provider.of<PassDB>(context, listen: false).getJourney(1000);
+    print(Provider.of<PassDB>(context, listen: false).journey);
+  }
+
   @override
   void initState() {
-    _addCustomMarker1();
-    _addCustomMarker2();
-    _determinePosition();
     super.initState();
+    if (mounted) {
+      _addCustomMarker1();
+      _addCustomMarker2();
+      _determinePosition();
+      _fetchRoute();
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override
@@ -441,6 +559,12 @@ class _MapComponentState extends State<MapComponent> {
                   position: _currentLocation,
                   infoWindow: const InfoWindow(title: 'My location'),
                 ),
+                for (var marker in Provider.of<PassDB>(context).journeyMarker)
+                  Marker(
+                      icon: markerIcon2,
+                      markerId: marker['markerId'],
+                      position: marker['position'],
+                      infoWindow: marker['infoWindow'])
 
                 //Other markers
               },

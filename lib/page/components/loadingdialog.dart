@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 void loadingDialog(BuildContext context, bool condition, String message) {
   showDialog(
@@ -13,11 +14,14 @@ void loadingDialog(BuildContext context, bool condition, String message) {
               Text(message),
             ],
           ),
-          content: const Row(
+          content: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                  height: 50, width: 50, child: CircularProgressIndicator()),
+                  height: 50,
+                  width: 50,
+                  child: SpinKitFadingCube(
+                      size: 25, color: Theme.of(context).colorScheme.primary)),
             ],
           ),
         );

@@ -69,4 +69,65 @@ class DriveDB extends ChangeNotifier {
       print(e);
     }
   }
+
+  Future<String> getDriverJourneyStatus(String jid) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .select('status')
+          .eq('journey_id', jid)
+          .limit(1)
+          .single();
+      return response['status'];
+    } catch (e) {
+      print(e);
+      return 'failed';
+    }
+  }
+
+  Future<List> getJourneyPassenger(String jid) async {
+    try {
+      final response = await supabase
+          .from('user_journey')
+          .select('user_id!inner(*),status')
+          .eq('journey_id', jid)
+          .neq('status', 'pending')
+          .neq('status', 'paid');
+      if (response.length == 0) {
+        return [];
+      }
+      return response;
+    } catch (e) {
+      print(e);
+      return [];
+    }
+  }
+
+  Future<String> changeJourneyStatus(String jid, String status) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .update({'status': status}).eq('journey_id', jid);
+      final response2 = await supabase.from('user_journey').update({
+        'status': status,
+      }).eq('journey_id', jid);
+      return response;
+    } catch (e) {
+      print(e);
+      return '';
+    }
+  }
+
+  Future<dynamic> deleteRoute(String jid) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .delete()
+          .eq('journey_id', jid)
+          .limit(1);
+      return 'success';
+    } catch (e) {
+      return 'failed';
+    }
+  }
 }

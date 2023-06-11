@@ -2,6 +2,7 @@ import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:paigun/page/components/loading_placeholder.dart';
 import 'package:paigun/page/components/sizeappbar.dart';
 import 'package:paigun/page/components/styledialog.dart';
 import 'package:paigun/provider/driver.dart';
@@ -42,12 +43,7 @@ class _DriverHomeState extends State<DriverHome> {
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: _isLoading
-            ? const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                ],
-              )
+            ? const LoadingPlaceholder()
             : Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,7 +146,7 @@ class _DriverHomeState extends State<DriverHome> {
                             context.read<DriveDB>().driverJourney.where((e) {
                               return e['status'] == 'done';
                             }).toList()[index]['destination_province'],
-                            DateFormat('dd/MM/yyyy hh:mm a').format(
+                            DateFormat('EEEE, dd MMMM yyyy').format(
                                 DateTime.parse(context
                                     .read<DriveDB>()
                                     .driverJourney

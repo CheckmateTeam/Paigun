@@ -71,7 +71,7 @@ class MainApp extends StatelessWidget {
         '/notification' : (context) => const PaiNotification(),
         '/chat' : (context) => const DriverChat(),
         '/driver/create': (context) => const CreateRoute(),
-        '/chat/username' : (context) => ChatRoom(room: Room(id:"asd",name:"asd" ,createdAt: DateTime.now())),
+        
       },
     );
   }

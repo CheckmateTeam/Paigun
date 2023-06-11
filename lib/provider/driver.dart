@@ -24,11 +24,64 @@ class DriveDB extends ChangeNotifier {
       //     'note': journey.note,
       //   }
       // ]);
-      // return response;
+      // return response;x
       return "success";
     } catch (e) {
       print(e);
     }
     notifyListeners();
+  }
+
+
+  Future<dynamic> sendMessage(String content,String roomId) async{
+     try {
+      final res = await supabase.from('message').
+      insert({
+        'roomId':roomId,
+        'content':content,
+        'profileId': user,
+      });
+      return res;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<dynamic> chatCreate(User customer) async{
+     try {
+      final res = await supabase.from('message').
+      insert({
+        'ownerId': user,
+        'userId':customer,
+      })
+      ;
+      return res;
+    } catch (e) {
+      print(e);
+    }
+  }
+  
+  Future<dynamic> getMessage(String roomId) async{
+     try {
+      final res = await supabase.from('message').
+      select('messageId, roomId, date, created_at, content, profileId')
+      .match({'roomId' : roomId});[
+      ];
+      return res;
+    } catch (e) {
+      print(e);
+    }
+
+    Future<dynamic> getChat() async {
+      try {
+      final res = await supabase.from('chat').
+      select('roomId, userId, ownerId, created_at')
+      .match({'ownerId' : user});[
+      ];
+      return res;
+    } catch (e) {
+      print(e);
+    }
+    }
   }
 }

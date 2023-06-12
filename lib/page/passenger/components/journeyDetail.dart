@@ -25,7 +25,6 @@ class _JourneyDetailState extends State<JourneyDetail> {
   @override
   void initState() {
     super.initState();
-    //print(widget.profile['id']);
   }
 
   @override
@@ -60,11 +59,13 @@ class _JourneyDetailState extends State<JourneyDetail> {
                       children: [
                         Row(
                           children: [
-                            Text(
-                              widget.profile['full_name'],
-                              style: GoogleFonts.nunito(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                            Center(
+                              child: Text(
+                                widget.profile['full_name'].toString().substring(0, 10) + "...",
+                                style: GoogleFonts.nunito(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             const SizedBox(
@@ -87,7 +88,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                         Row(
                           children: [
                             for (int i = 0; i < 5; i++)
-                              i < _rating
+                              i < widget.profile['rating']
                                   ? const Icon(
                                       Icons.star,
                                       color: Colors.amber,

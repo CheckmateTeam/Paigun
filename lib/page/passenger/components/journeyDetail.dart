@@ -61,7 +61,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                           children: [
                             Center(
                               child: Text(
-                                widget.profile['full_name'].toString().substring(0, 10) + "...",
+                                "${widget.profile['full_name'].toString().substring(0, 10)}...",
                                 style: GoogleFonts.nunito(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,

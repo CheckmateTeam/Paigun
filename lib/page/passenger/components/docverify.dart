@@ -32,7 +32,11 @@ class _DocVerifyState extends State<DocVerify> {
   }
 
   void getDoc() async {
-    _doc = await context.read<UserInfo>().getDocument();
+    try {
+      _doc = await context.read<UserInfo>().getDocument();
+    } catch (e) {
+      print(e);
+    }
     citiUploaded = await _doc['citizen_url'] != null ? true : false;
     driverUploaded = await _doc['driver_url'] != null ? true : false;
     taxUploaded = await _doc['tax_url'] != null ? true : false;
@@ -56,7 +60,7 @@ class _DocVerifyState extends State<DocVerify> {
                   Row(
                     children: [
                       Text(
-                        "For driver",
+                        "For passenger",
                         style: GoogleFonts.nunito(
                             fontSize: 16, color: Colors.black54),
                       ),

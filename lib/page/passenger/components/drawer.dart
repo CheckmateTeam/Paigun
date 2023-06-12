@@ -53,8 +53,13 @@ class _HomeDrawerState extends State<HomeDrawer> {
   ];
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    bool isVerified = true;
     return Drawer(
       child: ListView(
         children: [
@@ -62,8 +67,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
               height: MediaQuery.of(context).size.height * 0.3,
               child: const UserProfile()),
           ..._items
-              .map((item) => menuTile(Icon(item['icon']), item['name'],
-                  item['path'], context, isVerified))
+              .map((item) => menuTile(
+                  Icon(item['icon']),
+                  item['name'],
+                  item['path'],
+                  context,
+                  context.watch<UserInfo>().userinfo['verified']))
               .toList(),
           Padding(
             padding: const EdgeInsets.all(15.0),
@@ -235,7 +244,7 @@ class _UserProfileState extends State<UserProfile> {
                     style: GoogleFonts.nunito(
                         fontSize: 16, fontWeight: FontWeight.normal),
                   ),
-                  _isVerified
+                  context.watch<UserInfo>().userinfo['verified']
                       ? const Row(
                           children: [
                             Text(
@@ -266,7 +275,7 @@ class _UserProfileState extends State<UserProfile> {
                             )
                           ],
                         ),
-                  _isVerified
+                  context.watch<UserInfo>().userinfo['verified']
                       ? const SizedBox()
                       : const Row(
                           children: [

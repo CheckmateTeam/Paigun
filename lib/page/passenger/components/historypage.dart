@@ -98,6 +98,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                       status: context
                                           .read<PassDB>()
                                           .journeyRequest[index]['status'],
+                                      from: "history",
                                     ),
                                   ));
                             }, context.read<PassDB>().journeyRequest[index]['journey_id']['owner']['avatar_url'])),
@@ -164,197 +165,220 @@ Widget journeyTile(String origin, String destination, String date,
               border: Border.all(
                   color: const Color.fromARGB(255, 238, 238, 238), width: 0.8)),
           child: ListTile(
-            leading: Container(
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 224, 224, 224),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 5,
-                  ),
-                ],
-                borderRadius: BorderRadius.all(Radius.circular(50)),
+              leading: Container(
+                decoration: const BoxDecoration(
+                  color: Color.fromARGB(255, 224, 224, 224),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 5,
+                    ),
+                  ],
+                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                ),
+                width: 60,
+                child: driver == ''
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: Image.asset(
+                          'assets/images/avatarmock.png',
+                          width: 80,
+                          height: 80,
+                        ),
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: Image.network(
+                          driver,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          width: 80,
+                          height: 80,
+                        ),
+                      ),
               ),
-              width: 60,
-              child: driver == ''
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: Image.asset(
-                        'assets/images/avatarmock.png',
-                        width: 80,
-                        height: 80,
-                      ),
-                    )
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: Image.network(
-                        driver,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        },
-                        width: 80,
-                        height: 80,
-                      ),
-                    ),
-            ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.location_on_sharp),
-                    Text(
-                      origin,
-                      style: GoogleFonts.nunito(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[800]),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.flag_rounded),
-                    Text(
-                      destination,
-                      style: GoogleFonts.nunito(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[800]),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            subtitle: Text(
-              date,
-              style: GoogleFonts.nunito(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[500]),
-            ),
-            trailing: status == 'finished'
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      const CircleAvatar(
-                          backgroundColor: Color.fromARGB(255, 132, 55, 255),
-                          child: Icon(
-                            Icons.rate_review_outlined,
-                            color: Colors.white,
-                          )),
+                      const Icon(Icons.location_on_sharp),
                       Text(
-                        'Review',
+                        origin,
                         style: GoogleFonts.nunito(
-                            fontSize: 11,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Color.fromARGB(255, 132, 55, 255)),
+                            color: Colors.grey[800]),
                       ),
                     ],
-                  )
-                : status == 'accepted'
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const CircleAvatar(
-                              backgroundColor: Colors.indigoAccent,
-                              child: Icon(
-                                Icons.wallet_travel_rounded,
-                                color: Colors.white,
-                              )),
-                          Text(
-                            'In trip',
-                            style: GoogleFonts.nunito(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.indigoAccent),
-                          ),
-                        ],
-                      )
-                    : status == 'going'
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const CircleAvatar(
-                                  backgroundColor: Colors.indigoAccent,
-                                  child: Icon(
-                                    Icons.directions_car,
-                                    color: Colors.white,
-                                  )),
-                              Text(
-                                'On Going',
-                                style: GoogleFonts.nunito(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.indigoAccent),
-                              ),
-                            ],
-                          )
-                        : status == 'done'
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const CircleAvatar(
-                                      backgroundColor: Colors.greenAccent,
-                                      child: Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                      )),
-                                  Text(
-                                    'Success',
-                                    style: GoogleFonts.nunito(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.greenAccent),
-                                  ),
-                                ],
-                              )
-                            : status == 'paid'
-                                ? Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const CircleAvatar(
-                                          backgroundColor: Colors.blueAccent,
-                                          child: Icon(
-                                            Icons.payment,
-                                            color: Colors.white,
-                                          )),
-                                      Text(
-                                        'Waiting',
-                                        style: GoogleFonts.nunito(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.blueAccent),
-                                      ),
-                                    ],
-                                  )
-                                : Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const CircleAvatar(
-                                          backgroundColor: Colors.orangeAccent,
-                                          child: Icon(
-                                            Icons.hourglass_top_outlined,
-                                            color: Colors.white,
-                                          )),
-                                      Text(
-                                        'To pay',
-                                        style: GoogleFonts.nunito(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.orangeAccent),
-                                      ),
-                                    ],
-                                  ),
-          ),
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.flag_rounded),
+                      Text(
+                        destination,
+                        style: GoogleFonts.nunito(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800]),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              subtitle: Text(
+                date,
+                style: GoogleFonts.nunito(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[500]),
+              ),
+              trailing: status == 'pending'
+                  ? waitingAccepted()
+                  : status == 'accepted'
+                      ? toPay()
+                      : status == 'paid'
+                          ? inTrip()
+                          : status == 'going'
+                              ? onGoing()
+                              : status == 'done'
+                                  ? doneJourney()
+                                  : reviewPending()),
         ),
       ),
       const SizedBox(
         height: 10,
       )
+    ],
+  );
+}
+
+Widget reviewPending() {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const CircleAvatar(
+          backgroundColor: Color.fromARGB(255, 132, 55, 255),
+          child: Icon(
+            Icons.rate_review_outlined,
+            color: Colors.white,
+          )),
+      Text(
+        'Review',
+        style: GoogleFonts.nunito(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Color.fromARGB(255, 132, 55, 255)),
+      ),
+    ],
+  );
+}
+
+Widget inTrip() {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const CircleAvatar(
+          backgroundColor: Colors.indigoAccent,
+          child: Icon(
+            Icons.wallet_travel_rounded,
+            color: Colors.white,
+          )),
+      Text(
+        'In trip',
+        style: GoogleFonts.nunito(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.indigoAccent),
+      ),
+    ],
+  );
+}
+
+Widget onGoing() {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const CircleAvatar(
+          backgroundColor: Colors.indigoAccent,
+          child: Icon(
+            Icons.directions_car,
+            color: Colors.white,
+          )),
+      Text(
+        'On Going',
+        style: GoogleFonts.nunito(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.indigoAccent),
+      ),
+    ],
+  );
+}
+
+Widget doneJourney() {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const CircleAvatar(
+          backgroundColor: Colors.greenAccent,
+          child: Icon(
+            Icons.check,
+            color: Colors.white,
+          )),
+      Text(
+        'Success',
+        style: GoogleFonts.nunito(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.greenAccent),
+      ),
+    ],
+  );
+}
+
+Widget waitingAccepted() {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const CircleAvatar(
+          backgroundColor: Colors.blueAccent,
+          child: Icon(
+            Icons.payment,
+            color: Colors.white,
+          )),
+      Text(
+        'Waiting',
+        style: GoogleFonts.nunito(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.blueAccent),
+      ),
+    ],
+  );
+}
+
+Widget toPay() {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const CircleAvatar(
+          backgroundColor: Colors.orangeAccent,
+          child: Icon(
+            Icons.hourglass_top_outlined,
+            color: Colors.white,
+          )),
+      Text(
+        'To pay',
+        style: GoogleFonts.nunito(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.orangeAccent),
+      ),
     ],
   );
 }

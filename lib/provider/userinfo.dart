@@ -141,13 +141,14 @@ class UserInfo extends ChangeNotifier {
     notifyListeners();
   }
 
-  Map doc = {};
+  Map _doc = {};
+  get doc => _doc;
   Future<dynamic> getDocument() async {
     try {
       final res =
           await supabase.from('document').select().eq('owner', user!.id);
       //print(res[0]);
-      doc = res[0];
+      _doc = res[0];
       return res[0];
     } catch (e) {
       print(e);

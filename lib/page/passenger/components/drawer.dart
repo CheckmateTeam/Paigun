@@ -62,6 +62,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
       'path': 'howtouse',
     }
   ];
+  @override
+  void initState() {
+    super.initState();
+    setState(() {});
+    // Provider.of<DriveDB>(context, listen: false).getDriverJourney();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -397,7 +403,9 @@ class _UserProfileState extends State<UserProfile> {
 
 Widget menuTile(Icon icon, String title, String path, BuildContext context,
     bool isVerified) {
-  if (title == 'Driver mode' && (context.watch<UserInfo>().doc['driver_url'] == null || context.watch<UserInfo>().doc['tax_url'] == null)) {
+  if (title == 'Driver mode' &&
+      (context.watch<UserInfo>().doc['driver_url'] == null ||
+          context.watch<UserInfo>().doc['tax_url'] == null)) {
     return ListTile(
       title: Row(
         children: [

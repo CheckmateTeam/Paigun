@@ -60,7 +60,6 @@ class _PassengerHomeState extends State<PassengerHome> {
   void initState() {
     super.initState();
     getDoc();
-    // Provider.of<DriveDB>(context, listen: false).getDriverJourney();
   }
 
   @override

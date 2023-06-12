@@ -5,6 +5,7 @@ import 'package:paigun/page/components/loading_screen.dart';
 import 'package:paigun/page/components/splash_screen.dart';
 import 'package:paigun/page/driver/component/createroute.dart';
 import 'package:paigun/page/driver/component/requestpage.dart';
+import 'package:paigun/page/passenger/components/docverify.dart';
 import 'package:paigun/page/passenger/components/historypage.dart';
 import 'package:paigun/page/passenger/components/journeyboard.dart';
 import 'package:paigun/page/driver/home.dart';
@@ -66,6 +67,7 @@ class MainApp extends StatelessWidget {
         '/driver/create': (context) => const CreateRoute(),
         '/driver/request': (context) => const RequestPage(),
         '/history': (context) => const HistoryPage(),
+        '/docverify': (context) => const DocVerify(),
       },
     );
   }

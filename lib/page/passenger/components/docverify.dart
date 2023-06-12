@@ -33,10 +33,10 @@ class _DocVerifyState extends State<DocVerify> {
 
   void getDoc() async {
     _doc = await context.read<UserInfo>().getDocument();
-    citiUploaded = await _doc['citizen_url'] != null? true: false;
-    driverUploaded = await _doc['driver_url'] != null? true: false;
-    taxUploaded = await _doc['tax_url'] != null? true: false;
-    
+    citiUploaded = await _doc['citizen_url'] != null ? true : false;
+    driverUploaded = await _doc['driver_url'] != null ? true : false;
+    taxUploaded = await _doc['tax_url'] != null ? true : false;
+
     setState(() {
       isLoading = false;
     });
@@ -45,7 +45,8 @@ class _DocVerifyState extends State<DocVerify> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SizeAppbar(context, 'Verfication', () => Navigator.pushNamed(context, '/home')),
+      appBar: SizeAppbar(
+          context, 'Verfication', () => Navigator.pushNamed(context, '/home')),
       body: isLoading
           ? const LoadingPlaceholder()
           : Padding(
@@ -333,7 +334,8 @@ class _DocVerifyState extends State<DocVerify> {
                                                           setState(() {
                                                             _imageLoading =
                                                                 false;
-                                                            driverUploaded = true;
+                                                            driverUploaded =
+                                                                true;
                                                           });
                                                           Navigator.of(context)
                                                               .pop();
@@ -372,7 +374,8 @@ class _DocVerifyState extends State<DocVerify> {
                                                           setState(() {
                                                             _imageLoading =
                                                                 false;
-                                                            driverUploaded = true;
+                                                            driverUploaded =
+                                                                true;
                                                           });
                                                           Navigator.of(context)
                                                               .pop();

@@ -2,6 +2,7 @@ import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:paigun/page/components/loading_placeholder.dart';
 import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
@@ -13,9 +14,11 @@ class HomeDrawer extends StatefulWidget {
   const HomeDrawer(
       {super.key,
       required this.isUserVerified,
-      required this.isDriverVerified});
+      required this.isDriverVerified,
+      required this.isGotCheck});
   final bool isDriverVerified;
   final bool isUserVerified;
+  final bool isGotCheck;
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -59,23 +62,9 @@ class _HomeDrawerState extends State<HomeDrawer> {
       'path': 'howtouse',
     }
   ];
-  // Map _doc = {};
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   getDoc();
-  // }
-
-  // void getDoc() async {
-  //   _doc = await context.read<UserInfo>().getDocument();
-  //   setState(() {});
-  // }
 
   @override
   Widget build(BuildContext context) {
-    // bool isVerified =
-    //     _doc['driver_url'] != null && _doc['tax_url'] != null ? true : false;
     return Drawer(
       child: ListView(
         children: [
@@ -83,6 +72,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
               height: MediaQuery.of(context).size.height * 0.3,
               child: UserProfile(
                 isUserVerified: widget.isUserVerified,
+                isGotCheck: widget.isGotCheck,
               )),
           ..._items
               .map((item) => menuTile(Icon(item['icon']), item['name'],
@@ -111,33 +101,22 @@ class _HomeDrawerState extends State<HomeDrawer> {
 }
 
 class UserProfile extends StatefulWidget {
-  const UserProfile({super.key, required this.isUserVerified});
+  const UserProfile(
+      {super.key, required this.isUserVerified, required this.isGotCheck});
   final bool isUserVerified;
+  final bool isGotCheck;
 
   @override
   State<UserProfile> createState() => _UserProfileState();
 }
 
 class _UserProfileState extends State<UserProfile> {
-  // Map _doc = {};
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   getDoc();
-  // }
-
-  // void getDoc() async {
-  //   _doc = await context.read<UserInfo>().getDocument();
-  //   setState(() {});
-  // }
-
   TextEditingController _firstname = TextEditingController();
   TextEditingController _lastname = TextEditingController();
   bool _imageLoading = false;
   var faker = Faker();
   @override
   Widget build(BuildContext context) {
-    //bool _isVerified = _doc['citizen_url'] != null ? true : false;
     final ImagePicker imgPicker = ImagePicker();
     return DrawerHeader(
       padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 10),
@@ -271,7 +250,7 @@ class _UserProfileState extends State<UserProfile> {
                     style: GoogleFonts.nunito(
                         fontSize: 16, fontWeight: FontWeight.normal),
                   ),
-                  widget.isUserVerified
+                  context.watch<UserInfo>().doc['citizen_url'] != null
                       ? const Row(
                           children: [
                             Text(
@@ -302,7 +281,7 @@ class _UserProfileState extends State<UserProfile> {
                             )
                           ],
                         ),
-                  widget.isUserVerified
+                  context.watch<UserInfo>().doc['citizen_url'] != null
                       ? const SizedBox()
                       : Row(
                           children: [
@@ -418,7 +397,7 @@ class _UserProfileState extends State<UserProfile> {
 
 Widget menuTile(Icon icon, String title, String path, BuildContext context,
     bool isVerified) {
-  if (title == 'Driver mode' && !isVerified) {
+  if (title == 'Driver mode' && (context.watch<UserInfo>().doc['driver_url'] == null || context.watch<UserInfo>().doc['tax_url'] == null)) {
     return ListTile(
       title: Row(
         children: [

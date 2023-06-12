@@ -43,14 +43,16 @@ class _PassengerHomeState extends State<PassengerHome> {
   Map _doc = {};
   bool isDriverVerified = false;
   bool isUserVerified = false;
+  bool gotCheck = false;
   void getDoc() async {
-    _doc = await context.read<UserInfo>().getDocument();
     setState(() async {
+      _doc = await context.read<UserInfo>().getDocument();
       isDriverVerified =
           await _doc['driver_url'] != null && _doc['tax_url'] != null
               ? true
               : false;
       isUserVerified = await _doc['citizen_url'] != null ? true : false;
+      gotCheck = true;
     });
   }
 
@@ -69,9 +71,9 @@ class _PassengerHomeState extends State<PassengerHome> {
           key: _scaffoldKey,
           resizeToAvoidBottomInset: false,
           drawer: HomeDrawer(
-            isDriverVerified: isDriverVerified,
-            isUserVerified: isUserVerified,
-          ),
+              isDriverVerified: isDriverVerified,
+              isUserVerified: isUserVerified,
+              isGotCheck: gotCheck),
           body: SnappingSheet(
             lockOverflowDrag: true,
             snappingPositions: const [

@@ -229,10 +229,11 @@ class PassDB extends ChangeNotifier {
 
   Future<dynamic> getBoard() async {
     try {
-      final response = await supabase.from('board').select(
-          'board_id, owner, date, origin, destination, note, profile(avatar_url)');
-      _board = response;
-      //print(response);
+      final response = await supabase
+          .from('board')
+          .select('board_id, owner, date, origin, destination, note, profile(id, username, full_name, avatar_url)');
+          _board = response;
+          //print(response);
       return response;
     } catch (e) {
       print(e);

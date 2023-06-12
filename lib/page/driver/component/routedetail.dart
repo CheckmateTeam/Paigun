@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:map_launcher/map_launcher.dart' as map_launcher;
 import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/page/components/styledialog.dart';
+import 'package:paigun/page/driver/component/summarypage.dart';
 import 'package:paigun/provider/driver.dart';
 import 'package:provider/provider.dart';
 
@@ -374,7 +375,49 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                             borderRadius:
                                                 BorderRadius.circular(15)),
                                       ),
-                                      onPressed: () {},
+                                      onPressed: () async {
+                                        setState(() {
+                                          _isLoading = true;
+                                        });
+                                        loadingDialog(
+                                            context, _isLoading, 'Processing');
+                                        //setfinish
+                                        await context
+                                            .read<DriveDB>()
+                                            .completeJourney(
+                                                widget.info['journey_id']);
+                                        showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return StyleDialog(
+                                                  context,
+                                                  'Finished',
+                                                  'You have finish the trip. We will redirect you to summary page.',
+                                                  'Go', () {
+                                                int passengerCount =
+                                                    widget.passenger.length;
+                                                int seat =
+                                                    widget.info['price_seat'];
+                                                int total =
+                                                    passengerCount * seat;
+
+                                                Navigator.of(context)
+                                                    .pushAndRemoveUntil(
+                                                        MaterialPageRoute(
+                                                            builder:
+                                                                (context) =>
+                                                                    SummaryPage(
+                                                                      receive:
+                                                                          total,
+                                                                    )),
+                                                        (route) => false);
+                                              });
+                                            });
+
+                                        setState(() {
+                                          _isLoading = false;
+                                        });
+                                      },
                                       child: Container(
                                         width: double.infinity,
                                         padding: const EdgeInsets.all(15),

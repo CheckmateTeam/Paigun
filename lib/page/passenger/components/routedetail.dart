@@ -12,6 +12,7 @@ import 'package:paigun/page/components/loadingdialog.dart';
 
 import 'package:paigun/page/components/styledialog.dart';
 import 'package:paigun/page/passenger/components/paypage.dart';
+import 'package:paigun/page/passenger/components/reportpage.dart';
 import 'package:paigun/provider/passenger.dart';
 import 'package:provider/provider.dart';
 
@@ -19,11 +20,13 @@ class RouteDetail extends StatefulWidget {
   final Map driver;
   final Map info;
   final String status;
+  final String from;
   const RouteDetail({
     Key? key,
     required this.driver,
     required this.info,
     required this.status,
+    required this.from,
   }) : super(key: key);
 
   @override
@@ -102,12 +105,12 @@ class _RouteDetailState extends State<RouteDetail> {
     } else if (widget.status == 'paid') {
       setState(() {
         _isRequest = true;
+        _isDriverConfirm = true;
         _isPay = true;
       });
     } else if (widget.status == 'accepted') {
       setState(() {
         _isRequest = true;
-        _isPay = true;
         _isDriverConfirm = true;
       });
     } else if (widget.status == 'going') {
@@ -131,7 +134,7 @@ class _RouteDetailState extends State<RouteDetail> {
         _isPay = true;
         _isDriverConfirm = true;
         _isDriverStart = true;
-        _isFinished = false;
+        _isFinished = true;
         _isComplete = true;
       });
     }
@@ -556,476 +559,16 @@ class _RouteDetailState extends State<RouteDetail> {
                           height: 10,
                         ),
                         _isRequest
-                            ? _isPay
-                                ? _isDriverConfirm
+                            ? _isDriverConfirm
+                                ? _isPay
                                     ? _isDriverStart
                                         ? _isFinished
-                                            ? Column(
-                                                children: [
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  ElevatedButton(
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        elevation: 0,
-                                                        backgroundColor:
-                                                            Colors.white,
-                                                        shape: RoundedRectangleBorder(
-                                                            side: BorderSide(
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .primaryColor,
-                                                                width: 1),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        15)),
-                                                      ),
-                                                      onPressed: () {
-                                                        print(
-                                                            "Go to report page");
-                                                      },
-                                                      child: Container(
-                                                        width: double.infinity,
-                                                        alignment:
-                                                            Alignment.center,
-                                                        height: 50,
-                                                        child: Text(
-                                                            'Complete Route',
-                                                            style: GoogleFonts
-                                                                .nunito(
-                                                              fontSize: 16,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .primaryColor,
-                                                            )),
-                                                      )),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                ],
-                                              )
-                                            : Column(
-                                                children: [
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  ElevatedButton(
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        elevation: 0,
-                                                        backgroundColor:
-                                                            Theme.of(context)
-                                                                .primaryColor,
-                                                        shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        15)),
-                                                      ),
-                                                      onPressed: () {
-                                                        showDialog(
-                                                            context: context,
-                                                            builder: (context) {
-                                                              return StyleDialog(
-                                                                  context,
-                                                                  'On the way',
-                                                                  'You can not cancel during this time',
-                                                                  'OK', () {
-                                                                Navigator.pop(
-                                                                    context);
-                                                              });
-                                                            });
-                                                      },
-                                                      child: Container(
-                                                        width: double.infinity,
-                                                        alignment:
-                                                            Alignment.center,
-                                                        height: 50,
-                                                        child: Text(
-                                                            'Ongoing...',
-                                                            style: GoogleFonts
-                                                                .nunito(
-                                                              fontSize: 16,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              color:
-                                                                  Colors.white,
-                                                            )),
-                                                      )),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                ],
-                                              )
-                                        : Column(
-                                            children: [
-                                              Text(
-                                                  'You are in the trip, Cancellation is allowed unitl  ${DateFormat('EEEE dd/MM/yyyy hh:mm a').format(DateTime.parse(widget.info['date']).subtract(const Duration(days: 3)))}',
-                                                  style: GoogleFonts.nunito(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.grey[600],
-                                                  )),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              ElevatedButton(
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    elevation: 0,
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            side: BorderSide(
-                                                                color: Colors
-                                                                    .redAccent,
-                                                                width: 1),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        15)),
-                                                  ),
-                                                  onPressed: () {
-                                                    showDialog(
-                                                        context: context,
-                                                        builder: (BuildContext
-                                                            context) {
-                                                          return AlertDialog(
-                                                            title: const Text(
-                                                                'Cancle Request'),
-                                                            content: const Text(
-                                                                'Are you sure you want to cancel request to join this trip?'),
-                                                            actions: [
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                },
-                                                                child:
-                                                                    const Text(
-                                                                        'Back'),
-                                                              ),
-                                                              TextButton(
-                                                                onPressed:
-                                                                    () async {
-                                                                  setState(() {
-                                                                    _isLoading =
-                                                                        true;
-                                                                  });
-                                                                  loadingDialog(
-                                                                      context,
-                                                                      _isLoading,
-                                                                      'Sending request...');
-                                                                  await context
-                                                                      .read<
-                                                                          PassDB>()
-                                                                      .setUserRequest(
-                                                                        "cancel",
-                                                                        widget.info[
-                                                                            'journey_id'],
-                                                                      );
-                                                                  setState(() {
-                                                                    _isLoading =
-                                                                        false;
-                                                                    _isRequest =
-                                                                        false;
-                                                                  });
-                                                                  // ignore: use_build_context_synchronously
-                                                                  await showDialog(
-                                                                      context:
-                                                                          context,
-                                                                      builder:
-                                                                          (BuildContext
-                                                                              context) {
-                                                                        return StyleDialog(
-                                                                            context,
-                                                                            'Cancle Succes',
-                                                                            'You have cancel request to join this trip.',
-                                                                            'Done',
-                                                                            () {
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                        });
-                                                                      });
-                                                                },
-                                                                child: Text(
-                                                                    'Confirm'),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        });
-                                                  },
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    alignment: Alignment.center,
-                                                    height: 50,
-                                                    child: Text(
-                                                        'Cancel request',
-                                                        style:
-                                                            GoogleFonts.nunito(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          color:
-                                                              Colors.redAccent,
-                                                        )),
-                                                  )),
-                                            ],
-                                          )
-                                    : ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          elevation: 0,
-                                          backgroundColor:
-                                              Theme.of(context).primaryColor,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(15)),
-                                        ),
-                                        onPressed: () {},
-                                        child: Container(
-                                          width: double.infinity,
-                                          alignment: Alignment.center,
-                                          height: 50,
-                                          child:
-                                              Text('Waiting for driver confirm',
-                                                  style: GoogleFonts.nunito(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.white,
-                                                  )),
-                                        ))
-                                : Column(
-                                    children: [
-                                      Text('Please paid to confirm your seat.',
-                                          style: GoogleFonts.nunito(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.redAccent,
-                                          )),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            elevation: 0,
-                                            backgroundColor: Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color: Theme.of(context)
-                                                        .primaryColor,
-                                                    width: 1),
-                                                borderRadius:
-                                                    BorderRadius.circular(15)),
-                                          ),
-                                          onPressed: () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        PaymentPage(
-                                                          amount: widget.info[
-                                                              'price_seat'],
-                                                          promptPayId:
-                                                              widget.driver[
-                                                                  'username'],
-                                                          journey: widget.info,
-                                                          driver: widget.driver,
-                                                        )));
-                                          },
-                                          child: Container(
-                                            width: double.infinity,
-                                            alignment: Alignment.center,
-                                            height: 50,
-                                            child: Text('Pay now',
-                                                style: GoogleFonts.nunito(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Theme.of(context)
-                                                      .primaryColor,
-                                                )),
-                                          )),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            elevation: 0,
-                                            backgroundColor: Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color: Colors.redAccent,
-                                                    width: 1),
-                                                borderRadius:
-                                                    BorderRadius.circular(15)),
-                                          ),
-                                          onPressed: () {
-                                            showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: const Text(
-                                                        'Cancle Request'),
-                                                    content: const Text(
-                                                        'Are you sure you want to cancel request to join this trip?'),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        child:
-                                                            const Text('Back'),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed: () async {
-                                                          setState(() {
-                                                            _isLoading = true;
-                                                          });
-                                                          loadingDialog(
-                                                              context,
-                                                              _isLoading,
-                                                              'Sending request...');
-                                                          await context
-                                                              .read<PassDB>()
-                                                              .setUserRequest(
-                                                                "cancel",
-                                                                widget.info[
-                                                                    'journey_id'],
-                                                              );
-                                                          setState(() {
-                                                            _isLoading = false;
-                                                            _isRequest = false;
-                                                          });
-                                                          // ignore: use_build_context_synchronously
-                                                          await showDialog(
-                                                              context: context,
-                                                              builder:
-                                                                  (BuildContext
-                                                                      context) {
-                                                                return StyleDialog(
-                                                                    context,
-                                                                    'Cancle Succes',
-                                                                    'You have cancel request to join this trip.',
-                                                                    'Done', () {
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                });
-                                                              });
-                                                        },
-                                                        child: Text('Confirm'),
-                                                      ),
-                                                    ],
-                                                  );
-                                                });
-                                          },
-                                          child: Container(
-                                            width: double.infinity,
-                                            alignment: Alignment.center,
-                                            height: 50,
-                                            child: Text('Cancel request',
-                                                style: GoogleFonts.nunito(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.redAccent,
-                                                )),
-                                          )),
-                                    ],
-                                  )
-                            :
-                            //Request to join button
-                            ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15)),
-                                ),
-                                onPressed: () {
-                                  showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: const Text('Request to join'),
-                                          content: const Text(
-                                              'Are you sure you want to request to join this trip?'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text('Cancel'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () async {
-                                                setState(() {
-                                                  _isLoading = true;
-                                                });
-                                                loadingDialog(
-                                                    context,
-                                                    _isLoading,
-                                                    'Sending request...');
-                                                await context
-                                                    .read<PassDB>()
-                                                    .setUserRequest(
-                                                      "join",
-                                                      widget.info['journey_id'],
-                                                    );
-                                                setState(() {
-                                                  _isRequest = true;
-                                                  _isLoading = false;
-                                                });
-                                                // ignore: use_build_context_synchronously
-                                                await showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return StyleDialog(
-                                                          context,
-                                                          'Request sent',
-                                                          'You will get a notification when the driver accepts your request',
-                                                          'Done', () {
-                                                        Navigator.pop(context);
-                                                        Navigator.pop(context);
-                                                        Navigator.pop(context);
-                                                      });
-                                                    });
-                                              },
-                                              child: Text('Confirm'),
-                                            ),
-                                          ],
-                                        );
-                                      });
-                                },
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(15),
-                                  child: const Center(
-                                    child: Text(
-                                      'Request to join',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                )),
+                                            ? completedRoute()
+                                            : onGoing()
+                                        : inTrip()
+                                    : toPay()
+                                : waitForConfirm()
+                            : requestToJoin()
                       ],
                     ),
                   ),
@@ -1036,13 +579,402 @@ class _RouteDetailState extends State<RouteDetail> {
                 top: 20,
                 left: 20,
                 child: IconButton.filled(
-                    onPressed: () {
-                      Navigator.pop(context);
+                    onPressed: () async {
+                      if (widget.from == 'history') {
+                        Navigator.pushReplacementNamed(context, '/history');
+                      } else {
+                        Navigator.pop(context);
+                      }
                     },
                     icon: const Icon(Icons.arrow_back)))
           ],
         ),
       ),
     );
+  }
+
+  Widget completedRoute() {
+    return Column(
+      children: [
+        const SizedBox(
+          height: 10,
+        ),
+        ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                      color: Theme.of(context).primaryColor, width: 1),
+                  borderRadius: BorderRadius.circular(15)),
+            ),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) =>
+                      ReportPage(driver: widget.driver, info: widget.info)));
+            },
+            child: Container(
+              width: double.infinity,
+              alignment: Alignment.center,
+              height: 50,
+              child: Text('Complete Route',
+                  style: GoogleFonts.nunito(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).primaryColor,
+                  )),
+            )),
+        const SizedBox(
+          height: 10,
+        ),
+      ],
+    );
+  }
+
+  Widget onGoing() {
+    return Column(
+      children: [
+        const SizedBox(
+          height: 10,
+        ),
+        ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+            ),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return StyleDialog(context, 'On the way',
+                        'You can not cancel during this time', 'OK', () {
+                      Navigator.pop(context);
+                    });
+                  });
+            },
+            child: Container(
+              width: double.infinity,
+              alignment: Alignment.center,
+              height: 50,
+              child: Text('Ongoing...',
+                  style: GoogleFonts.nunito(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  )),
+            )),
+        const SizedBox(
+          height: 10,
+        ),
+      ],
+    );
+  }
+
+  Widget inTrip() {
+    return Column(
+      children: [
+        Text(
+            'You are in the trip, Cancellation is allowed unitl  ${DateFormat('EEEE dd/MM/yyyy hh:mm a').format(DateTime.parse(widget.info['date']).subtract(const Duration(days: 3)))}',
+            style: GoogleFonts.nunito(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[600],
+            )),
+        const SizedBox(
+          height: 10,
+        ),
+        ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Colors.redAccent, width: 1),
+                  borderRadius: BorderRadius.circular(15)),
+            ),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Cancle Request'),
+                      content: const Text(
+                          'Are you sure you want to cancel request to join this trip?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Back'),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            loadingDialog(
+                                context, _isLoading, 'Sending request...');
+                            await context.read<PassDB>().setUserRequest(
+                                  "cancel",
+                                  widget.info['journey_id'],
+                                );
+                            setState(() {
+                              _isLoading = false;
+                              _isRequest = false;
+                            });
+                            // ignore: use_build_context_synchronously
+                            await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return StyleDialog(
+                                      context,
+                                      'Cancle Succes',
+                                      'You have cancel request to join this trip.',
+                                      'Done', () {
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  });
+                                });
+                          },
+                          child: Text('Confirm'),
+                        ),
+                      ],
+                    );
+                  });
+            },
+            child: Container(
+              width: double.infinity,
+              alignment: Alignment.center,
+              height: 50,
+              child: Text('Cancel request',
+                  style: GoogleFonts.nunito(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.redAccent,
+                  )),
+            )),
+      ],
+    );
+  }
+
+  Widget waitForConfirm() {
+    return ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: Theme.of(context).primaryColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        ),
+        onPressed: () {},
+        child: Container(
+          width: double.infinity,
+          alignment: Alignment.center,
+          height: 50,
+          child: Text('Waiting for driver confirm',
+              style: GoogleFonts.nunito(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              )),
+        ));
+  }
+
+  Widget toPay() {
+    return Column(
+      children: [
+        Text('Please paid to confirm your seat.',
+            style: GoogleFonts.nunito(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.redAccent,
+            )),
+        const SizedBox(
+          height: 10,
+        ),
+        ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                      color: Theme.of(context).primaryColor, width: 1),
+                  borderRadius: BorderRadius.circular(15)),
+            ),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => PaymentPage(
+                            amount: widget.info['price_seat'],
+                            promptPayId: widget.driver['username'],
+                            journey: widget.info,
+                            driver: widget.driver,
+                          )));
+            },
+            child: Container(
+              width: double.infinity,
+              alignment: Alignment.center,
+              height: 50,
+              child: Text('Pay now',
+                  style: GoogleFonts.nunito(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).primaryColor,
+                  )),
+            )),
+        const SizedBox(
+          height: 10,
+        ),
+        ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Colors.redAccent, width: 1),
+                  borderRadius: BorderRadius.circular(15)),
+            ),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Cancle Request'),
+                      content: const Text(
+                          'Are you sure you want to cancel request to join this trip?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Back'),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            loadingDialog(
+                                context, _isLoading, 'Sending request...');
+                            await context.read<PassDB>().setUserRequest(
+                                  "cancel",
+                                  widget.info['journey_id'],
+                                );
+                            setState(() {
+                              _isLoading = false;
+                              _isRequest = false;
+                            });
+                            // ignore: use_build_context_synchronously
+                            await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return StyleDialog(
+                                      context,
+                                      'Cancle Succes',
+                                      'You have cancel request to join this trip.',
+                                      'Done', () {
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  });
+                                });
+                          },
+                          child: Text('Confirm'),
+                        ),
+                      ],
+                    );
+                  });
+            },
+            child: Container(
+              width: double.infinity,
+              alignment: Alignment.center,
+              height: 50,
+              child: Text('Cancel request',
+                  style: GoogleFonts.nunito(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.redAccent,
+                  )),
+            )),
+      ],
+    );
+  }
+
+  Widget requestToJoin() {
+    return //Request to join button
+        ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+            ),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Request to join'),
+                      content: const Text(
+                          'Are you sure you want to request to join this trip?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            loadingDialog(
+                                context, _isLoading, 'Sending request...');
+                            await context.read<PassDB>().setUserRequest(
+                                  "join",
+                                  widget.info['journey_id'],
+                                );
+                            setState(() {
+                              _isRequest = true;
+                              _isPay = false;
+                              _isDriverConfirm = false;
+                              _isLoading = false;
+                            });
+                            // ignore: use_build_context_synchronously
+                            await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return StyleDialog(
+                                      context,
+                                      'Request sent',
+                                      'You will get a notification when the driver accepts your request',
+                                      'Done', () {
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  });
+                                });
+                          },
+                          child: Text('Confirm'),
+                        ),
+                      ],
+                    );
+                  });
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(15),
+              child: const Center(
+                child: Text(
+                  'Request to join',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+            ));
   }
 }

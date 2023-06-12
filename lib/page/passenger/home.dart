@@ -12,6 +12,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:paigun/page/components/loadingdialog.dart';
+import 'package:paigun/page/components/styledialog.dart';
 import 'package:paigun/page/passenger/components/drawer.dart';
 import 'package:paigun/page/passenger/components/routedetail.dart';
 import 'package:paigun/provider/driver.dart';
@@ -43,7 +44,7 @@ class _PassengerHomeState extends State<PassengerHome> {
   @override
   void initState() {
     super.initState();
-    // Provider.of<DriveDB>(context, listen: false).getDriverJourney();
+    Provider.of<UserInfo>(context, listen: false).getUserInfo();
   }
 
   @override
@@ -124,8 +125,24 @@ class _PassengerHomeState extends State<PassengerHome> {
                                 foregroundColor: Colors.white,
                                 backgroundColor: Colors.white,
                                 onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, '/driver/create');
+                                  if (context
+                                      .read<UserInfo>()
+                                      .userinfo['verified']) {
+                                    Navigator.pushNamed(
+                                        context, '/driver/create');
+                                  } else {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return StyleDialog(
+                                              context,
+                                              'Unverified',
+                                              'Please verify your account before using the feature',
+                                              'OK', () {
+                                            Navigator.pop(context);
+                                          });
+                                        });
+                                  }
                                 },
                                 child: Icon(
                                   Icons.add_rounded,
@@ -189,7 +206,6 @@ class _PassengerHomeState extends State<PassengerHome> {
                                           .getJourneyStatus(context
                                               .read<PassDB>()
                                               .journey[index]['journey_id']);
-                                  print('status: $status');
                                   setState(() {
                                     _profileLoading = false;
                                   });
@@ -197,11 +213,12 @@ class _PassengerHomeState extends State<PassengerHome> {
                                   Navigator.push(context,
                                       MaterialPageRoute(builder: (context) {
                                     return RouteDetail(
-                                      driver: res[0],
-                                      info:
-                                          context.read<PassDB>().journey[index],
-                                      status: status,
-                                    );
+                                        driver: res[0],
+                                        info: context
+                                            .read<PassDB>()
+                                            .journey[index],
+                                        status: status,
+                                        from: 'home');
                                   }));
                                 },
                                 leading: const Icon(Icons.call_split_rounded),
@@ -327,9 +344,6 @@ class _PassengerHomeState extends State<PassengerHome> {
                               MaterialPageRoute(
                                   builder: (context) => const SearchPage()),
                             );
-                            print(destination['Current'] +
-                                ' ' +
-                                destination['Destination']);
                             _searchController.text = destination['Destination'];
                             if (destination['Current'] != '' &&
                                 destination['Destination'] != '') {
@@ -341,31 +355,33 @@ class _PassengerHomeState extends State<PassengerHome> {
                                   .read<PassDB>()
                                   .getJourneyByProvince(destination['Current'],
                                       destination['Destination']);
-                              if (res == null) {
+                              if (res.isEmpty) {
                                 setState(() {
                                   _isSearching = false;
                                 });
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'No available journey for this route'),
-                                  ),
-                                );
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return StyleDialog(
+                                          context,
+                                          'No route',
+                                          'There is no route between selected province. You can post in journey board to find the route',
+                                          'OK', () async {
+                                        loadingDialog(
+                                            context, _isSearching, 'Searching');
+                                        final res = await context
+                                            .read<PassDB>()
+                                            .getJourney(1000);
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                      });
+                                    });
                               } else {
                                 setState(() {
                                   _isSearching = false;
+                                  Navigator.pop(context);
                                 });
-                                Navigator.pop(context);
                               }
-                            } else {
-                              setState(() {
-                                _isSearching = true;
-                              });
-                              loadingDialog(context, _isSearching, 'Searching');
-                              final res =
-                                  await context.read<PassDB>().getJourney(1000);
-                              Navigator.pop(context);
                             }
                           },
                           textAlign: TextAlign.center,

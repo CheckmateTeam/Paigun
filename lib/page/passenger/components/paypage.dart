@@ -556,7 +556,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                                       return StyleDialog(
                                                           context,
                                                           'Success',
-                                                          'Please wait driver to confirm',
+                                                          'You are now on the journey',
                                                           'Back', () {
                                                         Navigator
                                                             .pushNamedAndRemoveUntil(

@@ -130,4 +130,30 @@ class DriveDB extends ChangeNotifier {
       return 'failed';
     }
   }
+
+  Future<dynamic> completeJourney(String jid) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .update({'status': 'done'}).eq('journey_id', jid);
+
+      return 'success';
+    } catch (e) {
+      return 'failed';
+    }
+  }
+
+  Future<dynamic> getJourneyInfo(String jid) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .select()
+          .eq('owner', user!.id)
+          .eq('journey_id', jid)
+          .single();
+      return response;
+    } catch (e) {
+      print(e);
+    }
+  }
 }

@@ -6,8 +6,16 @@ import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
 
+import '../../../provider/passenger.dart';
+import '../../components/styledialog.dart';
+
 class HomeDrawer extends StatefulWidget {
-  const HomeDrawer({super.key});
+  const HomeDrawer(
+      {super.key,
+      required this.isUserVerified,
+      required this.isDriverVerified});
+  final bool isDriverVerified;
+  final bool isUserVerified;
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -51,19 +59,34 @@ class _HomeDrawerState extends State<HomeDrawer> {
       'path': 'howtouse',
     }
   ];
+  // Map _doc = {};
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   getDoc();
+  // }
+
+  // void getDoc() async {
+  //   _doc = await context.read<UserInfo>().getDocument();
+  //   setState(() {});
+  // }
 
   @override
   Widget build(BuildContext context) {
-    bool isVerified = true;
+    // bool isVerified =
+    //     _doc['driver_url'] != null && _doc['tax_url'] != null ? true : false;
     return Drawer(
       child: ListView(
         children: [
           SizedBox(
               height: MediaQuery.of(context).size.height * 0.3,
-              child: const UserProfile()),
+              child: UserProfile(
+                isUserVerified: widget.isUserVerified,
+              )),
           ..._items
               .map((item) => menuTile(Icon(item['icon']), item['name'],
-                  item['path'], context, isVerified))
+                  item['path'], context, widget.isDriverVerified))
               .toList(),
           Padding(
             padding: const EdgeInsets.all(15.0),
@@ -88,20 +111,33 @@ class _HomeDrawerState extends State<HomeDrawer> {
 }
 
 class UserProfile extends StatefulWidget {
-  const UserProfile({super.key});
+  const UserProfile({super.key, required this.isUserVerified});
+  final bool isUserVerified;
 
   @override
   State<UserProfile> createState() => _UserProfileState();
 }
 
 class _UserProfileState extends State<UserProfile> {
-  bool _isVerified = true;
+  // Map _doc = {};
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   getDoc();
+  // }
+
+  // void getDoc() async {
+  //   _doc = await context.read<UserInfo>().getDocument();
+  //   setState(() {});
+  // }
+
   TextEditingController _firstname = TextEditingController();
   TextEditingController _lastname = TextEditingController();
   bool _imageLoading = false;
   var faker = Faker();
   @override
   Widget build(BuildContext context) {
+    //bool _isVerified = _doc['citizen_url'] != null ? true : false;
     final ImagePicker imgPicker = ImagePicker();
     return DrawerHeader(
       padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 10),
@@ -235,7 +271,7 @@ class _UserProfileState extends State<UserProfile> {
                     style: GoogleFonts.nunito(
                         fontSize: 16, fontWeight: FontWeight.normal),
                   ),
-                  _isVerified
+                  widget.isUserVerified
                       ? const Row(
                           children: [
                             Text(
@@ -266,21 +302,26 @@ class _UserProfileState extends State<UserProfile> {
                             )
                           ],
                         ),
-                  _isVerified
+                  widget.isUserVerified
                       ? const SizedBox()
-                      : const Row(
+                      : Row(
                           children: [
-                            Text('Verify now? ',
+                            const Text('Verify now? ',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 )),
-                            Text('Click here',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.redAccent,
-                                ))
+                            InkWell(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/docverify');
+                              },
+                              child: const Text('Click here',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.redAccent,
+                                  )),
+                            )
                           ],
                         )
                 ],
@@ -399,20 +440,28 @@ Widget menuTile(Icon icon, String title, String path, BuildContext context,
         color: Colors.grey,
       ),
       onTap: () {
+        // showDialog(
+        //     context: context,
+        //     builder: (context) => AlertDialog(
+        //           title: const Text('Unverified'),
+        //           content: const Text(
+        //               'Please verify your account before using this feature.'),
+        //           actions: [
+        //             TextButton(
+        //                 onPressed: () {
+        //                   Navigator.of(context).pop();
+        //                 },
+        //                 child: const Text('OK'))
+        //           ],
+        //         ));
         showDialog(
             context: context,
-            builder: (context) => AlertDialog(
-                  title: const Text('Unverified'),
-                  content: const Text(
-                      'Please verify your account before using this feature.'),
-                  actions: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('OK'))
-                  ],
-                ));
+            builder: (context) => StyleDialog(
+                context,
+                'Driver mode is lock.',
+                'Your profile need to verify more documents to unlock the Driver mode',
+                'Verify now',
+                () => Navigator.pushNamed(context, '/docverify')));
       },
     );
   }

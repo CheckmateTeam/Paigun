@@ -140,9 +140,12 @@ class UserInfo extends ChangeNotifier {
     }
     notifyListeners();
   }
-   Future<dynamic> getDocument() async {
+
+  Future<dynamic> getDocument() async {
     try {
-      final res = await supabase.from('document').select().eq('owner', user!.id);
+      final res =
+          await supabase.from('document').select().eq('owner', user!.id);
+          //print(res[0]);
       return res[0];
     } catch (e) {
       print(e);

@@ -21,6 +21,9 @@ class _DocVerifyState extends State<DocVerify> {
   bool _imageLoading = false;
   Map _doc = {};
   bool isLoading = true;
+  bool citiUploaded = false;
+  bool driverUploaded = false;
+  bool taxUploaded = false;
 
   @override
   void initState() {
@@ -30,6 +33,10 @@ class _DocVerifyState extends State<DocVerify> {
 
   void getDoc() async {
     _doc = await context.read<UserInfo>().getDocument();
+    citiUploaded = await _doc['citizen_url'] != null? true: false;
+    driverUploaded = await _doc['driver_url'] != null? true: false;
+    taxUploaded = await _doc['tax_url'] != null? true: false;
+    
     setState(() {
       isLoading = false;
     });
@@ -38,7 +45,7 @@ class _DocVerifyState extends State<DocVerify> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SizeAppbar(context, 'Verfication', () => Navigator.pop(context)),
+      appBar: SizeAppbar(context, 'Verfication', () => Navigator.pushNamed(context, '/home')),
       body: isLoading
           ? const LoadingPlaceholder()
           : Padding(
@@ -80,7 +87,7 @@ class _DocVerifyState extends State<DocVerify> {
                       children: [
                         Align(
                           alignment: Alignment.center,
-                          child: _doc['citizen_url'] != null
+                          child: citiUploaded
                               ? Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -154,6 +161,7 @@ class _DocVerifyState extends State<DocVerify> {
                                                           setState(() {
                                                             _imageLoading =
                                                                 false;
+                                                            citiUploaded = true;
                                                           });
                                                           Navigator.of(context)
                                                               .pop();
@@ -192,6 +200,7 @@ class _DocVerifyState extends State<DocVerify> {
                                                           setState(() {
                                                             _imageLoading =
                                                                 false;
+                                                            citiUploaded = true;
                                                           });
                                                           Navigator.of(context)
                                                               .pop();
@@ -250,7 +259,7 @@ class _DocVerifyState extends State<DocVerify> {
                       children: [
                         Align(
                           alignment: Alignment.center,
-                          child: _doc['driver_url'] != null
+                          child: driverUploaded
                               ? Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -324,6 +333,7 @@ class _DocVerifyState extends State<DocVerify> {
                                                           setState(() {
                                                             _imageLoading =
                                                                 false;
+                                                            driverUploaded = true;
                                                           });
                                                           Navigator.of(context)
                                                               .pop();
@@ -362,6 +372,7 @@ class _DocVerifyState extends State<DocVerify> {
                                                           setState(() {
                                                             _imageLoading =
                                                                 false;
+                                                            driverUploaded = true;
                                                           });
                                                           Navigator.of(context)
                                                               .pop();
@@ -407,7 +418,7 @@ class _DocVerifyState extends State<DocVerify> {
                       children: [
                         Align(
                           alignment: Alignment.center,
-                          child: _doc['tax_url'] != null
+                          child: taxUploaded
                               ? Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -481,6 +492,7 @@ class _DocVerifyState extends State<DocVerify> {
                                                           setState(() {
                                                             _imageLoading =
                                                                 false;
+                                                            taxUploaded = true;
                                                           });
                                                           Navigator.of(context)
                                                               .pop();
@@ -519,6 +531,7 @@ class _DocVerifyState extends State<DocVerify> {
                                                           setState(() {
                                                             _imageLoading =
                                                                 false;
+                                                            taxUploaded = true;
                                                           });
                                                           Navigator.of(context)
                                                               .pop();

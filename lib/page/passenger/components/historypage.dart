@@ -70,14 +70,16 @@ class _HistoryPageState extends State<HistoryPage> {
                         itemBuilder: (context, index) => journeyTile(
                                 context.read<PassDB>().journeyRequest.where((element) => element['status'] != 'done').toList()[index]
                                     ['journey_id']['origin_province'],
-                                context.read<PassDB>().journeyRequest.where((element) => element['status'] != 'done').toList()[index]
-                                    ['journey_id']['destination_province'],
-                                DateFormat('EEEE, dd MMMM yyyy').format(DateTime.parse(context
-                                    .read<PassDB>()
-                                    .journeyRequest
-                                    .where((element) =>
-                                        element['status'] != 'done')
-                                    .toList()[index]['journey_id']['date'])),
+                                context
+                                        .read<PassDB>()
+                                        .journeyRequest
+                                        .where((element) =>
+                                            element['status'] != 'done')
+                                        .toList()[index]['journey_id']
+                                    ['destination_province'],
+                                DateFormat('EEEE, dd MMMM yyyy').format(
+                                    DateTime.parse(context.read<PassDB>().journeyRequest.where((element) => element['status'] != 'done').toList()[index]['journey_id']['date'])
+                                        .toLocal()),
                                 context
                                     .read<PassDB>()
                                     .journeyRequest
@@ -135,10 +137,28 @@ class _HistoryPageState extends State<HistoryPage> {
                                     .journeyRequest
                                     .where((e) {
                               return e['status'] == 'done';
-                            }).toList()[index]['journey_id']['date'])),
+                            }).toList()[index]['journey_id']['date']).toLocal()),
                             'done',
                             context,
-                            () {},
+                            () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RouteDetail(
+                                      info: context
+                                          .read<PassDB>()
+                                          .journeyRequest[index]['journey_id'],
+                                      driver: context
+                                              .read<PassDB>()
+                                              .journeyRequest[index]
+                                          ['journey_id']['owner'],
+                                      status: context
+                                          .read<PassDB>()
+                                          .journeyRequest[index]['status'],
+                                      from: "history",
+                                    ),
+                                  ));
+                            },
                             context.read<PassDB>().journeyRequest[index]
                                 ['journey_id']['owner']['avatar_url'])),
                   ),
@@ -184,6 +204,7 @@ Widget journeyTile(String origin, String destination, String date,
                           'assets/images/avatarmock.png',
                           width: 80,
                           height: 80,
+                          fit: BoxFit.cover,
                         ),
                       )
                     : ClipRRect(
@@ -198,6 +219,7 @@ Widget journeyTile(String origin, String destination, String date,
                           },
                           width: 80,
                           height: 80,
+                          fit: BoxFit.cover,
                         ),
                       ),
               ),

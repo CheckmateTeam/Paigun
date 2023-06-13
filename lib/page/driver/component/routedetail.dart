@@ -41,6 +41,8 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
   final Set<Marker> _markers = {};
   List<LatLng> polylineCoordinates = [];
   bool _isStart = false;
+  bool _isFinish = false;
+  bool _isDone = true;
   bool _isLoading = false;
   Map _driverProfile = {};
   void createRoutePoint() async {
@@ -95,8 +97,15 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
   void getStatus() async {
     if (widget.status == "going") {
       _isStart = true;
-    } else {
+    } else if (widget.status == "available") {
       _isStart = false;
+    } else if (widget.status == "finished") {
+      _isStart = true;
+      _isFinish = true;
+    } else if (widget.status == 'done') {
+      _isStart = true;
+      _isFinish = true;
+      _isDone = true;
     }
   }
 
@@ -151,8 +160,6 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
 
   @override
   Widget build(BuildContext context) {
-    Faker faker = Faker();
-    int _rating = faker.randomGenerator.integer(5);
     return SafeArea(
       child: BottomSheetScaffold(
         draggableBody: false,
@@ -166,7 +173,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                   return Column(
                     children: [
                       Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.white,
                           boxShadow: [
                             BoxShadow(
@@ -201,6 +208,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                       'assets/images/avatarmock.png',
                                       width: 80,
                                       height: 80,
+                                      fit: BoxFit.cover,
                                     ),
                                   )
                                 : ClipRRect(
@@ -218,6 +226,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                       },
                                       width: 80,
                                       height: 80,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
                           ),
@@ -230,7 +239,13 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                     widget.passenger[index]['user_id']
                                         ['full_name'],
                                     style: GoogleFonts.nunito(
-                                        fontSize: 18,
+                                        fontSize: widget
+                                                    .passenger[index]['user_id']
+                                                        ['full_name']
+                                                    .length >
+                                                15
+                                            ? 16
+                                            : 18,
                                         fontWeight: FontWeight.w800,
                                         color: Colors.grey[800]),
                                   ),
@@ -261,7 +276,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              Icon(Icons.verified, color: Colors.green),
+                              const Icon(Icons.verified, color: Colors.green),
                             ],
                           ),
                           trailing: IconButton.filled(
@@ -271,7 +286,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                   color: Colors.white)),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                     ],
@@ -364,107 +379,228 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _isStart
-                            ? Column(
-                                children: [
-                                  ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        elevation: 0,
-                                        backgroundColor:
-                                            Theme.of(context).primaryColor,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15)),
-                                      ),
-                                      onPressed: () async {
-                                        setState(() {
-                                          _isLoading = true;
-                                        });
-                                        loadingDialog(
-                                            context, _isLoading, 'Processing');
-                                        //setfinish
-                                        await context
-                                            .read<DriveDB>()
-                                            .completeJourney(
-                                                widget.info['journey_id']);
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return StyleDialog(
-                                                  context,
-                                                  'Finished',
-                                                  'You have finish the trip. We will redirect you to summary page.',
-                                                  'Go', () {
-                                                int passengerCount =
-                                                    widget.passenger.length;
-                                                int seat =
-                                                    widget.info['price_seat'];
-                                                int total =
-                                                    passengerCount * seat;
+                            ? _isFinish
+                                ? _isDone
+                                    ? Column(
+                                        children: [
+                                          ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                elevation: 0,
+                                                backgroundColor: Colors.green,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15)),
+                                              ),
+                                              onPressed: () async {},
+                                              child: Container(
+                                                width: double.infinity,
+                                                padding:
+                                                    const EdgeInsets.all(15),
+                                                child: Center(
+                                                  child: Text(
+                                                    'Completed Route',
+                                                    style: GoogleFonts.nunito(
+                                                        color: Colors.white,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ),
+                                              )),
+                                        ],
+                                      )
+                                    : Column(
+                                        children: [
+                                          ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                elevation: 0,
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                        .primaryColor,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15)),
+                                              ),
+                                              onPressed: () async {
+                                                setState(() {
+                                                  _isLoading = true;
+                                                });
+                                                loadingDialog(context,
+                                                    _isLoading, 'Processing');
+                                                //set completed
+                                                bool isPassdone = await context
+                                                    .read<DriveDB>()
+                                                    .isPassengerAllCompleted(
+                                                        widget.info[
+                                                            'journey_id']);
+                                                if (isPassdone) {
+                                                  await context
+                                                      .read<DriveDB>()
+                                                      .completeJourney(widget
+                                                          .info['journey_id']);
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return StyleDialog(
+                                                            context,
+                                                            'Finished',
+                                                            'You have finish the trip. We will redirect you to summary page.',
+                                                            'Go', () {
+                                                          int passengerCount =
+                                                              widget.passenger
+                                                                  .length;
+                                                          int seat =
+                                                              widget.info[
+                                                                  'price_seat'];
+                                                          int total =
+                                                              passengerCount *
+                                                                  seat;
 
-                                                Navigator.of(context)
-                                                    .pushAndRemoveUntil(
-                                                        MaterialPageRoute(
-                                                            builder:
-                                                                (context) =>
-                                                                    SummaryPage(
-                                                                      receive:
-                                                                          total,
-                                                                    )),
-                                                        (route) => false);
-                                              });
+                                                          Navigator.of(context)
+                                                              .pushAndRemoveUntil(
+                                                                  MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              SummaryPage(
+                                                                                receive: total,
+                                                                              )),
+                                                                  (route) =>
+                                                                      false);
+                                                        });
+                                                      });
+
+                                                  setState(() {
+                                                    _isLoading = false;
+                                                  });
+                                                } else {
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return StyleDialog(
+                                                            context,
+                                                            'Oops!',
+                                                            'Please wait for all passengers to complete the journey.',
+                                                            'Ok', () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        });
+                                                      });
+                                                }
+                                              },
+                                              child: Container(
+                                                width: double.infinity,
+                                                padding:
+                                                    const EdgeInsets.all(15),
+                                                child: Center(
+                                                  child: Text(
+                                                    'Completed',
+                                                    style: GoogleFonts.nunito(
+                                                        color: Colors.white,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ),
+                                              )),
+                                        ],
+                                      )
+                                : Column(
+                                    children: [
+                                      ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            elevation: 0,
+                                            backgroundColor:
+                                                Theme.of(context).primaryColor,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15)),
+                                          ),
+                                          onPressed: () async {
+                                            setState(() {
+                                              _isLoading = true;
                                             });
+                                            loadingDialog(context, _isLoading,
+                                                'Processing');
+                                            //arrive at destination
+                                            await context
+                                                .read<DriveDB>()
+                                                .changeJourneyStatus(
+                                                    widget.info['journey_id'],
+                                                    "finished");
+                                            showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return StyleDialog(
+                                                      context,
+                                                      'Success',
+                                                      'Please wait for passengers confirmation to receive money.',
+                                                      'OK', () {
+                                                    setState(() {
+                                                      _isFinish = true;
+                                                    });
+                                                    Navigator.pop(context);
+                                                    Navigator.pop(context);
+                                                  });
+                                                });
 
-                                        setState(() {
-                                          _isLoading = false;
-                                        });
-                                      },
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(15),
-                                        child: Center(
-                                          child: Text(
-                                            'Completed',
-                                            style: GoogleFonts.nunito(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                      )),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        elevation: 0,
-                                        backgroundColor:
-                                            Color.fromARGB(255, 179, 179, 179),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15)),
+                                            setState(() {
+                                              _isLoading = false;
+                                            });
+                                          },
+                                          child: Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(15),
+                                            child: Center(
+                                              child: Text(
+                                                'Arrive at destination',
+                                                style: GoogleFonts.nunito(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ),
+                                          )),
+                                      const SizedBox(
+                                        height: 10,
                                       ),
-                                      onPressed: () {
-                                        openMapLauncher(map_launcher.Coords(
-                                            double.parse(
-                                                widget.info['destination_lat']),
-                                            double.parse(widget
-                                                .info['destination_lng'])));
-                                      },
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(15),
-                                        child: Center(
-                                          child: Text(
-                                            'Open Map',
-                                            style: GoogleFonts.nunito(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold),
+                                      ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            elevation: 0,
+                                            backgroundColor:
+                                                const Color.fromARGB(
+                                                    255, 179, 179, 179),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15)),
                                           ),
-                                        ),
-                                      )),
-                                ],
-                              )
+                                          onPressed: () {
+                                            openMapLauncher(map_launcher.Coords(
+                                                double.parse(widget
+                                                    .info['destination_lat']),
+                                                double.parse(widget
+                                                    .info['destination_lng'])));
+                                          },
+                                          child: Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(15),
+                                            child: Center(
+                                              child: Text(
+                                                'Open Map',
+                                                style: GoogleFonts.nunito(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ),
+                                          )),
+                                    ],
+                                  )
                             : Column(
                                 children: [
                                   ElevatedButton(
@@ -712,7 +848,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                               ],
                             ),
                             Text(
-                                DateFormat("EEEE, dd MMMM yyyy, HH:mm")
+                                DateFormat("EEEE, dd MMMM yyyy, HH:mm a")
                                     .format(DateTime.parse(widget.info['date']))
                                     .toString(),
                                 style: GoogleFonts.nunito(
@@ -872,7 +1008,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                 left: 20,
                 child: IconButton.filled(
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.pushReplacementNamed(context, '/driver');
                     },
                     icon: const Icon(Icons.arrow_back)))
           ],

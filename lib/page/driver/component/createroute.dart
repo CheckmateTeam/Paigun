@@ -587,7 +587,8 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                                                       Navigator.pop(context);
                                                       Navigator
                                                           .pushReplacementNamed(
-                                                              context, '/home');
+                                                              context,
+                                                              '/driver');
                                                     },
                                                     child: const Text(
                                                         'Back to home')),

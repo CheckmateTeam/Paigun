@@ -45,7 +45,7 @@ class _RouteDetailState extends State<RouteDetail> {
   bool _isDriverStart = false;
   bool _isPay = false;
   bool _isFinished = false;
-  bool _isComplete = false;
+  bool _isDone = false;
   Map _driverProfile = {};
   void createRoutePoint() async {
     PolylinePoints polylinePoints = PolylinePoints();
@@ -135,7 +135,7 @@ class _RouteDetailState extends State<RouteDetail> {
         _isDriverConfirm = true;
         _isDriverStart = true;
         _isFinished = true;
-        _isComplete = true;
+        _isDone = true;
       });
     }
   }
@@ -240,6 +240,7 @@ class _RouteDetailState extends State<RouteDetail> {
                                             'assets/images/avatarmock.png',
                                             width: 80,
                                             height: 80,
+                                            fit: BoxFit.cover,
                                           ),
                                         )
                                       : widget.driver['avatar_url'] == ''
@@ -250,6 +251,7 @@ class _RouteDetailState extends State<RouteDetail> {
                                                 'assets/images/avatarmock.png',
                                                 width: 80,
                                                 height: 80,
+                                                fit: BoxFit.cover,
                                               ),
                                             )
                                           : ClipRRect(
@@ -269,6 +271,7 @@ class _RouteDetailState extends State<RouteDetail> {
                                                 },
                                                 width: 100,
                                                 height: 80,
+                                                fit: BoxFit.cover,
                                               ),
                                             ),
                                 ),
@@ -286,7 +289,11 @@ class _RouteDetailState extends State<RouteDetail> {
                                               : widget.driver['full_name'] ??
                                                   '',
                                           style: GoogleFonts.nunito(
-                                            fontSize: 20,
+                                            fontSize: widget.driver['full_name']
+                                                        .length >
+                                                    15
+                                                ? 14
+                                                : 20,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -415,7 +422,7 @@ class _RouteDetailState extends State<RouteDetail> {
                               ],
                             ),
                             Text(
-                                DateFormat("EEEE, dd MMMM yyyy, HH:mm")
+                                DateFormat("EEEE, dd MMMM yyyy, HH:mm a")
                                     .format(DateTime.parse(widget.info['date']))
                                     .toString(),
                                 style: GoogleFonts.nunito(
@@ -563,7 +570,9 @@ class _RouteDetailState extends State<RouteDetail> {
                                 ? _isPay
                                     ? _isDriverStart
                                         ? _isFinished
-                                            ? completedRoute()
+                                            ? _isDone
+                                                ? doneRoute()
+                                                : completedRoute()
                                             : onGoing()
                                         : inTrip()
                                     : toPay()
@@ -590,6 +599,42 @@ class _RouteDetailState extends State<RouteDetail> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget doneRoute() {
+    return Column(
+      children: [
+        const SizedBox(
+          height: 10,
+        ),
+        ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Colors.green,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+            ),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) =>
+                      ReportPage(driver: widget.driver, info: widget.info)));
+            },
+            child: Container(
+              width: double.infinity,
+              alignment: Alignment.center,
+              height: 50,
+              child: Text('Success journey',
+                  style: GoogleFonts.nunito(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  )),
+            )),
+        const SizedBox(
+          height: 10,
+        ),
+      ],
     );
   }
 

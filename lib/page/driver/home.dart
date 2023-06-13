@@ -175,13 +175,51 @@ class _DriverHomeState extends State<DriverHome> {
                   Expanded(
                     child: ListView.builder(
                         itemCount: _doneJourney.length,
-                        itemBuilder: (context, index) => journeyTile(
-                            _doneJourney[index]['origin_province'],
-                            _doneJourney[index]['destination_province'],
-                            DateFormat('EEEE, dd MMMM yyyy').format(
-                                DateTime.parse(_doneJourney[index]['date'])),
-                            'done',
-                            context)),
+                        itemBuilder: (context, index) => GestureDetector(
+                              onTap: () async {
+                                setState(() {
+                                  _profileLoading = true;
+                                });
+                                loadingDialog(
+                                    context, _profileLoading, 'Loading...');
+                                final res = await Provider.of<UserInfo>(context,
+                                        listen: false)
+                                    .userinfo;
+
+                                final String status =
+                                    await Provider.of<DriveDB>(context,
+                                            listen: false)
+                                        .getDriverJourneyStatus(
+                                            _doneJourney[index]['journey_id']);
+                                List passenger = await Provider.of<DriveDB>(
+                                        context,
+                                        listen: false)
+                                    .getJourneyPassenger(
+                                        _doneJourney[index]['journey_id']);
+                                setState(() {
+                                  _profileLoading = false;
+                                });
+                                Navigator.pop(context);
+                                print(res);
+                                Navigator.push(context,
+                                    MaterialPageRoute(builder: (context) {
+                                  return DriverRouteDetail(
+                                    driver: res,
+                                    passenger: passenger,
+                                    info: _doneJourney[index],
+                                    status: status,
+                                  );
+                                }));
+                              },
+                              child: journeyTile(
+                                  _doneJourney[index]['origin_province'],
+                                  _doneJourney[index]['destination_province'],
+                                  DateFormat('EEEE, dd MMMM yyyy').format(
+                                      DateTime.parse(
+                                          _doneJourney[index]['date'])),
+                                  'done',
+                                  context),
+                            )),
                   ),
                 ],
               ),
@@ -210,7 +248,9 @@ Widget journeyTile(String origin, String destination, String date,
                     ? Theme.of(context).primaryColor.withOpacity(0.8)
                     : status == 'going'
                         ? Colors.orange.withOpacity(0.8)
-                        : Colors.green.withOpacity(0.8),
+                        : status == 'finished'
+                            ? Color.fromARGB(255, 33, 0, 180).withOpacity(0.8)
+                            : Colors.green.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(10)),
             child: status == 'available'
                 ? const Icon(
@@ -222,10 +262,15 @@ Widget journeyTile(String origin, String destination, String date,
                         Icons.flight_takeoff,
                         color: Colors.white,
                       )
-                    : const Icon(
-                        Icons.check_circle_outline,
-                        color: Colors.white,
-                      ),
+                    : status == 'finished'
+                        ? const Icon(
+                            Icons.query_builder,
+                            color: Colors.white,
+                          )
+                        : const Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.white,
+                          ),
           ),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

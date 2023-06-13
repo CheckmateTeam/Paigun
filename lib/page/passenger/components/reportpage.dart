@@ -140,6 +140,7 @@ class _ReportPageState extends State<ReportPage> {
                                             'assets/images/avatarmock.png',
                                             width: 80,
                                             height: 80,
+                                            fit: BoxFit.cover,
                                           ),
                                         )
                                       : widget.driver['avatar_url'] == ''
@@ -150,6 +151,7 @@ class _ReportPageState extends State<ReportPage> {
                                                 'assets/images/avatarmock.png',
                                                 width: 80,
                                                 height: 80,
+                                                fit: BoxFit.cover,
                                               ),
                                             )
                                           : ClipRRect(
@@ -169,6 +171,7 @@ class _ReportPageState extends State<ReportPage> {
                                                 },
                                                 width: 100,
                                                 height: 80,
+                                                fit: BoxFit.cover,
                                               ),
                                             ),
                                 ),
@@ -183,7 +186,11 @@ class _ReportPageState extends State<ReportPage> {
                                           ? 'Loading...'
                                           : widget.driver['full_name'] ?? '',
                                       style: GoogleFonts.nunito(
-                                        fontSize: 20,
+                                        fontSize:
+                                            widget.driver['full_name'].length >
+                                                    15
+                                                ? 16
+                                                : 18,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),

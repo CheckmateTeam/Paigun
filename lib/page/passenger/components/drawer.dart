@@ -11,14 +11,7 @@ import '../../../provider/passenger.dart';
 import '../../components/styledialog.dart';
 
 class HomeDrawer extends StatefulWidget {
-  const HomeDrawer(
-      {super.key,
-      required this.isUserVerified,
-      required this.isDriverVerified,
-      required this.isGotCheck});
-  final bool isDriverVerified;
-  final bool isUserVerified;
-  final bool isGotCheck;
+  const HomeDrawer({super.key});
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -76,20 +69,13 @@ class _HomeDrawerState extends State<HomeDrawer> {
         children: [
           SizedBox(
               height: MediaQuery.of(context).size.height * 0.3,
-              child: UserProfile(
-                isUserVerified: widget.isUserVerified,
-                isGotCheck: widget.isGotCheck,
-              )),
-          ..._items
-              .map((item) => menuTile(Icon(item['icon']), item['name'],
-                  item['path'], context, widget.isDriverVerified))
-              .toList(),
-              // .map((item) => menuTile(
-              //     Icon(item['icon']),
-              //     item['name'],
-              //     item['path'],
-              //     context,
-              //     context.watch<UserInfo>().userinfo['verified']))
+              child: UserProfile()),
+          ..._items.map((item) => menuTile(
+              Icon(item['icon']),
+              item['name'],
+              item['path'],
+              context,
+              context.watch<UserInfo>().userinfo['driver_verified'])),
           Padding(
             padding: const EdgeInsets.all(15.0),
             child: ElevatedButton(
@@ -113,10 +99,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
 }
 
 class UserProfile extends StatefulWidget {
-  const UserProfile(
-      {super.key, required this.isUserVerified, required this.isGotCheck});
-  final bool isUserVerified;
-  final bool isGotCheck;
+  const UserProfile({super.key});
 
   @override
   State<UserProfile> createState() => _UserProfileState();
@@ -254,8 +237,7 @@ class _UserProfileState extends State<UserProfile> {
                     style: GoogleFonts.nunito(
                         fontSize: 16, fontWeight: FontWeight.normal),
                   ),
-                  context.watch<UserInfo>().doc['citizen_url'] != null
-                  //context.watch<UserInfo>().userinfo['verified']
+                  context.watch<UserInfo>().userinfo['verified']
                       ? const Row(
                           children: [
                             Text(
@@ -286,8 +268,7 @@ class _UserProfileState extends State<UserProfile> {
                             )
                           ],
                         ),
-                  context.watch<UserInfo>().doc['citizen_url'] != null
-                  //context.watch<UserInfo>().userinfo['verified']
+                  context.watch<UserInfo>().userinfo['verified']
                       ? const SizedBox()
                       : Row(
                           children: [
@@ -403,9 +384,7 @@ class _UserProfileState extends State<UserProfile> {
 
 Widget menuTile(Icon icon, String title, String path, BuildContext context,
     bool isVerified) {
-  if (title == 'Driver mode' &&
-      (context.watch<UserInfo>().doc['driver_url'] == null ||
-          context.watch<UserInfo>().doc['tax_url'] == null)) {
+  if (title == 'Driver mode' && !isVerified) {
     return ListTile(
       title: Row(
         children: [
@@ -427,20 +406,6 @@ Widget menuTile(Icon icon, String title, String path, BuildContext context,
         color: Colors.grey,
       ),
       onTap: () {
-        // showDialog(
-        //     context: context,
-        //     builder: (context) => AlertDialog(
-        //           title: const Text('Unverified'),
-        //           content: const Text(
-        //               'Please verify your account before using this feature.'),
-        //           actions: [
-        //             TextButton(
-        //                 onPressed: () {
-        //                   Navigator.of(context).pop();
-        //                 },
-        //                 child: const Text('OK'))
-        //           ],
-        //         ));
         showDialog(
             context: context,
             builder: (context) => StyleDialog(

@@ -41,26 +41,10 @@ class _PassengerHomeState extends State<PassengerHome> {
   bool _isSearching = false;
   bool _profileLoading = false;
   Map destination = {};
-  Map _doc = {};
-  bool isDriverVerified = false;
-  bool isUserVerified = false;
-  bool gotCheck = false;
-  void getDoc() async {
-    setState(() async {
-      _doc = await context.read<UserInfo>().getDocument();
-      isDriverVerified =
-          await _doc['driver_url'] != null && _doc['tax_url'] != null
-              ? true
-              : false;
-      isUserVerified = await _doc['citizen_url'] != null ? true : false;
-      gotCheck = true;
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    getDoc();
     Provider.of<UserInfo>(context, listen: false).getUserInfo();
   }
 
@@ -74,10 +58,7 @@ class _PassengerHomeState extends State<PassengerHome> {
       child: Scaffold(
           key: _scaffoldKey,
           resizeToAvoidBottomInset: false,
-          drawer: HomeDrawer(
-              isDriverVerified: isDriverVerified,
-              isUserVerified: isUserVerified,
-              isGotCheck: gotCheck),
+          drawer: const HomeDrawer(),
           body: SnappingSheet(
             lockOverflowDrag: true,
             snappingPositions: const [
@@ -150,7 +131,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                                 onPressed: () {
                                   if (context
                                       .read<UserInfo>()
-                                      .userinfo['verified']) {
+                                      .userinfo['driver_verified']) {
                                     Navigator.pushNamed(
                                         context, '/driver/create');
                                   } else {
@@ -159,10 +140,10 @@ class _PassengerHomeState extends State<PassengerHome> {
                                         builder: (context) {
                                           return StyleDialog(
                                               context,
-                                              'Unverified',
-                                              'Please verify your account before using the feature',
-                                              'OK', () {
-                                            Navigator.pop(context);
+                                              'This feture is lock.',
+                                              'Your profile need to verify more documents to unlock the Driver mode',
+                                              'Verify now', () {
+                                            Navigator.pushNamed(context, '/docverify');
                                           });
                                         });
                                   }

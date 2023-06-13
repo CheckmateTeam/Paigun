@@ -134,6 +134,21 @@ class UserInfo extends ChangeNotifier {
         'owner': supabase.auth.currentUser!.id,
         '${type}_url': signedUrl,
       });
+      getDocument();
+      if (type == 'citizen') {
+        await supabase.from('profile').upsert({
+          'id': supabase.auth.currentUser!.id,
+          'username': supabase.auth.currentUser!.phone!,
+          'verified': true,
+        });
+      } else if ((type == 'driver' && doc['tax_url'] != null) ||
+          (type == 'tax' && doc['driver_url'] != null)) {
+        await supabase.from('profile').upsert({
+          'id': supabase.auth.currentUser!.id,
+          'username': supabase.auth.currentUser!.phone!,
+          'driver_verified': true,
+        });
+      }
       notifyListeners();
     } catch (e) {
       print(e);

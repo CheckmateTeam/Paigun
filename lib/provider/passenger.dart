@@ -69,6 +69,7 @@ class PassDB extends ChangeNotifier {
           .neq('owner', user!.id)
           .gt('available_seat', 0);
       _journey.clear();
+      _journeyMarker.clear();
       for (var i in response) {
         int distance = calculateDistance(
                 LatLng(double.parse(i['origin_lat']), 0).latitude,
@@ -220,7 +221,9 @@ class PassDB extends ChangeNotifier {
     try {
       await supabase
           .from('user_journey')
-          .update({'status': 'done'}).eq('journey_id', jid);
+          .update({'status': 'done'})
+          .eq('journey_id', jid)
+          .eq('user_id', user!.id);
 
       //rating driver
       double oldRating = 0;

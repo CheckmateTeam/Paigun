@@ -47,9 +47,12 @@ class _PassengerHomeState extends State<PassengerHome> {
     Provider.of<UserInfo>(context, listen: false).getUserInfo();
   }
 
+  Future<void> _fetchRoute() async {
+    await Provider.of<PassDB>(context, listen: false).getJourney(1000);
+  }
+
   @override
   Widget build(BuildContext context) {
-    var faker = Faker();
     return SafeArea(
       child: Scaffold(
           key: _scaffoldKey,
@@ -167,133 +170,188 @@ class _PassengerHomeState extends State<PassengerHome> {
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     height: MediaQuery.of(context).size.height,
-                    child: ListView.builder(
-                      itemCount: context.watch<PassDB>().journey.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 15),
-                          child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 1,
-                                    blurRadius: 5,
-                                    offset: const Offset(
-                                        0, 3), // changes position of shadow
-                                  ),
-                                ],
+                    child: context.watch<PassDB>().journey.isEmpty
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                height: 50,
                               ),
-                              child: ListTile(
-                                onTap: () async {
+                              Text(
+                                'No route available right now.',
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              IconButton.filled(
+                                style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Colors.white),
+                                    shape: MaterialStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20.0),
+                                    ))),
+                                onPressed: () async {
                                   setState(() {
-                                    _profileLoading = true;
+                                    _isSearching = true;
                                   });
                                   loadingDialog(
-                                      context, _profileLoading, 'Loading...');
-                                  final res = await Provider.of<PassDB>(context,
-                                          listen: false)
-                                      .getJourneyDriver(context
-                                          .read<PassDB>()
-                                          .journey[index]['owner']);
-
-                                  final String status =
-                                      await Provider.of<PassDB>(context,
-                                              listen: false)
-                                          .getJourneyStatus(context
-                                              .read<PassDB>()
-                                              .journey[index]['journey_id']);
+                                      context, _isSearching, 'Searching...');
+                                  await _fetchRoute();
                                   setState(() {
-                                    _profileLoading = false;
+                                    _isSearching = false;
                                   });
                                   Navigator.pop(context);
-                                  Navigator.push(context,
-                                      MaterialPageRoute(builder: (context) {
-                                    return RouteDetail(
-                                        driver: res[0],
-                                        info: context
-                                            .read<PassDB>()
-                                            .journey[index],
-                                        status: status,
-                                        from: 'home');
-                                  }));
                                 },
-                                leading: const Icon(Icons.call_split_rounded),
-                                title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Text(
-                                      context
-                                              .read<PassDB>()
-                                              .journey[index]['origin_province']
-                                              .toString()
-                                              .contains('Chang Wat')
-                                          ? context
-                                              .read<PassDB>()
-                                              .journey[index]['origin_province']
-                                              .toString()
-                                              .split("Chang Wat ")[1]
-                                          : context
-                                              .read<PassDB>()
-                                              .journey[index]['origin_province']
-                                              .toString(),
-                                      style: GoogleFonts.nunito(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                                icon: const Icon(Icons.refresh_rounded),
+                                color: Theme.of(context).colorScheme.primary,
+                              )
+                            ],
+                          )
+                        : ListView.builder(
+                            itemCount: context.watch<PassDB>().journey.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 5, horizontal: 15),
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 1,
+                                          blurRadius: 5,
+                                          offset: const Offset(0,
+                                              3), // changes position of shadow
+                                        ),
+                                      ],
+                                    ),
+                                    child: ListTile(
+                                      onTap: () async {
+                                        setState(() {
+                                          _profileLoading = true;
+                                        });
+                                        loadingDialog(context, _profileLoading,
+                                            'Loading...');
+                                        final res = await Provider.of<PassDB>(
+                                                context,
+                                                listen: false)
+                                            .getJourneyDriver(context
+                                                .read<PassDB>()
+                                                .journey[index]['owner']);
+
+                                        final String status =
+                                            await Provider.of<PassDB>(context,
+                                                    listen: false)
+                                                .getJourneyStatus(context
+                                                        .read<PassDB>()
+                                                        .journey[index]
+                                                    ['journey_id']);
+                                        setState(() {
+                                          _profileLoading = false;
+                                        });
+                                        Navigator.pop(context);
+                                        Navigator.push(context,
+                                            MaterialPageRoute(
+                                                builder: (context) {
+                                          return RouteDetail(
+                                              driver: res[0],
+                                              info: context
+                                                  .read<PassDB>()
+                                                  .journey[index],
+                                              status: status,
+                                              from: 'home');
+                                        }));
+                                      },
+                                      leading:
+                                          const Icon(Icons.call_split_rounded),
+                                      title: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text(
+                                            context
+                                                    .read<PassDB>()
+                                                    .journey[index]
+                                                        ['origin_province']
+                                                    .toString()
+                                                    .contains('Chang Wat')
+                                                ? context
+                                                    .read<PassDB>()
+                                                    .journey[index]
+                                                        ['origin_province']
+                                                    .toString()
+                                                    .split("Chang Wat ")[1]
+                                                : context
+                                                    .read<PassDB>()
+                                                    .journey[index]
+                                                        ['origin_province']
+                                                    .toString(),
+                                            style: GoogleFonts.nunito(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const Icon(
+                                              Icons.arrow_right_alt_rounded,
+                                              color: Colors.black),
+                                          Text(
+                                            context
+                                                    .read<PassDB>()
+                                                    .journey[index]
+                                                        ['destination_province']
+                                                    .toString()
+                                                    .contains('Chang Wat')
+                                                ? context
+                                                    .read<PassDB>()
+                                                    .journey[index]
+                                                        ['destination_province']
+                                                    .toString()
+                                                    .split("Chang Wat ")[1]
+                                                : context
+                                                    .read<PassDB>()
+                                                    .journey[index]
+                                                        ['destination_province']
+                                                    .toString(),
+                                            style: GoogleFonts.nunito(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                    Icon(Icons.arrow_right_alt_rounded,
-                                        color: Colors.black),
-                                    Text(
-                                      context
-                                              .read<PassDB>()
-                                              .journey[index]
-                                                  ['destination_province']
-                                              .toString()
-                                              .contains('Chang Wat')
-                                          ? context
-                                              .read<PassDB>()
-                                              .journey[index]
-                                                  ['destination_province']
-                                              .toString()
-                                              .split("Chang Wat ")[1]
-                                          : context
-                                              .read<PassDB>()
-                                              .journey[index]
-                                                  ['destination_province']
-                                              .toString(),
-                                      style: GoogleFonts.nunito(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                                      subtitle: Center(
+                                        child: Text(
+                                          DateFormat('dd/MM/yyyy hh:mm a')
+                                              .format(DateTime.parse(context
+                                                  .read<PassDB>()
+                                                  .journey[index]['date'])),
+                                          style: GoogleFonts.nunito(
+                                            color: const ui.Color.fromARGB(
+                                                255, 138, 138, 138),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                subtitle: Center(
-                                  child: Text(
-                                    DateFormat('dd/MM/yyyy hh:mm a').format(
-                                        DateTime.parse(context
-                                            .read<PassDB>()
-                                            .journey[index]['date'])),
-                                    style: GoogleFonts.nunito(
-                                      color:
-                                          ui.Color.fromARGB(255, 138, 138, 138),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ),
-                                trailing: const Icon(Icons.arrow_forward_ios),
-                              )),
-                        );
-                      },
-                    ),
+                                      trailing:
+                                          const Icon(Icons.arrow_forward_ios),
+                                    )),
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -527,7 +585,6 @@ class _MapComponentState extends State<MapComponent> {
 
   Future<void> _fetchRoute() async {
     await Provider.of<PassDB>(context, listen: false).getJourney(1000);
-    print(Provider.of<PassDB>(context, listen: false).journey);
   }
 
   @override
@@ -610,7 +667,7 @@ class _MapComponentState extends State<MapComponent> {
                           ),
                         ),
                       ),
-                      Divider(),
+                      const Divider(),
                       GestureDetector(
                         onTap: () {
                           _goToCurrent();

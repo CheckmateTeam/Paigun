@@ -106,7 +106,8 @@ class _PaymentPageState extends State<PaymentPage> {
                                       borderRadius:
                                           BorderRadius.all(Radius.circular(50)),
                                     ),
-                                    width: 80,
+                                    width: 70,
+                                    height: 70,
                                     child: widget.driver.isEmpty
                                         ? ClipRRect(
                                             borderRadius:
@@ -115,6 +116,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                               'assets/images/avatarmock.png',
                                               width: 80,
                                               height: 80,
+                                              fit: BoxFit.cover,
                                             ),
                                           )
                                         : widget.driver['avatar_url'] == ''
@@ -125,6 +127,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                                   'assets/images/avatarmock.png',
                                                   width: 80,
                                                   height: 80,
+                                                  fit: BoxFit.cover,
                                                 ),
                                               )
                                             : ClipRRect(
@@ -144,6 +147,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                                   },
                                                   width: 100,
                                                   height: 80,
+                                                  fit: BoxFit.cover,
                                                 ),
                                               ),
                                   ),
@@ -162,18 +166,18 @@ class _PaymentPageState extends State<PaymentPage> {
                                                 : widget.driver['full_name'] ??
                                                     '',
                                             style: GoogleFonts.nunito(
-                                              fontSize: 20,
+                                              fontSize: widget
+                                                          .driver['full_name']
+                                                          .length >
+                                                      15
+                                                  ? 14
+                                                  : 16,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const SizedBox(
                                             width: 3,
                                           ),
-                                          const Icon(
-                                            Icons.verified,
-                                            color: Colors.green,
-                                            size: 20,
-                                          )
                                         ],
                                       ),
                                       Text(
@@ -181,7 +185,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                             ? 'Loading...'
                                             : 'Tel: 0${widget.driver['username'].toString().substring(2) ?? ''}',
                                         style: GoogleFonts.nunito(
-                                          fontSize: 16,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -556,7 +560,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                                       return StyleDialog(
                                                           context,
                                                           'Success',
-                                                          'Please wait driver to confirm',
+                                                          'You are now on the journey',
                                                           'Back', () {
                                                         Navigator
                                                             .pushNamedAndRemoveUntil(

@@ -84,6 +84,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
               .map((item) => menuTile(Icon(item['icon']), item['name'],
                   item['path'], context, widget.isDriverVerified))
               .toList(),
+              // .map((item) => menuTile(
+              //     Icon(item['icon']),
+              //     item['name'],
+              //     item['path'],
+              //     context,
+              //     context.watch<UserInfo>().userinfo['verified']))
           Padding(
             padding: const EdgeInsets.all(15.0),
             child: ElevatedButton(
@@ -199,29 +205,28 @@ class _UserProfileState extends State<UserProfile> {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(50),
-                  child: Container(
-                    color: Colors.grey[300],
-                    child: [
-                      '',
-                      null,
-                    ].contains(context.read<UserInfo>().userinfo['avatar_url'])
-                        ? Image.asset(
-                            'assets/images/avatarmock.png',
-                            width: 100,
-                            height: 100,
-                          )
-                        : Image.network(
-                            context.watch<UserInfo>().userinfo['avatar_url'],
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            },
-                            width: 100,
-                            height: 100,
-                          ),
-                  ),
+                  child: [
+                    '',
+                    null,
+                  ].contains(context.read<UserInfo>().userinfo['avatar_url'])
+                      ? Image.asset(
+                          'assets/images/avatarmock.png',
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.network(
+                          context.watch<UserInfo>().userinfo['avatar_url'],
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
               const SizedBox(
@@ -232,24 +237,17 @@ class _UserProfileState extends State<UserProfile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context
-                                .watch<UserInfo>()
-                                .userinfo['full_name']
-                                .toString()
-                                .length >
-                            10
-                        ? context
-                                .watch<UserInfo>()
-                                .userinfo['full_name']
-                                .toString()
-                                .substring(0, 10) +
-                            '...'
-                        : context
-                            .watch<UserInfo>()
-                            .userinfo['full_name']
-                            .toString(),
+                    context.watch<UserInfo>().userinfo['full_name'].toString(),
                     style: GoogleFonts.nunito(
-                        fontSize: 20, fontWeight: FontWeight.w800),
+                        fontSize: context
+                                    .watch<UserInfo>()
+                                    .userinfo['full_name']
+                                    .toString()
+                                    .length >
+                                12
+                            ? 15
+                            : 20,
+                        fontWeight: FontWeight.w800),
                   ),
                   Text(
                     '0${context.watch<UserInfo>().userinfo['username'].toString().substring(2)}',
@@ -257,6 +255,7 @@ class _UserProfileState extends State<UserProfile> {
                         fontSize: 16, fontWeight: FontWeight.normal),
                   ),
                   context.watch<UserInfo>().doc['citizen_url'] != null
+                  //context.watch<UserInfo>().userinfo['verified']
                       ? const Row(
                           children: [
                             Text(
@@ -288,6 +287,7 @@ class _UserProfileState extends State<UserProfile> {
                           ],
                         ),
                   context.watch<UserInfo>().doc['citizen_url'] != null
+                  //context.watch<UserInfo>().userinfo['verified']
                       ? const SizedBox()
                       : Row(
                           children: [

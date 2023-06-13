@@ -56,7 +56,7 @@ class DriveDB extends ChangeNotifier {
       final response2 = await supabase
           .from('user_journey')
           .select('journey_id!inner(*),user_id!inner(*),status,create_at')
-          .eq('status', 'paid')
+          .eq('status', 'pending')
           .neq('user_id.id', user!.id);
       _journey.clear();
       _journey.addAll(response);
@@ -128,6 +128,50 @@ class DriveDB extends ChangeNotifier {
       return 'success';
     } catch (e) {
       return 'failed';
+    }
+  }
+
+  Future<dynamic> completeJourney(String jid) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .update({'status': 'done'}).eq('journey_id', jid);
+
+      return 'success';
+    } catch (e) {
+      return 'failed';
+    }
+  }
+
+  Future<dynamic> getJourneyInfo(String jid) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .select()
+          .eq('owner', user!.id)
+          .eq('journey_id', jid)
+          .single();
+      return response;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<dynamic> isPassengerAllCompleted(String jid) async {
+    try {
+      final response = await supabase
+          .from('user_journey')
+          .select()
+          .eq('journey_id', jid)
+          .eq('status', 'finished');
+
+      if (response.length == 0) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 }

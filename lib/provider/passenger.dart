@@ -69,6 +69,7 @@ class PassDB extends ChangeNotifier {
           .neq('owner', user!.id)
           .gt('available_seat', 0);
       _journey.clear();
+      _journeyMarker.clear();
       for (var i in response) {
         int distance = calculateDistance(
                 LatLng(double.parse(i['origin_lat']), 0).latitude,
@@ -192,6 +193,16 @@ class PassDB extends ChangeNotifier {
         final response = await supabase
             .from('user_journey')
             .update({'status': "accepted"}).eq('journey_id', journeyId);
+
+        //reduce available seat
+        final response2 = await supabase
+            .from('journey')
+            .select('available_seat')
+            .eq('journey_id', journeyId)
+            .single();
+        int availableSeat = response2['available_seat'];
+        final response3 = await supabase.from('journey').update(
+            {'available_seat': availableSeat - 1}).eq('journey_id', journeyId);
         return response;
       } else if (type == "decline") {
         final response = await supabase
@@ -200,6 +211,47 @@ class PassDB extends ChangeNotifier {
             .eq('journey_id', journeyId);
         return response;
       }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> passengerFinishJourney(String jid, String comment, String driver,
+      double rating, List<String> report) async {
+    try {
+      await supabase
+          .from('user_journey')
+          .update({'status': 'done'})
+          .eq('journey_id', jid)
+          .eq('user_id', user!.id);
+
+      //rating driver
+      double oldRating = 0;
+      double newrating = 0;
+      final response = await supabase
+          .from('profile')
+          .select('rating')
+          .eq('id', driver)
+          .single();
+      if (response['rating'] == null) {
+        newrating = rating;
+      } else {
+        oldRating = double.parse(response['rating'].toString());
+        newrating = (oldRating + rating) / 2;
+      }
+
+      await supabase
+          .from('profile')
+          .update({'rating': newrating}).eq('id', driver);
+
+      //save report
+      await supabase.from('journey_report').insert([
+        {
+          'journey': jid,
+          'comment': comment,
+          'report': report,
+        }
+      ]);
     } catch (e) {
       print(e);
     }

@@ -9,6 +9,7 @@ import 'package:paigun/page/passenger/components/docverify.dart';
 import 'package:paigun/page/passenger/components/historypage.dart';
 import 'package:paigun/page/passenger/components/journeyboard.dart';
 import 'package:paigun/page/driver/home.dart';
+import 'package:paigun/page/passenger/components/reportpage.dart';
 import 'package:paigun/page/passenger/home.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';

@@ -25,11 +25,24 @@ class DriverHome extends StatefulWidget {
 class _DriverHomeState extends State<DriverHome> {
   bool _isLoading = false;
   bool _profileLoading = false;
+
+  List _doneJourney = [];
+  List _openJourney = [];
   void _fetchInfo() async {
     setState(() {
       _isLoading = true;
     });
     await context.read<DriveDB>().getDriverJourney();
+    _doneJourney = context
+        .read<DriveDB>()
+        .driverJourney
+        .where((element) => element['status'] == 'done')
+        .toList();
+    _openJourney = context
+        .read<DriveDB>()
+        .driverJourney
+        .where((element) => element['status'] != 'done')
+        .toList();
     setState(() {
       _isLoading = false;
     });
@@ -40,6 +53,7 @@ class _DriverHomeState extends State<DriverHome> {
     // TODO: implement initState
     super.initState();
     _fetchInfo();
+    print(context.read<DriveDB>().driverJourney);
   }
 
   @override
@@ -103,14 +117,7 @@ class _DriverHomeState extends State<DriverHome> {
                   const Divider(),
                   Expanded(
                     child: ListView.builder(
-                        itemCount: context
-                            .watch<DriveDB>()
-                            .driverJourney
-                            .where((e) {
-                              return e['status'] == 'available';
-                            })
-                            .toList()
-                            .length,
+                        itemCount: _openJourney.length,
                         itemBuilder: (context, index) => GestureDetector(
                               onTap: () async {
                                 setState(() {
@@ -125,21 +132,13 @@ class _DriverHomeState extends State<DriverHome> {
                                 final String status =
                                     await Provider.of<DriveDB>(context,
                                             listen: false)
-                                        .getDriverJourneyStatus(context
-                                            .read<DriveDB>()
-                                            .driverJourney
-                                            .where((e) {
-                                  return e['status'] == 'available';
-                                }).toList()[index]['journey_id']);
+                                        .getDriverJourneyStatus(
+                                            _openJourney[index]['journey_id']);
                                 List passenger = await Provider.of<DriveDB>(
                                         context,
                                         listen: false)
-                                    .getJourneyPassenger(context
-                                        .read<DriveDB>()
-                                        .driverJourney
-                                        .where((e) {
-                                  return e['status'] == 'available';
-                                }).toList()[index]['journey_id']);
+                                    .getJourneyPassenger(
+                                        _openJourney[index]['journey_id']);
                                 setState(() {
                                   _profileLoading = false;
                                 });
@@ -150,37 +149,18 @@ class _DriverHomeState extends State<DriverHome> {
                                   return DriverRouteDetail(
                                     driver: res,
                                     passenger: passenger,
-                                    info: context
-                                        .read<DriveDB>()
-                                        .driverJourney
-                                        .where((e) {
-                                      return e['status'] == 'available';
-                                    }).toList()[index],
+                                    info: _openJourney[index],
                                     status: status,
                                   );
                                 }));
                               },
                               child: journeyTile(
-                                  context
-                                      .read<DriveDB>()
-                                      .driverJourney
-                                      .where((e) {
-                                    return e['status'] == 'available';
-                                  }).toList()[index]['origin_province'],
-                                  context
-                                      .read<DriveDB>()
-                                      .driverJourney
-                                      .where((e) {
-                                    return e['status'] == 'available';
-                                  }).toList()[index]['destination_province'],
+                                  _openJourney[index]['origin_province'],
+                                  _openJourney[index]['destination_province'],
                                   DateFormat('dd/MM/yyyy hh:mm a').format(
-                                      DateTime.parse(context
-                                          .read<DriveDB>()
-                                          .driverJourney
-                                          .where((e) {
-                                    return e['status'] == 'available';
-                                  }).toList()[index]['date'])),
-                                  'open',
+                                      DateTime.parse(
+                                          _openJourney[index]['date'])),
+                                  _openJourney[index]['status'],
                                   context),
                             )),
                   ),
@@ -194,30 +174,52 @@ class _DriverHomeState extends State<DriverHome> {
                   const Divider(),
                   Expanded(
                     child: ListView.builder(
-                        itemCount: context
-                            .watch<DriveDB>()
-                            .driverJourney
-                            .where((e) {
-                              return e['status'] == 'done';
-                            })
-                            .toList()
-                            .length,
-                        itemBuilder: (context, index) => journeyTile(
-                            context.read<DriveDB>().driverJourney.where((e) {
-                              return e['status'] == 'done';
-                            }).toList()[index]['origin_province'],
-                            context.read<DriveDB>().driverJourney.where((e) {
-                              return e['status'] == 'done';
-                            }).toList()[index]['destination_province'],
-                            DateFormat('EEEE, dd MMMM yyyy').format(
-                                DateTime.parse(context
-                                    .read<DriveDB>()
-                                    .driverJourney
-                                    .where((e) {
-                              return e['status'] == 'done';
-                            }).toList()[index]['date'])),
-                            'done',
-                            context)),
+                        itemCount: _doneJourney.length,
+                        itemBuilder: (context, index) => GestureDetector(
+                              onTap: () async {
+                                setState(() {
+                                  _profileLoading = true;
+                                });
+                                loadingDialog(
+                                    context, _profileLoading, 'Loading...');
+                                final res = await Provider.of<UserInfo>(context,
+                                        listen: false)
+                                    .userinfo;
+
+                                final String status =
+                                    await Provider.of<DriveDB>(context,
+                                            listen: false)
+                                        .getDriverJourneyStatus(
+                                            _doneJourney[index]['journey_id']);
+                                List passenger = await Provider.of<DriveDB>(
+                                        context,
+                                        listen: false)
+                                    .getJourneyPassenger(
+                                        _doneJourney[index]['journey_id']);
+                                setState(() {
+                                  _profileLoading = false;
+                                });
+                                Navigator.pop(context);
+                                print(res);
+                                Navigator.push(context,
+                                    MaterialPageRoute(builder: (context) {
+                                  return DriverRouteDetail(
+                                    driver: res,
+                                    passenger: passenger,
+                                    info: _doneJourney[index],
+                                    status: status,
+                                  );
+                                }));
+                              },
+                              child: journeyTile(
+                                  _doneJourney[index]['origin_province'],
+                                  _doneJourney[index]['destination_province'],
+                                  DateFormat('EEEE, dd MMMM yyyy').format(
+                                      DateTime.parse(
+                                          _doneJourney[index]['date'])),
+                                  'done',
+                                  context),
+                            )),
                   ),
                 ],
               ),
@@ -242,12 +244,33 @@ Widget journeyTile(String origin, String destination, String date,
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.8),
+                color: status == 'available'
+                    ? Theme.of(context).primaryColor.withOpacity(0.8)
+                    : status == 'going'
+                        ? Colors.orange.withOpacity(0.8)
+                        : status == 'finished'
+                            ? Color.fromARGB(255, 33, 0, 180).withOpacity(0.8)
+                            : Colors.green.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(10)),
-            child: const Icon(
-              Icons.location_on_outlined,
-              color: Colors.white,
-            ),
+            child: status == 'available'
+                ? const Icon(
+                    Icons.location_on_outlined,
+                    color: Colors.white,
+                  )
+                : status == 'going'
+                    ? const Icon(
+                        Icons.flight_takeoff,
+                        color: Colors.white,
+                      )
+                    : status == 'finished'
+                        ? const Icon(
+                            Icons.query_builder,
+                            color: Colors.white,
+                          )
+                        : const Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.white,
+                          ),
           ),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -245,7 +245,9 @@ class PassDB extends ChangeNotifier {
       } else if (type == "accept") {
         final response = await supabase
             .from('user_journey')
-            .update({'status': "accepted"}).eq('journey_id', journeyId);
+            .update({'status': "accepted"})
+            .eq('journey_id', journeyId)
+            .eq('user_id', user!.id);
 
         //reduce available seat
         final response2 = await supabase

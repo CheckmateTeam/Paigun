@@ -2,9 +2,13 @@ import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:paigun/page/components/loading_placeholder.dart';
 import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
+
+import '../../../provider/passenger.dart';
+import '../../components/styledialog.dart';
 
 class HomeDrawer extends StatefulWidget {
   const HomeDrawer({super.key});
@@ -51,11 +55,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
       'path': 'howtouse',
     }
   ];
-
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    Provider.of<UserInfo>(context, listen: false).getUserInfo();
+    setState(() {});
+    // Provider.of<DriveDB>(context, listen: false).getDriverJourney();
   }
 
   @override
@@ -65,15 +70,13 @@ class _HomeDrawerState extends State<HomeDrawer> {
         children: [
           SizedBox(
               height: MediaQuery.of(context).size.height * 0.3,
-              child: const UserProfile()),
-          ..._items
-              .map((item) => menuTile(
-                  Icon(item['icon']),
-                  item['name'],
-                  item['path'],
-                  context,
-                  context.watch<UserInfo>().userinfo['verified']))
-              .toList(),
+              child: UserProfile()),
+          ..._items.map((item) => menuTile(
+              Icon(item['icon']),
+              item['name'],
+              item['path'],
+              context,
+              context.watch<UserInfo>().userinfo['driver_verified'])),
           Padding(
             padding: const EdgeInsets.all(15.0),
             child: ElevatedButton(
@@ -104,7 +107,6 @@ class UserProfile extends StatefulWidget {
 }
 
 class _UserProfileState extends State<UserProfile> {
-  bool _isVerified = true;
   TextEditingController _firstname = TextEditingController();
   TextEditingController _lastname = TextEditingController();
   bool _imageLoading = false;
@@ -269,19 +271,24 @@ class _UserProfileState extends State<UserProfile> {
                         ),
                   context.watch<UserInfo>().userinfo['verified']
                       ? const SizedBox()
-                      : const Row(
+                      : Row(
                           children: [
-                            Text('Verify now? ',
+                            const Text('Verify now? ',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 )),
-                            Text('Click here',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.redAccent,
-                                ))
+                            InkWell(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/docverify');
+                              },
+                              child: const Text('Click here',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.redAccent,
+                                  )),
+                            )
                           ],
                         )
                 ],
@@ -402,18 +409,12 @@ Widget menuTile(Icon icon, String title, String path, BuildContext context,
       onTap: () {
         showDialog(
             context: context,
-            builder: (context) => AlertDialog(
-                  title: const Text('Unverified'),
-                  content: const Text(
-                      'Please verify your account before using this feature.'),
-                  actions: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('OK'))
-                  ],
-                ));
+            builder: (context) => StyleDialog(
+                context,
+                'Driver mode is lock.',
+                'Your profile need to verify more documents to unlock the Driver mode',
+                'Verify now',
+                () => Navigator.pushNamed(context, '/docverify')));
       },
     );
   }

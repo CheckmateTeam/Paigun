@@ -41,6 +41,7 @@ class _PassengerHomeState extends State<PassengerHome> {
   bool _isSearching = false;
   bool _profileLoading = false;
   Map destination = {};
+
   @override
   void initState() {
     super.initState();
@@ -130,7 +131,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                                 onPressed: () {
                                   if (context
                                       .read<UserInfo>()
-                                      .userinfo['verified']) {
+                                      .userinfo['driver_verified']) {
                                     Navigator.pushNamed(
                                         context, '/driver/create');
                                   } else {
@@ -139,10 +140,10 @@ class _PassengerHomeState extends State<PassengerHome> {
                                         builder: (context) {
                                           return StyleDialog(
                                               context,
-                                              'Unverified',
-                                              'Please verify your account before using the feature',
-                                              'OK', () {
-                                            Navigator.pop(context);
+                                              'This feture is lock.',
+                                              'Your profile need to verify more documents to unlock the Driver mode',
+                                              'Verify now', () {
+                                            Navigator.pushNamed(context, '/docverify');
                                           });
                                         });
                                   }

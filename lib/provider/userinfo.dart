@@ -134,15 +134,36 @@ class UserInfo extends ChangeNotifier {
         'owner': supabase.auth.currentUser!.id,
         '${type}_url': signedUrl,
       });
+      getDocument();
+      if (type == 'citizen') {
+        await supabase.from('profile').upsert({
+          'id': supabase.auth.currentUser!.id,
+          'username': supabase.auth.currentUser!.phone!,
+          'verified': true,
+        });
+      } else if ((type == 'driver' && doc['tax_url'] != null) ||
+          (type == 'tax' && doc['driver_url'] != null)) {
+        await supabase.from('profile').upsert({
+          'id': supabase.auth.currentUser!.id,
+          'username': supabase.auth.currentUser!.phone!,
+          'driver_verified': true,
+        });
+      }
       notifyListeners();
     } catch (e) {
       print(e);
     }
     notifyListeners();
   }
-   Future<dynamic> getDocument() async {
+
+  Map _doc = {};
+  get doc => _doc;
+  Future<dynamic> getDocument() async {
     try {
-      final res = await supabase.from('document').select().eq('owner', user!.id);
+      final res =
+          await supabase.from('document').select().eq('owner', user!.id);
+      //print(res[0]);
+      _doc = res[0];
       return res[0];
     } catch (e) {
       print(e);

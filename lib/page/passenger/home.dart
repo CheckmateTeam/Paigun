@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:math';
 import 'package:faker/faker.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:ui' as ui;
@@ -48,9 +49,9 @@ class _PassengerHomeState extends State<PassengerHome> {
     Provider.of<UserInfo>(context, listen: false).getUserInfo();
   }
 
-  Future<void> _fetchRoute() async {
-    await Provider.of<PassDB>(context, listen: false).getJourney(1000);
-  }
+  // Future<void> _fetchRoute() async {
+  //   await Provider.of<PassDB>(context, listen: false).getJourney(1000);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +144,8 @@ class _PassengerHomeState extends State<PassengerHome> {
                                               'This feture is lock.',
                                               'Your profile need to verify more documents to unlock the Driver mode',
                                               'Verify now', () {
-                                            Navigator.pushNamed(context, '/docverify');
+                                            Navigator.pushNamed(
+                                                context, '/docverify');
                                           });
                                         });
                                   }
@@ -206,7 +208,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                                   });
                                   loadingDialog(
                                       context, _isSearching, 'Searching...');
-                                  await _fetchRoute();
+                                  // await _fetchRoute();
                                   setState(() {
                                     _isSearching = false;
                                   });
@@ -500,6 +502,7 @@ class _MapComponentState extends State<MapComponent> {
   BitmapDescriptor markerIcon2 = BitmapDescriptor.defaultMarker;
   String _GpsError = '';
   MapType _currentMapType = MapType.normal;
+  LatLng cameraPos = const LatLng(0, 0);
 
   void _addCustomMarker1() async {
     final ByteData bytes = await rootBundle.load('assets/images/marker1.png');
@@ -551,6 +554,7 @@ class _MapComponentState extends State<MapComponent> {
         super.setState(() {
           _currentLocation = LatLng(
               currentLocation.latitude ?? 0, currentLocation.longitude ?? 0);
+          cameraPos = _currentLocation;
           Provider.of<PassDB>(context, listen: false)
               .updatePosition(_currentLocation);
         });
@@ -584,8 +588,33 @@ class _MapComponentState extends State<MapComponent> {
     ));
   }
 
-  Future<void> _fetchRoute() async {
-    await Provider.of<PassDB>(context, listen: false).getJourney(1000);
+  Future<void> _fetchRouteAll(int dis) async {
+    await Provider.of<PassDB>(context, listen: false).getJourney(dis);
+    print('fetch');
+  }
+
+  Future<void> _fetchRoute(int dis) async {
+    await Provider.of<PassDB>(context, listen: false)
+        .getJourneyByMap(dis, cameraPos);
+    print('fetch');
+  }
+
+  Future<void> _initFetchRoute() async {
+    GoogleMapController mapController = await _MapController.future;
+    LatLngBounds bounds = await mapController.getVisibleRegion();
+
+    LatLng edge = bounds.northeast;
+    double dis = calculateDistance(
+        cameraPos.latitude, cameraPos.longitude, edge.latitude, edge.longitude);
+    _fetchRoute(dis.toInt());
+  }
+
+  double calculateDistance(lat1, lon1, lat2, lon2) {
+    var p = 0.017453292519943295;
+    var a = 0.5 -
+        cos((lat2 - lat1) * p) / 2 +
+        cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2;
+    return 12742 * asin(sqrt(a));
   }
 
   @override
@@ -595,7 +624,7 @@ class _MapComponentState extends State<MapComponent> {
       _addCustomMarker1();
       _addCustomMarker2();
       _determinePosition();
-      _fetchRoute();
+      _initFetchRoute();
     }
   }
 
@@ -615,11 +644,28 @@ class _MapComponentState extends State<MapComponent> {
               onMapCreated: (GoogleMapController controller) {
                 _MapController.complete(controller);
                 controller.showMarkerInfoWindow(const MarkerId('current'));
+                for (var marker in Provider.of<PassDB>(context).journeyMarker) {
+                  controller.showMarkerInfoWindow(marker['markerId']);
+                }
               },
               initialCameraPosition: CameraPosition(
                 target: _currentLocation,
                 zoom: 15,
               ),
+              onCameraIdle: () async {
+                GoogleMapController mapController = await _MapController.future;
+                LatLngBounds bounds = await mapController.getVisibleRegion();
+
+                LatLng edge = bounds.northeast;
+                double dis = calculateDistance(cameraPos.latitude,
+                    cameraPos.longitude, edge.latitude, edge.longitude);
+                _fetchRoute(dis.toInt());
+              },
+              onCameraMove: (position) {
+                setState(() {
+                  cameraPos = position.target;
+                });
+              },
               myLocationButtonEnabled: true,
               markers: {
                 //Current Location marker

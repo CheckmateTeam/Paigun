@@ -289,7 +289,7 @@ class _RequestPageState extends State<RequestPage> {
                                     .toLocal())
                                 .toString(),
                             style: GoogleFonts.nunito(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             )),
                       ],
@@ -333,12 +333,13 @@ class _RequestPageState extends State<RequestPage> {
                                                       _isLoading,
                                                       'Accepting request...');
                                                   await context
-                                                      .read<PassDB>()
-                                                      .setUserRequest(
-                                                          'accept',
+                                                      .read<DriveDB>()
+                                                      .driverAcceptedRequest(
                                                           item[index]
                                                                   ['journey_id']
-                                                              ['journey_id']);
+                                                              ['journey_id'],
+                                                          item[index]['user_id']
+                                                              ['id']);
                                                   await context
                                                       .read<DriveDB>()
                                                       .getDriverJourney();

@@ -616,9 +616,14 @@ class _RouteDetailState extends State<RouteDetail> {
                   borderRadius: BorderRadius.circular(15)),
             ),
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) =>
-                      ReportPage(driver: widget.driver, info: widget.info)));
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return StyleDialog(context, 'Completed',
+                        'This journey has been completed', 'OK', () {
+                      Navigator.pop(context);
+                    });
+                  });
             },
             child: Container(
               width: double.infinity,

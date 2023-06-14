@@ -18,12 +18,23 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   bool _isLoading = false;
-
+  List _doneList = [];
+  List _onGoingList = [];
   void fetchRequestHistory() async {
     setState(() {
       _isLoading = true;
     });
     await context.read<PassDB>().getReqeustJourneyHistory();
+    _doneList = context
+        .read<PassDB>()
+        .journeyRequest
+        .where((element) => element['status'] == 'done')
+        .toList();
+    _onGoingList = context
+        .read<PassDB>()
+        .journeyRequest
+        .where((element) => element['status'] != 'done')
+        .toList();
     setState(() {
       _isLoading = false;
     });
@@ -59,51 +70,32 @@ class _HistoryPageState extends State<HistoryPage> {
                   const Divider(),
                   Expanded(
                     child: ListView.builder(
-                        itemCount: context
-                            .watch<PassDB>()
-                            .journeyRequest
-                            .where((e) {
-                              return e['status'] != 'done';
-                            })
-                            .toList()
-                            .length,
+                        itemCount: _onGoingList.length,
                         itemBuilder: (context, index) => journeyTile(
-                                context.read<PassDB>().journeyRequest.where((element) => element['status'] != 'done').toList()[index]
-                                    ['journey_id']['origin_province'],
-                                context
-                                        .read<PassDB>()
-                                        .journeyRequest
-                                        .where((element) =>
-                                            element['status'] != 'done')
-                                        .toList()[index]['journey_id']
+                                _onGoingList[index]['journey_id']
+                                    ['origin_province'],
+                                _onGoingList[index]['journey_id']
                                     ['destination_province'],
                                 DateFormat('EEEE, dd MMMM yyyy').format(
-                                    DateTime.parse(context.read<PassDB>().journeyRequest.where((element) => element['status'] != 'done').toList()[index]['journey_id']['date'])
+                                    DateTime.parse(_onGoingList[index]
+                                            ['journey_id']['date'])
                                         .toLocal()),
-                                context
-                                    .read<PassDB>()
-                                    .journeyRequest
-                                    .where((element) => element['status'] != 'done')
-                                    .toList()[index]['status'],
+                                _onGoingList[index]['status'],
                                 context, () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => RouteDetail(
-                                      info: context
-                                          .read<PassDB>()
-                                          .journeyRequest[index]['journey_id'],
-                                      driver: context
-                                              .read<PassDB>()
-                                              .journeyRequest[index]
-                                          ['journey_id']['owner'],
-                                      status: context
-                                          .read<PassDB>()
-                                          .journeyRequest[index]['status'],
+                                      info: _onGoingList[index]['journey_id'],
+                                      driver: _onGoingList[index]['journey_id']
+                                          ['owner'],
+                                      status: _onGoingList[index]['status'],
                                       from: "history",
                                     ),
                                   ));
-                            }, context.read<PassDB>().journeyRequest[index]['journey_id']['owner']['avatar_url'])),
+                            },
+                                _onGoingList[index]['journey_id']['owner']
+                                    ['avatar_url'])),
                   ),
                   Text(
                     'Success',
@@ -115,52 +107,32 @@ class _HistoryPageState extends State<HistoryPage> {
                   const Divider(),
                   Expanded(
                     child: ListView.builder(
-                        itemCount: context
-                            .watch<PassDB>()
-                            .journeyRequest
-                            .where((e) {
-                              return e['status'] == 'done';
-                            })
-                            .toList()
-                            .length,
+                        itemCount: _doneList.length,
                         itemBuilder: (context, index) => journeyTile(
-                            context.read<PassDB>().journeyRequest.where((e) {
-                              return e['status'] == 'done';
-                            }).toList()[index]['journey_id']['origin_province'],
-                            context.read<PassDB>().journeyRequest.where((e) {
-                              return e['status'] == 'done';
-                            }).toList()[index]['journey_id']
-                                ['destination_province'],
-                            DateFormat('EEEE, dd MMMM yyyy').format(
-                                DateTime.parse(context
-                                    .read<PassDB>()
-                                    .journeyRequest
-                                    .where((e) {
-                              return e['status'] == 'done';
-                            }).toList()[index]['journey_id']['date']).toLocal()),
-                            'done',
-                            context,
-                            () {
+                                _doneList[index]['journey_id']
+                                    ['origin_province'],
+                                _doneList[index]['journey_id']
+                                    ['destination_province'],
+                                DateFormat('EEEE, dd MMMM yyyy').format(
+                                    DateTime.parse(_doneList[index]
+                                            ['journey_id']['date'])
+                                        .toLocal()),
+                                'done',
+                                context, () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => RouteDetail(
-                                      info: context
-                                          .read<PassDB>()
-                                          .journeyRequest[index]['journey_id'],
-                                      driver: context
-                                              .read<PassDB>()
-                                              .journeyRequest[index]
-                                          ['journey_id']['owner'],
-                                      status: context
-                                          .read<PassDB>()
-                                          .journeyRequest[index]['status'],
+                                      info: _doneList[index]['journey_id'],
+                                      driver: _doneList[index]['journey_id']
+                                          ['owner'],
+                                      status: _doneList[index]['status'],
                                       from: "history",
                                     ),
                                   ));
                             },
-                            context.read<PassDB>().journeyRequest[index]
-                                ['journey_id']['owner']['avatar_url'])),
+                                _doneList[index]['journey_id']['owner']
+                                    ['avatar_url'])),
                   ),
                 ],
               ),

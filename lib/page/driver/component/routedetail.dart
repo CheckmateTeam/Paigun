@@ -42,7 +42,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
   List<LatLng> polylineCoordinates = [];
   bool _isStart = false;
   bool _isFinish = false;
-  bool _isDone = true;
+  bool _isDone = false;
   bool _isLoading = false;
   Map _driverProfile = {};
   void createRoutePoint() async {
@@ -392,7 +392,19 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                                         BorderRadius.circular(
                                                             15)),
                                               ),
-                                              onPressed: () async {},
+                                              onPressed: () async {
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return StyleDialog(
+                                                          context,
+                                                          'Completed route',
+                                                          'This route has been completed',
+                                                          'OK', () {
+                                                        Navigator.pop(context);
+                                                      });
+                                                    });
+                                              },
                                               child: Container(
                                                 width: double.infinity,
                                                 padding:

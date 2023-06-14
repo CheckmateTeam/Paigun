@@ -92,7 +92,7 @@ class DriveDB extends ChangeNotifier {
           .select('user_id!inner(*),status')
           .eq('journey_id', jid)
           .neq('status', 'pending')
-          .neq('status', 'paid');
+          .neq('status', 'accepted');
       if (response.length == 0) {
         return [];
       }
@@ -120,15 +120,31 @@ class DriveDB extends ChangeNotifier {
 
   Future<dynamic> deleteRoute(String jid) async {
     try {
-      final response = await supabase
-          .from('journey')
-          .delete()
-          .eq('journey_id', jid)
-          .limit(1);
+      final response =
+          await supabase.from('journey').delete().eq('journey_id', jid);
       return 'success';
     } catch (e) {
       return 'failed';
     }
+  }
+
+  Future<dynamic> driverAcceptedRequest(String journeyId, String userId) async {
+    final response = await supabase
+        .from('user_journey')
+        .update({'status': "accepted"})
+        .eq('journey_id', journeyId)
+        .eq('user_id', userId);
+
+    //reduce available seat
+    final response2 = await supabase
+        .from('journey')
+        .select('available_seat')
+        .eq('journey_id', journeyId)
+        .single();
+    int availableSeat = response2['available_seat'];
+    final response3 = await supabase.from('journey').update(
+        {'available_seat': availableSeat - 1}).eq('journey_id', journeyId);
+    return response;
   }
 
   Future<dynamic> completeJourney(String jid) async {

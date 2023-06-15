@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../provider/driver.dart';
 import '../../components/sizeappbar.dart';
 import '../../chatroom/component/message.dart';
 import '../../chatroom/component/room.dart';
-
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,13 +28,19 @@ class ChatRoom extends StatefulWidget {
 }
 
 class _ChatRoom extends State<ChatRoom> {
-  List<Message>? _messages = [];
+  List _messages = [];
 
-  void getBoard() async {
-    _journey = await context.read<PassDB>().getBoard();
-    _showJourney = _journey;
-    isLoading = false;
+  void getMessage(Room room) async {
+    _messages = await context.read<DriveDB>().getMessage(room.roomId);
     setState(() {});
+  }
+
+  void sendMessage(Message message) async{
+    
+    
+    _messages = await context.read<DriveDB>().getMessage("user");
+    
+    
   }
   @override
   Widget build(BuildContext context) {
@@ -44,80 +51,10 @@ class _ChatRoom extends State<ChatRoom> {
         padding: EdgeInsets.all(10.0),
         child: Column(
           children: [
-            const SizedBox(
-              height: 15,
-            ),
-            Container(
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                  Container(
-                      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          color: Color.fromARGB(255, 199, 199, 199)),
-                      child: Row(
-                        children: [
-                          TextButton(
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll(
-                                  Color.fromARGB((currentChat == 1) ? 255 : 0,
-                                      36, 70, 221)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                currentChat = 1;
-                              });
-                            },
-                            child: Text(
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    height: 0,
-                                    color: (currentChat == 1)
-                                        ? Colors.white
-                                        : Colors.black),
-                                "Driver"),
-                          ),
-                          TextButton(
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll(
-                                  Color.fromARGB((currentChat == 1) ? 0 : 255,
-                                      36, 70, 221)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                currentChat = 2;
-                              });
-                            },
-                            child: Text(
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    height: 0,
-                                    color: (currentChat == 1)
-                                        ? Colors.black
-                                        : Colors.white),
-                                "Passenger"),
-                          )
-                        ],
-                      )),
-                ])),
 
-
-                SizedBox(height:20,),
-
-
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: chatList.length,
-                    itemBuilder: (context,index){
-                      return chatBox((currentChat == 1)
-                                        ? chatList[index]['Name'] : chatListP[index]['Name'],
-                                      (currentChat == 1)
-                                        ? chatList[index]['Message'] : chatListP[index]['Message']);
-                    }))
           ],
         ),
-      ),,
+      ),
     );
     }
 

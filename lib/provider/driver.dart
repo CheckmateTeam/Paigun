@@ -57,7 +57,7 @@ class DriveDB extends ChangeNotifier {
       final response2 = await supabase
           .from('user_journey')
           .select('journey_id!inner(*),user_id!inner(*),status,create_at')
-          .eq('status', 'paid')
+          .eq('status', 'pending')
           .neq('user_id.id', user!.id);
       _journey.clear();
       _journey.addAll(response);
@@ -121,6 +121,111 @@ class DriveDB extends ChangeNotifier {
     } catch (e) {
       print(e);
     }
+    }
+  }
+
+  Future<String> getDriverJourneyStatus(String jid) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .select('status')
+          .eq('journey_id', jid)
+          .limit(1)
+          .single();
+      return response['status'];
+    } catch (e) {
+      print(e);
+      return 'failed';
+    }
+  }
+
+  Future<List> getJourneyPassenger(String jid) async {
+    try {
+      final response = await supabase
+          .from('user_journey')
+          .select('user_id!inner(*),status')
+          .eq('journey_id', jid)
+          .neq('status', 'pending')
+          .neq('status', 'paid');
+      if (response.length == 0) {
+        return [];
+      }
+      return response;
+    } catch (e) {
+      print(e);
+      return [];
+    }
+  }
+
+  Future<String> changeJourneyStatus(String jid, String status) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .update({'status': status}).eq('journey_id', jid);
+      final response2 = await supabase.from('user_journey').update({
+        'status': status,
+      }).eq('journey_id', jid);
+      return response;
+    } catch (e) {
+      print(e);
+      return '';
+    }
+  }
+
+  Future<dynamic> deleteRoute(String jid) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .delete()
+          .eq('journey_id', jid)
+          .limit(1);
+      return 'success';
+    } catch (e) {
+      return 'failed';
+    }
+  }
+
+  Future<dynamic> completeJourney(String jid) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .update({'status': 'done'}).eq('journey_id', jid);
+
+      return 'success';
+    } catch (e) {
+      return 'failed';
+    }
+  }
+
+  Future<dynamic> getJourneyInfo(String jid) async {
+    try {
+      final response = await supabase
+          .from('journey')
+          .select()
+          .eq('owner', user!.id)
+          .eq('journey_id', jid)
+          .single();
+      return response;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<dynamic> isPassengerAllCompleted(String jid) async {
+    try {
+      final response = await supabase
+          .from('user_journey')
+          .select()
+          .eq('journey_id', jid)
+          .eq('status', 'finished');
+
+      if (response.length == 0) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 }

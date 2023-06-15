@@ -28,7 +28,7 @@ class UserInfo extends ChangeNotifier {
         ),
       );
       final newUser = await supabase.from('profile').upsert({
-        'id': supabase.auth.currentUser!,
+        'id': supabase.auth.currentUser!.id,
         'username': phone.substring(1),
         'full_name': name,
         'avatar_url': '',
@@ -115,5 +115,59 @@ class UserInfo extends ChangeNotifier {
         ),
       );
     }
+  }
+
+  Future<void> addDocument(String path, String type) async {
+    try {
+      File image = File(path);
+      String fileName = '${user!.id}_$type';
+      String signedUrl = "";
+
+      await supabase.storage.from('document').upload(
+            fileName,
+            image,
+          );
+      signedUrl = await supabase.storage
+          .from('document')
+          .createSignedUrl(fileName, 60 * 60 * 24 * 365);
+      await supabase.from('document').upsert({
+        'owner': supabase.auth.currentUser!.id,
+        '${type}_url': signedUrl,
+      });
+      getDocument();
+      if (type == 'citizen') {
+        await supabase.from('profile').upsert({
+          'id': supabase.auth.currentUser!.id,
+          'username': supabase.auth.currentUser!.phone!,
+          'verified': true,
+        });
+      } else if ((type == 'driver' && doc['tax_url'] != null) ||
+          (type == 'tax' && doc['driver_url'] != null)) {
+        await supabase.from('profile').upsert({
+          'id': supabase.auth.currentUser!.id,
+          'username': supabase.auth.currentUser!.phone!,
+          'driver_verified': true,
+        });
+      }
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+    notifyListeners();
+  }
+
+  Map _doc = {};
+  get doc => _doc;
+  Future<dynamic> getDocument() async {
+    try {
+      final res =
+          await supabase.from('document').select().eq('owner', user!.id);
+      //print(res[0]);
+      _doc = res[0];
+      return res[0];
+    } catch (e) {
+      print(e);
+    }
+    notifyListeners();
   }
 }

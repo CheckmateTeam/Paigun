@@ -6,12 +6,14 @@ import 'package:paigun/page/components/loading_screen.dart';
 import 'package:paigun/page/components/splash_screen.dart';
 import 'package:paigun/page/driver/component/createroute.dart';
 import 'package:paigun/page/driver/component/requestpage.dart';
+import 'package:paigun/page/passenger/components/docverify.dart';
 import 'package:paigun/page/passenger/components/historypage.dart';
 import 'package:paigun/page/passenger/components/chat.dart';
 import 'package:paigun/page/passenger/components/chatroom.dart';
 import 'package:paigun/page/passenger/components/journeyboard.dart';
 import 'package:paigun/page/driver/home.dart';
 import 'package:paigun/page/passenger/components/notification.dart';
+import 'package:paigun/page/passenger/components/reportpage.dart';
 import 'package:paigun/page/passenger/home.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:provider/provider.dart';
@@ -72,6 +74,7 @@ class MainApp extends StatelessWidget {
         '/driver/create': (context) => const CreateRoute(),
         '/driver/request': (context) => const RequestPage(),
         '/history': (context) => const HistoryPage(),
+        '/docverify': (context) => const DocVerify(),
       },
     );
   }

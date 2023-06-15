@@ -22,7 +22,7 @@ Widget StyleDialog(BuildContext context, String title, String content,
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(content),
+        Text(content, textAlign: TextAlign.center,),
       ],
     ),
     actions: [

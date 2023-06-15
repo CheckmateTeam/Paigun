@@ -1,4 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
+import 'package:day_night_time_picker/day_night_time_picker.dart';
+import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -293,8 +297,17 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                                   .add(const Duration(days: 365)));
                           if (selectDate != null) {
                             // ignore: use_build_context_synchronously
-                            TimeOfDay? selectTime = await showTimePicker(
-                                context: context, initialTime: TimeOfDay.now());
+                            final res = await Navigator.of(context).push(
+                              showPicker(
+                                context: context,
+                                value: Time(
+                                    hour: TimeOfDay.now().hour,
+                                    minute: TimeOfDay.now().minute),
+                                onChange: (value) {},
+                              ),
+                            );
+
+                            TimeOfDay? selectTime = res as TimeOfDay?;
                             if (selectTime != null) {
                               DateTime dateTime = DateTime(
                                   selectDate.year,
@@ -574,7 +587,8 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                                                       Navigator.pop(context);
                                                       Navigator
                                                           .pushReplacementNamed(
-                                                              context, '/home');
+                                                              context,
+                                                              '/driver');
                                                     },
                                                     child: const Text(
                                                         'Back to home')),

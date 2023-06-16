@@ -41,6 +41,7 @@ class _DocVerifyState extends State<DocVerify> {
     driverUploaded = await _doc['driver_url'] != null ? true : false;
     taxUploaded = await _doc['tax_url'] != null ? true : false;
 
+
     setState(() {
       isLoading = false;
     });

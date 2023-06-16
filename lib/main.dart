@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:paigun/page/authentication/login.dart';
+import 'package:paigun/page/chatroom/component/room.dart';
 import 'package:paigun/page/components/loading_screen.dart';
 import 'package:paigun/page/components/splash_screen.dart';
 import 'package:paigun/page/driver/component/createroute.dart';
 import 'package:paigun/page/driver/component/requestpage.dart';
 import 'package:paigun/page/passenger/components/docverify.dart';
 import 'package:paigun/page/passenger/components/historypage.dart';
+import 'package:paigun/page/passenger/components/chat.dart';
+import 'package:paigun/page/passenger/components/chatroom.dart';
 import 'package:paigun/page/passenger/components/journeyboard.dart';
 import 'package:paigun/page/driver/home.dart';
+import 'package:paigun/page/passenger/components/notification.dart';
 import 'package:paigun/page/passenger/components/reportpage.dart';
 import 'package:paigun/page/passenger/home.dart';
 import 'package:paigun/provider/userinfo.dart';
@@ -65,6 +69,8 @@ class MainApp extends StatelessWidget {
         '/journeyboard/create': (context) => const CreateJourney(),
         '/loading': (context) => const Loading(),
         '/driver': (context) => const DriverHome(),
+        '/notification' : (context) => const PaiNotification(),
+        '/chat' : (context) => const DriverChat(),
         '/driver/create': (context) => const CreateRoute(),
         '/driver/request': (context) => const RequestPage(),
         '/history': (context) => const HistoryPage(),

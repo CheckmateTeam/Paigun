@@ -150,8 +150,6 @@ class _RouteDetailState extends State<RouteDetail> {
 
   @override
   Widget build(BuildContext context) {
-    Faker faker = Faker();
-    int _rating = faker.randomGenerator.integer(5);
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -316,22 +314,33 @@ class _RouteDetailState extends State<RouteDetail> {
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    Row(
-                                      children: [
-                                        for (int i = 0; i < 5; i++)
-                                          i < _rating
-                                              ? const Icon(
-                                                  Icons.star,
-                                                  color: Colors.amber,
-                                                  size: 20,
-                                                )
-                                              : const Icon(
+                                    _driverProfile['rating'] == null
+                                        ? Row(
+                                            children: [
+                                              for (int i = 0; i < 5; i++)
+                                                const Icon(
                                                   Icons.star,
                                                   color: Colors.grey,
                                                   size: 20,
                                                 ),
-                                      ],
-                                    ),
+                                            ],
+                                          )
+                                        : Row(
+                                            children: [
+                                              for (int i = 0; i < 5; i++)
+                                                i < _driverProfile['rating']
+                                                    ? const Icon(
+                                                        Icons.star,
+                                                        color: Colors.amber,
+                                                        size: 20,
+                                                      )
+                                                    : const Icon(
+                                                        Icons.star,
+                                                        color: Colors.grey,
+                                                        size: 20,
+                                                      ),
+                                            ],
+                                          ),
                                   ],
                                 ),
                                 IconButton.filled(

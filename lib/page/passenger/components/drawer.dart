@@ -60,7 +60,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
     super.initState();
     Provider.of<UserInfo>(context, listen: false).getUserInfo();
     setState(() {});
-    // Provider.of<DriveDB>(context, listen: false).getDriverJourney();
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:paigun/provider/passenger.dart';
 import 'package:provider/provider.dart';
 
 import '../../function/show_snackbar.dart';
@@ -23,6 +24,13 @@ class _LoadingState extends State<Loading> with SingleTickerProviderStateMixin {
   bool _redirectCalled = false;
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _controller.forward();
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -31,12 +39,16 @@ class _LoadingState extends State<Loading> with SingleTickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _redirect();
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed && !_redirectCalled && mounted) {
+        _redirect();
+      }
+    });
   }
 
   Future<void> _redirect() async {
     await Future.delayed(const Duration(seconds: 1));
-    if (_redirectCalled || !mounted) {
+    if (!mounted) {
       return;
     }
 
@@ -44,9 +56,10 @@ class _LoadingState extends State<Loading> with SingleTickerProviderStateMixin {
     final session = supabase.auth.currentSession;
     await Provider.of<UserInfo>(context, listen: false).getUserInfo();
     if (session != null) {
-      Navigator.of(context).popAndPushNamed('/home');
+      // Provider.of<PassDB>(context, listen: false).getJourney(5);
+      Navigator.of(context).pushReplacementNamed('/home');
     } else {
-      Navigator.of(context).popAndPushNamed('/login');
+      Navigator.of(context).pushReplacementNamed('/login');
     }
   }
 

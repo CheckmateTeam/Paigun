@@ -14,16 +14,20 @@ class PassDB extends ChangeNotifier {
   User? user = supabase.auth.currentUser;
 
   LatLng _currentPosition = const LatLng(0, 0);
-
+  LatLng _cameraPosition = const LatLng(0, 0);
   LatLng get currentPosition => _currentPosition;
+  LatLng get cameraPosition => _cameraPosition;
   List get journey => _journey;
   List get board => _board;
   List get journeyMarker => _journeyMarker;
   List get journeyRequest => _journeyRequest;
+  bool get isSearching => _isSearching;
+
   List _journey = [];
   List _journeyMarker = [];
   List _journeyRequest = [];
   List _board = [];
+  bool _isSearching = false;
 
   double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
@@ -75,8 +79,8 @@ class PassDB extends ChangeNotifier {
         int distance = calculateDistance(
                 LatLng(double.parse(i['origin_lat']), 0).latitude,
                 LatLng(0, double.parse(i['origin_lng'])).longitude,
-                LatLng(double.parse(i['destination_lat']), 0).latitude,
-                LatLng(0, double.parse(i['destination_lng'])).longitude)
+                cameraPosition.latitude,
+                cameraPosition.longitude)
             .round();
         if (distance <= fetchDistance) {
           _journey.add({
@@ -317,6 +321,11 @@ class PassDB extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateCameraPosition(LatLng position) {
+    _cameraPosition = position;
+    notifyListeners();
+  }
+
   Future<dynamic> createBoard(Board board) async {
     try {
       final response = await supabase.from('board').insert([
@@ -344,6 +353,11 @@ class PassDB extends ChangeNotifier {
     } catch (e) {
       print(e);
     }
+    notifyListeners();
+  }
+
+  void setisSearching(bool bool) {
+    _isSearching = bool;
     notifyListeners();
   }
 }

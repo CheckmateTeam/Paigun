@@ -105,13 +105,32 @@ class DriveDB extends ChangeNotifier {
 
   Future<String> changeJourneyStatus(String jid, String status) async {
     try {
-      final response = await supabase
-          .from('journey')
-          .update({'status': status}).eq('journey_id', jid);
-      final response2 = await supabase.from('user_journey').update({
-        'status': status,
-      }).eq('journey_id', jid);
-      return response;
+      if (status == 'going') {
+        final response = await supabase
+            .from('journey')
+            .update({'status': status}).eq('journey_id', jid);
+        final response2 = await supabase
+            .from('user_journey')
+            .update({
+              'status': status,
+            })
+            .eq('journey_id', jid)
+            .eq('status', 'paid');
+        final response3 = await supabase
+            .from('user_journey')
+            .delete()
+            .eq('journey_id', jid)
+            .eq('status', 'accepted');
+        return response;
+      } else {
+        final response = await supabase
+            .from('journey')
+            .update({'status': status}).eq('journey_id', jid);
+        final response2 = await supabase.from('user_journey').update({
+          'status': status,
+        }).eq('journey_id', jid);
+        return response;
+      }
     } catch (e) {
       print(e);
       return '';

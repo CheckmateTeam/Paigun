@@ -52,8 +52,9 @@ class _DriverHomeState extends State<DriverHome> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _fetchInfo();
-    print(context.read<DriveDB>().driverJourney);
+    if (mounted) {
+      _fetchInfo();
+    }
   }
 
   @override

@@ -3,15 +3,18 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:faker/faker.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/page/components/styledialog.dart';
 import 'package:paigun/page/passenger/components/drawer.dart';
@@ -47,6 +50,21 @@ class _PassengerHomeState extends State<PassengerHome> {
   void initState() {
     super.initState();
     Provider.of<UserInfo>(context, listen: false).getUserInfo();
+    initOnesignal();
+  }
+
+  void initOnesignal() async {
+    await OneSignal.shared.setLogLevel(OSLogLevel.debug, OSLogLevel.none);
+    await OneSignal.shared.setAppId(dotenv.env['ONESIGNAL_APP_ID'] ?? '');
+    await Firebase.initializeApp();
+// The promptForPushNotificationsWithUserResponse function will show the iOS or Android push notification prompt. We recommend removing the following code and instead using an In-App Message to prompt for notification permission
+    await OneSignal.shared
+        .promptUserForPushNotificationPermission()
+        .then((accepted) {
+      print("Accepted permission: $accepted");
+    });
+    final externalUserId = context.read<UserInfo>().user!.id;
+    OneSignal.shared.setExternalUserId(externalUserId);
   }
 
   @override

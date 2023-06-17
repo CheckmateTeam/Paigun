@@ -73,27 +73,54 @@ class _RouteDetailState extends State<RouteDetail> {
       for (var point in result.points) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
       }
+      GoogleMapController controller = await _MapController.future;
+      double minLat = _FromPosition.latitude < _ToPosition.latitude
+          ? _FromPosition.latitude
+          : _ToPosition.latitude;
+      double maxLat = _FromPosition.latitude > _ToPosition.latitude
+          ? _FromPosition.latitude
+          : _ToPosition.latitude;
+      double minLng = _FromPosition.longitude < _ToPosition.longitude
+          ? _FromPosition.longitude
+          : _ToPosition.longitude;
+      double maxLng = _FromPosition.longitude > _ToPosition.longitude
+          ? _FromPosition.longitude
+          : _ToPosition.longitude;
+      controller.animateCamera(CameraUpdate.newLatLngBounds(
+          LatLngBounds(
+            southwest: LatLng(minLat, minLng),
+            northeast: LatLng(maxLat, maxLng),
+          ),
+          100));
     }
+
+    setState(() {});
+  }
+
+  void zoomout() async {
+    LatLng _FromPosition = LatLng(double.parse(widget.info['origin_lat']),
+        double.parse(widget.info['origin_lng']));
+    LatLng _ToPosition = LatLng(double.parse(widget.info['destination_lat']),
+        double.parse(widget.info['destination_lng']));
     GoogleMapController controller = await _MapController.future;
+    double minLat = _FromPosition.latitude < _ToPosition.latitude
+        ? _FromPosition.latitude
+        : _ToPosition.latitude;
+    double maxLat = _FromPosition.latitude > _ToPosition.latitude
+        ? _FromPosition.latitude
+        : _ToPosition.latitude;
+    double minLng = _FromPosition.longitude < _ToPosition.longitude
+        ? _FromPosition.longitude
+        : _ToPosition.longitude;
+    double maxLng = _FromPosition.longitude > _ToPosition.longitude
+        ? _FromPosition.longitude
+        : _ToPosition.longitude;
     controller.animateCamera(CameraUpdate.newLatLngBounds(
         LatLngBounds(
-          southwest: LatLng(
-              _FromPosition.latitude < _ToPosition.latitude
-                  ? _FromPosition.latitude
-                  : _ToPosition.latitude,
-              _FromPosition.longitude < _ToPosition.longitude
-                  ? _FromPosition.longitude
-                  : _ToPosition.longitude),
-          northeast: LatLng(
-              _FromPosition.latitude > _ToPosition.latitude
-                  ? _FromPosition.latitude
-                  : _ToPosition.latitude,
-              _FromPosition.longitude > _ToPosition.longitude
-                  ? _FromPosition.longitude
-                  : _ToPosition.longitude),
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
         ),
         80));
-    setState(() {});
   }
 
   void getStatus() async {
@@ -144,14 +171,12 @@ class _RouteDetailState extends State<RouteDetail> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getStatus();
     createRoutePoint();
+    getStatus();
   }
 
   @override
   Widget build(BuildContext context) {
-    Faker faker = Faker();
-    int _rating = faker.randomGenerator.integer(5);
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -180,6 +205,19 @@ class _RouteDetailState extends State<RouteDetail> {
                     )
                   }),
             ),
+            Positioned(
+                right: 7,
+                top: 55,
+                child: IconButton.filled(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      elevation: 5,
+                    ),
+                    onPressed: () {
+                      zoomout();
+                    },
+                    icon: Icon(Icons.zoom_out_map_outlined,
+                        color: Colors.grey[700]))),
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -286,14 +324,16 @@ class _RouteDetailState extends State<RouteDetail> {
                                         Text(
                                           widget.driver.isEmpty
                                               ? 'Loading...'
-                                              : widget.driver['full_name'] ??
-                                                  '',
+                                              : widget.driver['full_name']
+                                                          .length >
+                                                      13
+                                                  ? widget.driver['full_name']
+                                                          .toString()
+                                                          .substring(0, 12) +
+                                                      '...'
+                                                  : widget.driver['full_name'],
                                           style: GoogleFonts.nunito(
-                                            fontSize: widget.driver['full_name']
-                                                        .length >
-                                                    15
-                                                ? 14
-                                                : 20,
+                                            fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -316,22 +356,33 @@ class _RouteDetailState extends State<RouteDetail> {
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    Row(
-                                      children: [
-                                        for (int i = 0; i < 5; i++)
-                                          i < _rating
-                                              ? const Icon(
-                                                  Icons.star,
-                                                  color: Colors.amber,
-                                                  size: 20,
-                                                )
-                                              : const Icon(
+                                    _driverProfile['rating'] == null
+                                        ? Row(
+                                            children: [
+                                              for (int i = 0; i < 5; i++)
+                                                const Icon(
                                                   Icons.star,
                                                   color: Colors.grey,
                                                   size: 20,
                                                 ),
-                                      ],
-                                    ),
+                                            ],
+                                          )
+                                        : Row(
+                                            children: [
+                                              for (int i = 0; i < 5; i++)
+                                                i < _driverProfile['rating']
+                                                    ? const Icon(
+                                                        Icons.star,
+                                                        color: Colors.amber,
+                                                        size: 20,
+                                                      )
+                                                    : const Icon(
+                                                        Icons.star,
+                                                        color: Colors.grey,
+                                                        size: 20,
+                                                      ),
+                                            ],
+                                          ),
                                   ],
                                 ),
                                 IconButton.filled(
@@ -616,9 +667,14 @@ class _RouteDetailState extends State<RouteDetail> {
                   borderRadius: BorderRadius.circular(15)),
             ),
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) =>
-                      ReportPage(driver: widget.driver, info: widget.info)));
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return StyleDialog(context, 'Completed',
+                        'This journey has been completed', 'OK', () {
+                      Navigator.pop(context);
+                    });
+                  });
             },
             child: Container(
               width: double.infinity,

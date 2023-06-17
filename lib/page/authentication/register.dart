@@ -106,6 +106,7 @@ class _SignupState extends State<Signup> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IntlPhoneField(
+                                disableLengthCheck: true,
                                 decoration: const InputDecoration(
                                     labelText: 'Phone Number',
                                     border: OutlineInputBorder(
@@ -186,11 +187,18 @@ class _SignupState extends State<Signup> {
                                       ),
                                     );
                                   } else {
+                                    String phone = "";
+                                    if (phoneNo.startsWith("+660")) {
+                                      phone =
+                                          phoneNo.replaceFirst("+660", "+66");
+                                    } else {
+                                      phone = phoneNo;
+                                    }
                                     setState(() {
                                       _isLoading = true;
                                     });
                                     await supabase.auth.signInWithOtp(
-                                      phone: phoneNo,
+                                      phone: phone,
                                     );
                                     await Future.delayed(
                                         const Duration(seconds: 1));
@@ -204,7 +212,7 @@ class _SignupState extends State<Signup> {
                                             builder: (context) => Verification(
                                                 name: name,
                                                 password: password,
-                                                phoneNo: phoneNo)));
+                                                phoneNo: phone)));
                                   }
                                 }
                               },

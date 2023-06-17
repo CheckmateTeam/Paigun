@@ -152,16 +152,14 @@ class _RequestPageState extends State<RequestPage> {
                                     Text(
                                       item[index]['user_id'].isEmpty
                                           ? 'Loading...'
-                                          : item[index]['user_id']
-                                                  ['full_name'] ??
-                                              '',
+                                          : item[index]['user_id']['full_name']
+                                                      .length >
+                                                  15
+                                              ? '${item[index]['user_id']['full_name'].toString().substring(0, 14)}...'
+                                              : item[index]['user_id']
+                                                  ['full_name'],
                                       style: GoogleFonts.nunito(
-                                        fontSize: item[index]['user_id']
-                                                        ['full_name']
-                                                    .length >
-                                                15
-                                            ? 14
-                                            : 20,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -289,7 +287,7 @@ class _RequestPageState extends State<RequestPage> {
                                     .toLocal())
                                 .toString(),
                             style: GoogleFonts.nunito(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             )),
                       ],
@@ -333,12 +331,13 @@ class _RequestPageState extends State<RequestPage> {
                                                       _isLoading,
                                                       'Accepting request...');
                                                   await context
-                                                      .read<PassDB>()
-                                                      .setUserRequest(
-                                                          'accept',
+                                                      .read<DriveDB>()
+                                                      .driverAcceptedRequest(
                                                           item[index]
                                                                   ['journey_id']
-                                                              ['journey_id']);
+                                                              ['journey_id'],
+                                                          item[index]['user_id']
+                                                              ['id']);
                                                   await context
                                                       .read<DriveDB>()
                                                       .getDriverJourney();

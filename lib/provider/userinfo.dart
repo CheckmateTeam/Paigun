@@ -9,7 +9,13 @@ import '../function/show_snackbar.dart';
 class UserInfo extends ChangeNotifier {
   Session? session = supabase.auth.currentSession;
   User? user = supabase.auth.currentUser;
-  Map _userinfo = {};
+  Map _userinfo = {
+    'id': '',
+    'username': '',
+    'full_name': '',
+    'avatar_url': '',
+    'verified': false
+  };
   get username async =>
       await supabase.from('profile').select('username').eq('id', user!.id);
 
@@ -41,7 +47,10 @@ class UserInfo extends ChangeNotifier {
 
   Future<dynamic> getUserInfo() async {
     try {
-      final res = await supabase.from('profile').select().eq('id', user!.id);
+      final res = await supabase
+          .from('profile')
+          .select()
+          .eq('id', supabase.auth.currentUser!.id);
       _userinfo = res[0];
       return res[0];
     } catch (e) {
@@ -61,7 +70,6 @@ class UserInfo extends ChangeNotifier {
     } catch (e) {
       print(e);
     }
-    getUserInfo();
     notifyListeners();
   }
 

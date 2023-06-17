@@ -20,104 +20,48 @@ serve(async (req) => {
   const { record, table, type } = await req.json();
   const connection = await pool.connect();
   try {
-    if (table == "board") {
+    if (table == "user_journey") {
       const notification = new OneSignal.Notification();
-      notification.app_id = _OnesignalAppId_;
-      notification.include_external_user_ids = [record.owner];
-      notification.contents = {
-        en: `Your journey is from ${record.origin}!`,
-      };
-      const onesignalApiRes = await onesignal.createNotification(notification);
-
-      return new Response(
-        JSON.stringify({ onesignalResponse: onesignalApiRes }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization:
-              "Basic N2VkMmM1NjUtZTkyMy00ZTVkLTlhZTMtZDY2YTkzODI0YmMw",
-          },
-        }
-      );
-    } else if (table == "journey") {
-      const notification = new OneSignal.Notification();
-      notification.app_id = _OnesignalAppId_;
-      notification.include_external_user_ids = [record.owner];
-      notification.headings = {
-        en: `Status changed`,
-      };
-      notification.contents = {
-        en: `Your journey just change the status to ${record.status}!`,
-      };
-      const onesignalApiRes = await onesignal.createNotification(notification);
-
-      return new Response(
-        JSON.stringify({ onesignalResponse: onesignalApiRes }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization:
-              "Basic N2VkMmM1NjUtZTkyMy00ZTVkLTlhZTMtZDY2YTkzODI0YmMw",
-          },
-        }
-      );
-    } else if (table == "user_journey" && type == "INSERT") {
-      const result =
-        await connection.queryObject`SELECT full_name, journey.owner FROM user_journey, journey, profile WHERE journey.journey_id = ${record.journey_id} and profile.id = ${record.user_id}`;
-      const selected = result.rows[0];
-      //console.log(result);
-      //console.log(selected);
-      const notification = new OneSignal.Notification();
-      notification.app_id = _OnesignalAppId_;
-      notification.include_external_user_ids = [selected.owner];
-      notification.contents = {
-        en: `${selected.full_name} request to join your journey.`,
-      };
-      notification.headings = {
-        en: `New join request!`,
-      };
-      const onesignalApiRes = await onesignal.createNotification(notification);
-
-      return new Response(
-        JSON.stringify({ onesignalResponse: onesignalApiRes }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization:
-              "Basic N2VkMmM1NjUtZTkyMy00ZTVkLTlhZTMtZDY2YTkzODI0YmMw",
-          },
-        }
-      );
-    } else if (table == "user_journey" && type == "UPDATE") {
-      const result =
-        await connection.queryObject`SELECT full_name FROM user_journey, journey, profile WHERE user_journey.journey_id = ${record.journey_id} and journey.journey_id = ${record.journey_id} and profile.id = journey.owner`;
-      const selected = result.rows[0];
-      console.log(result);
-      console.log(selected);
-      const notification = new OneSignal.Notification();
-      notification.app_id = _OnesignalAppId_;
-      notification.include_external_user_ids = [record.user_id];
-      if (record.status == "accepted") {
+      if (type == "INSERT") {
+        const result =
+          await connection.queryObject`SELECT full_name, journey.owner FROM user_journey, journey, profile WHERE journey.journey_id = ${record.journey_id} and profile.id = ${record.user_id}`;
+        const selected = result.rows[0];
+        notification.app_id = _OnesignalAppId_;
+        notification.include_external_user_ids = [selected.owner];
         notification.contents = {
-          en: `The journey from ${selected.full_name} is accepted, please paid to be confirmed.`,
+          en: `${selected.full_name} request to join your journey.`,
         };
         notification.headings = {
-          en: `Request accepted!`,
+          en: `New join request!`,
         };
-      } else if (record.status == "paid") {
-        notification.contents = {
-          en: `You have paid for the journey from ${selected.full_name}, your journey request is confirmed`,
-        };
-        notification.headings = {
-          en: `Payment succeed!`,
-        };
-      }else if (record.status == "finished") {
-        notification.contents = {
-          en: `The journey from ${selected.full_name} is arrived, please complete the route.`,
-        };
-        notification.headings = {
-          en: `Journey arrived!`,
-        };
+      } else if (type == "UPDATE") {
+        const result =
+          await connection.queryObject`SELECT full_name FROM user_journey, journey, profile WHERE user_journey.journey_id = ${record.journey_id} and journey.journey_id = ${record.journey_id} and profile.id = journey.owner`;
+        const selected = result.rows[0];
+        notification.app_id = _OnesignalAppId_;
+        notification.include_external_user_ids = [record.user_id];
+        if (record.status == "accepted") {
+          notification.contents = {
+            en: `The journey from ${selected.full_name} is accepted, please paid to be confirmed.`,
+          };
+          notification.headings = {
+            en: `Request accepted!`,
+          };
+        } else if (record.status == "paid") {
+          notification.contents = {
+            en: `You have paid for the journey from ${selected.full_name}, your journey request is confirmed`,
+          };
+          notification.headings = {
+            en: `Payment succeed!`,
+          };
+        } else if (record.status == "finished") {
+          notification.contents = {
+            en: `The journey from ${selected.full_name} is arrived, please complete the route.`,
+          };
+          notification.headings = {
+            en: `Journey arrived!`,
+          };
+        }
       }
       const onesignalApiRes = await onesignal.createNotification(notification);
 
@@ -137,7 +81,6 @@ serve(async (req) => {
         record.driver_url != null &&
         record.tax_url != null
       ) {
-        // Build OneSignal notification object
         const notification = new OneSignal.Notification();
         notification.app_id = _OnesignalAppId_;
         notification.include_external_user_ids = [record.owner];
@@ -166,7 +109,6 @@ serve(async (req) => {
         record.driver_url == null &&
         record.tax_url == null
       ) {
-        // Build OneSignal notification object
         const notification = new OneSignal.Notification();
         notification.app_id = _OnesignalAppId_;
         notification.include_external_user_ids = [record.owner];

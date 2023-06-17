@@ -1,5 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:paigun/page/authentication/login.dart';
 import 'package:paigun/page/chatroom/component/room.dart';
 import 'package:paigun/page/components/loading_screen.dart';
@@ -32,6 +34,15 @@ Future<void> main() async {
     url: dotenv.env['SUPABASE_URL'] ?? '',
     anonKey: dotenv.env['SUPABASE_KEY'] ?? '',
   );
+  await OneSignal.shared.setLogLevel(OSLogLevel.debug, OSLogLevel.none);
+  await OneSignal.shared.setAppId(dotenv.env['ONESIGNAL_APP_ID'] ?? '');
+  await Firebase.initializeApp();
+// The promptForPushNotificationsWithUserResponse function will show the iOS or Android push notification prompt. We recommend removing the following code and instead using an In-App Message to prompt for notification permission
+  await OneSignal.shared
+      .promptUserForPushNotificationPermission()
+      .then((accepted) {
+    print("Accepted permission: $accepted");
+  });
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => UserInfo()),
     ChangeNotifierProvider(create: (_) => PassDB()),
@@ -45,6 +56,11 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: (context, child) {
+        final externalUserId = context.watch<DriveDB>().user!.id;
+        OneSignal.shared.setExternalUserId(externalUserId);
+        return child!;
+      },
       debugShowCheckedModeBanner: false,
       title: 'Paigun',
       theme: ThemeData(
@@ -69,8 +85,8 @@ class MainApp extends StatelessWidget {
         '/journeyboard/create': (context) => const CreateJourney(),
         '/loading': (context) => const Loading(),
         '/driver': (context) => const DriverHome(),
-        '/notification' : (context) => const PaiNotification(),
-        '/chat' : (context) => const DriverChat(),
+        '/notification': (context) => const PaiNotification(),
+        '/chat': (context) => const DriverChat(),
         '/driver/create': (context) => const CreateRoute(),
         '/driver/request': (context) => const RequestPage(),
         '/history': (context) => const HistoryPage(),

@@ -275,8 +275,19 @@ class PassDB extends ChangeNotifier {
     }
   }
 
-  Future<void> passengerFinishJourney(String jid, String comment, String driver,
-      double rating, List<String> report) async {
+  Future<void> passengerReport(List<String> reportList, String jid) async {
+    try {
+      await supabase.from('journey_report').upsert({
+        'journey': jid,
+        'report': reportList,
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> passengerFinishJourney(
+      String jid, String comment, String driver, double rating) async {
     try {
       await supabase
           .from('user_journey')
@@ -304,11 +315,10 @@ class PassDB extends ChangeNotifier {
           .update({'rating': newrating}).eq('id', driver);
 
       //save report
-      await supabase.from('journey_report').insert([
+      await supabase.from('journey_report').upsert([
         {
           'journey': jid,
           'comment': comment,
-          'report': report,
         }
       ]);
     } catch (e) {

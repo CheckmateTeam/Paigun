@@ -70,7 +70,6 @@ class UserInfo extends ChangeNotifier {
     } catch (e) {
       print(e);
     }
-    getUserInfo();
     notifyListeners();
   }
 

@@ -73,27 +73,54 @@ class _RouteDetailState extends State<RouteDetail> {
       for (var point in result.points) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
       }
+      GoogleMapController controller = await _MapController.future;
+      double minLat = _FromPosition.latitude < _ToPosition.latitude
+          ? _FromPosition.latitude
+          : _ToPosition.latitude;
+      double maxLat = _FromPosition.latitude > _ToPosition.latitude
+          ? _FromPosition.latitude
+          : _ToPosition.latitude;
+      double minLng = _FromPosition.longitude < _ToPosition.longitude
+          ? _FromPosition.longitude
+          : _ToPosition.longitude;
+      double maxLng = _FromPosition.longitude > _ToPosition.longitude
+          ? _FromPosition.longitude
+          : _ToPosition.longitude;
+      controller.animateCamera(CameraUpdate.newLatLngBounds(
+          LatLngBounds(
+            southwest: LatLng(minLat, minLng),
+            northeast: LatLng(maxLat, maxLng),
+          ),
+          100));
     }
+
+    setState(() {});
+  }
+
+  void zoomout() async {
+    LatLng _FromPosition = LatLng(double.parse(widget.info['origin_lat']),
+        double.parse(widget.info['origin_lng']));
+    LatLng _ToPosition = LatLng(double.parse(widget.info['destination_lat']),
+        double.parse(widget.info['destination_lng']));
     GoogleMapController controller = await _MapController.future;
+    double minLat = _FromPosition.latitude < _ToPosition.latitude
+        ? _FromPosition.latitude
+        : _ToPosition.latitude;
+    double maxLat = _FromPosition.latitude > _ToPosition.latitude
+        ? _FromPosition.latitude
+        : _ToPosition.latitude;
+    double minLng = _FromPosition.longitude < _ToPosition.longitude
+        ? _FromPosition.longitude
+        : _ToPosition.longitude;
+    double maxLng = _FromPosition.longitude > _ToPosition.longitude
+        ? _FromPosition.longitude
+        : _ToPosition.longitude;
     controller.animateCamera(CameraUpdate.newLatLngBounds(
         LatLngBounds(
-          southwest: LatLng(
-              _FromPosition.latitude < _ToPosition.latitude
-                  ? _FromPosition.latitude
-                  : _ToPosition.latitude,
-              _FromPosition.longitude < _ToPosition.longitude
-                  ? _FromPosition.longitude
-                  : _ToPosition.longitude),
-          northeast: LatLng(
-              _FromPosition.latitude > _ToPosition.latitude
-                  ? _FromPosition.latitude
-                  : _ToPosition.latitude,
-              _FromPosition.longitude > _ToPosition.longitude
-                  ? _FromPosition.longitude
-                  : _ToPosition.longitude),
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
         ),
         80));
-    setState(() {});
   }
 
   void getStatus() async {
@@ -144,8 +171,8 @@ class _RouteDetailState extends State<RouteDetail> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getStatus();
     createRoutePoint();
+    getStatus();
   }
 
   @override
@@ -178,6 +205,19 @@ class _RouteDetailState extends State<RouteDetail> {
                     )
                   }),
             ),
+            Positioned(
+                right: 7,
+                top: 55,
+                child: IconButton.filled(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      elevation: 5,
+                    ),
+                    onPressed: () {
+                      zoomout();
+                    },
+                    icon: Icon(Icons.zoom_out_map_outlined,
+                        color: Colors.grey[700]))),
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -284,14 +324,16 @@ class _RouteDetailState extends State<RouteDetail> {
                                         Text(
                                           widget.driver.isEmpty
                                               ? 'Loading...'
-                                              : widget.driver['full_name'] ??
-                                                  '',
+                                              : widget.driver['full_name']
+                                                          .length >
+                                                      13
+                                                  ? widget.driver['full_name']
+                                                          .toString()
+                                                          .substring(0, 12) +
+                                                      '...'
+                                                  : widget.driver['full_name'],
                                           style: GoogleFonts.nunito(
-                                            fontSize: widget.driver['full_name']
-                                                        .length >
-                                                    15
-                                                ? 14
-                                                : 20,
+                                            fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),

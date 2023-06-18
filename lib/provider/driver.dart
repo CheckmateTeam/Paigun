@@ -86,12 +86,11 @@ class DriveDB extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> chatCreate(User customer) async{
+  Future<dynamic> chatCreate() async{
      try {
       final res = await supabase.from('message').
       insert({
-        'ownerId': user,
-        'userId':customer,
+        'userId': user,
       })
       ;
       return res;
@@ -111,18 +110,20 @@ class DriveDB extends ChangeNotifier {
       print(e);
     }
 
-    Future<dynamic> getChat() async {
+    
+  }
+  
+  Future<dynamic> getRoom() async {
       try {
       final res = await supabase.from('chat').
-      select('roomId, userId, ownerId, created_at')
-      .match({'ownerId' : user});[
+      select('roomId, userId, created_at')
+      .match({'userId' : user});[
       ];
       return res;
     } catch (e) {
       print(e);
     }
     }
-  }
 
   Future<String> getDriverJourneyStatus(String jid) async {
     try {

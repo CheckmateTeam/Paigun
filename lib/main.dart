@@ -70,7 +70,7 @@ class MainApp extends StatelessWidget {
         '/loading': (context) => const Loading(),
         '/driver': (context) => const DriverHome(),
         '/notification' : (context) => const PaiNotification(),
-        '/chat' : (context) => const DriverChat(),
+        '/chat' : (context) => const ChatRoom(),
         '/driver/create': (context) => const CreateRoute(),
         '/driver/request': (context) => const RequestPage(),
         '/history': (context) => const HistoryPage(),

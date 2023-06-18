@@ -56,7 +56,7 @@ serve(async (req) => {
           };
         } else if (record.status == "finished") {
           notification.contents = {
-            en: `The journey from ${selected.full_name} is arrived, please complete the route.`,
+            en: `The journey from ${selected.full_name} is arrived, please review to complete the journey.`,
           };
           notification.headings = {
             en: `Journey arrived!`,

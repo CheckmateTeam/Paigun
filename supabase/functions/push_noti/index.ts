@@ -14,15 +14,14 @@ const configuration = OneSignal.createConfiguration({
 });
 
 const onesignal = new OneSignal.DefaultApi(configuration);
-//console.log("HEELOO TESTTEST");
 
 serve(async (req) => {
   const { record, table, type } = await req.json();
   const connection = await pool.connect();
   try {
-    if (table == "user_journey") {
+    if (table === "user_journey") {
       const notification = new OneSignal.Notification();
-      if (type == "INSERT") {
+      if (type === "INSERT") {
         const result =
           await connection.queryObject`SELECT full_name, journey.owner FROM user_journey, journey, profile WHERE journey.journey_id = ${record.journey_id} and profile.id = ${record.user_id}`;
         const selected = result.rows[0];
@@ -31,50 +30,38 @@ serve(async (req) => {
         notification.contents = {
           en: `${selected.full_name} request to join your journey.`,
         };
-        notification.headings = {
-          en: `New join request!`,
-        };
-      } else if (type == "UPDATE") {
+        notification.headings = { en: `New join request!` };
+      } else if (type === "UPDATE") {
         const result =
           await connection.queryObject`SELECT full_name FROM user_journey, journey, profile WHERE user_journey.journey_id = ${record.journey_id} and journey.journey_id = ${record.journey_id} and profile.id = journey.owner`;
         const selected = result.rows[0];
         notification.app_id = _OnesignalAppId_;
         notification.include_external_user_ids = [record.user_id];
-        if (record.status == "accepted") {
+        if (record.status === "accepted") {
           notification.contents = {
             en: `The journey from ${selected.full_name} is accepted, please paid to be confirmed.`,
           };
-          notification.headings = {
-            en: `Request accepted!`,
-          };
-        } else if (record.status == "paid") {
+          notification.headings = { en: `Request accepted!` };
+        } else if (record.status === "paid") {
           notification.contents = {
             en: `You have paid for the journey from ${selected.full_name}, your journey request is confirmed.`,
           };
-          notification.headings = {
-            en: `Payment succeed!`,
-          };
-        } else if (record.status == "going") {
+          notification.headings = { en: `Payment succeed!` };
+        } else if (record.status === "going") {
           notification.contents = {
             en: `The journey from ${selected.full_name} is just started, have a safe trip!.`,
           };
-          notification.headings = {
-            en: `Journey started!`,
-          };
-        } else if (record.status == "finished") {
+          notification.headings = { en: `Journey started!` };
+        } else if (record.status === "finished") {
           notification.contents = {
             en: `The journey from ${selected.full_name} is arrived, please review to complete the journey.`,
           };
-          notification.headings = {
-            en: `Journey arrived!`,
-          };
-        } else if (record.status == "done") {
+          notification.headings = { en: `Journey arrived!` };
+        } else if (record.status === "done") {
           notification.contents = {
             en: `The journey from ${selected.full_name} is finished, thank you for using Paigun.`,
           };
-          notification.headings = {
-            en: `Thank you!`,
-          };
+          notification.headings = { en: `Thank you!` };
         }
       }
       const onesignalApiRes = await onesignal.createNotification(notification);
@@ -89,7 +76,7 @@ serve(async (req) => {
           },
         }
       );
-    } else if (table == "document") {
+    } else if (table === "document") {
       if (
         record.citizen_url != null &&
         record.driver_url != null &&
@@ -98,12 +85,8 @@ serve(async (req) => {
         const notification = new OneSignal.Notification();
         notification.app_id = _OnesignalAppId_;
         notification.include_external_user_ids = [record.owner];
-        notification.headings = {
-          en: `Driver mode verified!`,
-        };
-        notification.contents = {
-          en: `Your driver mode has been verified.`,
-        };
+        notification.headings = { en: `Driver mode verified!` };
+        notification.contents = { en: `Your driver mode has been verified.` };
         const onesignalApiRes = await onesignal.createNotification(
           notification
         );
@@ -126,12 +109,8 @@ serve(async (req) => {
         const notification = new OneSignal.Notification();
         notification.app_id = _OnesignalAppId_;
         notification.include_external_user_ids = [record.owner];
-        notification.headings = {
-          en: `Account verified!`,
-        };
-        notification.contents = {
-          en: `Your account has been verified.`,
-        };
+        notification.headings = { en: `Account verified!` };
+        notification.contents = { en: `Your account has been verified.` };
         const onesignalApiRes = await onesignal.createNotification(
           notification
         );

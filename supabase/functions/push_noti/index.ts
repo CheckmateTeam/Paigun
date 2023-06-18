@@ -49,10 +49,17 @@ serve(async (req) => {
           };
         } else if (record.status == "paid") {
           notification.contents = {
-            en: `You have paid for the journey from ${selected.full_name}, your journey request is confirmed`,
+            en: `You have paid for the journey from ${selected.full_name}, your journey request is confirmed.`,
           };
           notification.headings = {
             en: `Payment succeed!`,
+          };
+        } else if (record.status == "going") {
+          notification.contents = {
+            en: `The journey from ${selected.full_name} is just started, have a safe trip!.`,
+          };
+          notification.headings = {
+            en: `Journey started!`,
           };
         } else if (record.status == "finished") {
           notification.contents = {
@@ -60,6 +67,13 @@ serve(async (req) => {
           };
           notification.headings = {
             en: `Journey arrived!`,
+          };
+        } else if (record.status == "done") {
+          notification.contents = {
+            en: `The journey from ${selected.full_name} is finished, thank you for using Paigun.`,
+          };
+          notification.headings = {
+            en: `Thank you!`,
           };
         }
       }

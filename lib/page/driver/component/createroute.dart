@@ -31,7 +31,7 @@ class _CreateRouteState extends State<CreateRoute> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-            resizeToAvoidBottomInset: false,
+            resizeToAvoidBottomInset: true,
             appBar: SizeAppbar(
                 context, 'Create Route', () => Navigator.pop(context)),
             body: const Padding(
@@ -124,59 +124,58 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _PriceController.text = 'Free';
   }
 
   @override
   Widget build(BuildContext context) {
     LatLng currentPosition = Provider.of<PassDB>(context).currentPosition;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 0,
-                  blurRadius: 10,
-                  offset: const Offset(0, 3), // changes position of shadow
-                ),
-              ],
-            ),
-            height: MediaQuery.of(context).size.height * 0.24,
-            width: MediaQuery.of(context).size.width,
-            child: AbsorbPointer(
-              child: GoogleMap(
-                  onMapCreated: (GoogleMapController controller) {
-                    _MapController.complete(controller);
-                  },
-                  myLocationButtonEnabled: true,
-                  myLocationEnabled: true,
-                  zoomControlsEnabled: false,
-                  mapType: MapType.normal,
-                  initialCameraPosition: CameraPosition(
-                    target: currentPosition,
-                    zoom: 10,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 0,
+                    blurRadius: 10,
+                    offset: const Offset(0, 3), // changes position of shadow
                   ),
-                  markers: _markers,
-                  polylines: {
-                    Polyline(
-                      polylineId: const PolylineId('route'),
-                      color: Theme.of(context).primaryColor,
-                      width: 5,
-                      points: polylineCoordinates,
-                    )
-                  }),
-            )),
-        const SizedBox(
-          height: 20,
-        ),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.5,
-          width: MediaQuery.of(context).size.width,
-          child: Column(
+                ],
+              ),
+              height: MediaQuery.of(context).size.height * 0.24,
+              width: MediaQuery.of(context).size.width,
+              child: AbsorbPointer(
+                child: GoogleMap(
+                    onMapCreated: (GoogleMapController controller) {
+                      _MapController.complete(controller);
+                    },
+                    myLocationButtonEnabled: true,
+                    myLocationEnabled: true,
+                    zoomControlsEnabled: false,
+                    mapType: MapType.normal,
+                    initialCameraPosition: CameraPosition(
+                      target: currentPosition,
+                      zoom: 10,
+                    ),
+                    markers: _markers,
+                    polylines: {
+                      Polyline(
+                        polylineId: const PolylineId('route'),
+                        color: Theme.of(context).primaryColor,
+                        width: 5,
+                        points: polylineCoordinates,
+                      )
+                    }),
+              )),
+          const SizedBox(
+            height: 40,
+          ),
+          Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -195,11 +194,11 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                                         dotenv.env['GOOGLEMAP_KEY'] ?? '',
                                         displayLocation: currentPosition,
                                       )));
-
+                          print(result.name.toString());
                           //location pick
                           _FromController.text = result.name.toString().length >
-                                  10
-                              ? '${result.name.toString().substring(0, 10)}...'
+                                  8
+                              ? '${result.name.toString().substring(0, 8)}...'
                               : result.name.toString();
                           String province =
                               result.city.toString() == 'Krung Thep Maha Nakhon'
@@ -242,7 +241,6 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                                         dotenv.env['GOOGLEMAP_KEY'] ?? '',
                                         displayLocation: currentPosition,
                                       )));
-
                           //location pick
                           _ToController.text = result.name.toString().length > 8
                               ? '${result.name.toString().substring(0, 8)}...'
@@ -361,6 +359,14 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                     Expanded(
                       child: TextField(
                         controller: _PriceController,
+                        onTap: () {
+                          _PriceController.text = '';
+                        },
+                        onChanged: (value) {
+                          if (value == '0' || value == '') {
+                            _PriceController.text = 'Free';
+                          }
+                        },
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
@@ -622,8 +628,8 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

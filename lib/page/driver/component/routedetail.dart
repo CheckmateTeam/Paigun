@@ -667,51 +667,70 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                                 BorderRadius.circular(15)),
                                       ),
                                       onPressed: () {
-                                        showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title:
-                                                    const Text('Start Route?'),
-                                                content: const Text(
-                                                    'Are you sure you want to start this trip?'),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: const Text('Cancel'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () async {
-                                                      setState(() {
-                                                        _isLoading = true;
-                                                      });
-                                                      loadingDialog(
-                                                          context,
-                                                          _isLoading,
-                                                          'Starting...');
-                                                      final res = await context
-                                                          .read<DriveDB>()
-                                                          .changeJourneyStatus(
-                                                              widget.info[
-                                                                  'journey_id'],
-                                                              'going');
-                                                      setState(() {
-                                                        _isStart = true;
-                                                      });
-                                                      setState(() {
-                                                        _isLoading = false;
-                                                      });
-                                                      Navigator.pop(context);
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child:
-                                                        const Text('Confirm'),
-                                                  ),
-                                                ],
-                                              );
-                                            });
+                                        if (widget.passenger.isEmpty) {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return StyleDialog(
+                                                    context,
+                                                    'Oops!',
+                                                    'There is no passenger in this trip. The system will automatically cancel this trip.',
+                                                    'OK', () {
+                                                  context
+                                                      .read<DriveDB>()
+                                                      .deleteRoute(widget
+                                                          .info['journey_id']);
+                                                  Navigator.of(context).pop();
+                                                });
+                                              });
+                                        } else {
+                                          showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text(
+                                                      'Start Route?'),
+                                                  content: const Text(
+                                                      'Are you sure you want to start this trip?'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child:
+                                                          const Text('Cancel'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () async {
+                                                        setState(() {
+                                                          _isLoading = true;
+                                                        });
+                                                        loadingDialog(
+                                                            context,
+                                                            _isLoading,
+                                                            'Starting...');
+                                                        final res = await context
+                                                            .read<DriveDB>()
+                                                            .changeJourneyStatus(
+                                                                widget.info[
+                                                                    'journey_id'],
+                                                                'going');
+                                                        setState(() {
+                                                          _isStart = true;
+                                                        });
+                                                        setState(() {
+                                                          _isLoading = false;
+                                                        });
+                                                        Navigator.pop(context);
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child:
+                                                          const Text('Confirm'),
+                                                    ),
+                                                  ],
+                                                );
+                                              });
+                                        }
                                       },
                                       child: Container(
                                         width: double.infinity,

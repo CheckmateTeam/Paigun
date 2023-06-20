@@ -35,11 +35,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
       'path': 'history',
     },
     {
-      'icon': Icons.notifications_none_outlined,
-      'name': 'Notification',
-      'path': 'notification',
-    },
-    {
       'icon': Icons.dashboard_outlined,
       'name': 'Journey board',
       'path': 'journeyboard',

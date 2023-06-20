@@ -63,8 +63,8 @@ class _PassengerHomeState extends State<PassengerHome> {
         .then((accepted) {
       print("Accepted permission: $accepted");
     });
-    final externalUserId = context.read<UserInfo>().user!.id;
-    OneSignal.shared.setExternalUserId(externalUserId);
+    final externalUserId = await context.read<UserInfo>().userinfo['id'];
+    await OneSignal.shared.setExternalUserId(externalUserId);
   }
 
   @override

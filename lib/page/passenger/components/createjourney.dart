@@ -36,7 +36,6 @@ class _CreateJourneyState extends State<CreateJourney> {
           child: Column(
             children: [
               SizedBox(
-                height: 45,
                 child: Row(
                   children: [
                     Expanded(
@@ -87,7 +86,6 @@ class _CreateJourneyState extends State<CreateJourney> {
               ),
               SizedBox(height: 20),
               SizedBox(
-                height: 45,
                 child: Row(
                   children: [
                     Expanded(
@@ -259,10 +257,10 @@ class _CreateJourneyState extends State<CreateJourney> {
                                                       Navigator.pop(context);
                                                       Navigator
                                                           .pushReplacementNamed(
-                                                              context, '/journeyboard');
+                                                              context,
+                                                              '/journeyboard');
                                                     },
-                                                    child: const Text(
-                                                        'Done')),
+                                                    child: const Text('Done')),
                                               ],
                                             ));
                                   },

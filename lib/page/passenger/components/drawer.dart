@@ -20,11 +20,6 @@ class HomeDrawer extends StatefulWidget {
 class _HomeDrawerState extends State<HomeDrawer> {
   final List<Map<String, dynamic>> _items = [
     {
-      'icon': Icons.home,
-      'name': 'Home',
-      'path': 'home',
-    },
-    {
       'icon': Icons.chat_outlined,
       'name': 'Chat',
       'path': 'chat',
@@ -33,11 +28,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
       'icon': Icons.history,
       'name': 'History',
       'path': 'history',
-    },
-    {
-      'icon': Icons.notifications_none_outlined,
-      'name': 'Notification',
-      'path': 'notification',
     },
     {
       'icon': Icons.dashboard_outlined,

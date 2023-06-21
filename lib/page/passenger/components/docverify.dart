@@ -199,8 +199,9 @@ class _DocVerifyState extends State<DocVerify> {
                                                               'Uploading image');
                                                           await context
                                                               .read<UserInfo>()
-                                                              .updateProfileImage(
-                                                                  image.path);
+                                                              .addDocument(
+                                                                  image.path,
+                                                                  "citizen");
 
                                                           setState(() {
                                                             _imageLoading =
@@ -372,8 +373,9 @@ class _DocVerifyState extends State<DocVerify> {
                                                               'Uploading image');
                                                           await context
                                                               .read<UserInfo>()
-                                                              .updateProfileImage(
-                                                                  image.path);
+                                                              .addDocument(
+                                                                  image.path,
+                                                                  "driver");
 
                                                           setState(() {
                                                             _imageLoading =
@@ -532,8 +534,9 @@ class _DocVerifyState extends State<DocVerify> {
                                                               'Uploading image');
                                                           await context
                                                               .read<UserInfo>()
-                                                              .updateProfileImage(
-                                                                  image.path);
+                                                              .addDocument(
+                                                                  image.path,
+                                                                  "tax");
 
                                                           setState(() {
                                                             _imageLoading =

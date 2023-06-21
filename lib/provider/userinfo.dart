@@ -66,7 +66,7 @@ class UserInfo extends ChangeNotifier {
         'username': supabase.auth.currentUser!.phone!,
         'full_name': name,
       });
-      getUserInfo();
+      _userinfo['full_name'] = name;
     } catch (e) {
       print(e);
     }

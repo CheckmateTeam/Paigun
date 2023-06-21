@@ -20,11 +20,6 @@ class HomeDrawer extends StatefulWidget {
 class _HomeDrawerState extends State<HomeDrawer> {
   final List<Map<String, dynamic>> _items = [
     {
-      'icon': Icons.home,
-      'name': 'Home',
-      'path': 'home',
-    },
-    {
       'icon': Icons.chat_outlined,
       'name': 'Chat',
       'path': 'chat',
@@ -33,11 +28,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
       'icon': Icons.history,
       'name': 'History',
       'path': 'history',
-    },
-    {
-      'icon': Icons.notifications_none_outlined,
-      'name': 'Notification',
-      'path': 'notification',
     },
     {
       'icon': Icons.dashboard_outlined,
@@ -60,7 +50,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
     super.initState();
     Provider.of<UserInfo>(context, listen: false).getUserInfo();
     setState(() {});
-    // Provider.of<DriveDB>(context, listen: false).getDriverJourney();
   }
 
   @override
@@ -221,17 +210,19 @@ class _UserProfileState extends State<UserProfile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.watch<UserInfo>().userinfo['full_name'].toString(),
+                    context
+                                .watch<UserInfo>()
+                                .userinfo['full_name']
+                                .toString()
+                                .length >
+                            13
+                        ? '${context.watch<UserInfo>().userinfo['full_name'].toString().substring(0, 13)}...'
+                        : context
+                            .watch<UserInfo>()
+                            .userinfo['full_name']
+                            .toString(),
                     style: GoogleFonts.nunito(
-                        fontSize: context
-                                    .watch<UserInfo>()
-                                    .userinfo['full_name']
-                                    .toString()
-                                    .length >
-                                12
-                            ? 15
-                            : 20,
-                        fontWeight: FontWeight.w800),
+                        fontSize: 18, fontWeight: FontWeight.w800),
                   ),
                   Text(
                     '0${context.watch<UserInfo>().userinfo['username'].toString().substring(2)}',
@@ -352,9 +343,18 @@ class _UserProfileState extends State<UserProfile> {
                             },
                             child: const Text('Cancel')),
                         TextButton(
-                            onPressed: () {
-                              context.read<UserInfo>().updateUsername(
+                            onPressed: () async {
+                              setState(() {
+                                _imageLoading = true;
+                              });
+                              loadingDialog(
+                                  context, _imageLoading, 'Saving...');
+                              await context.read<UserInfo>().updateUsername(
                                   "${_firstname.text} ${_lastname.text}");
+                              setState(() {
+                                _imageLoading = false;
+                              });
+                              Navigator.of(context).pop();
                               Navigator.of(context).pop();
                             },
                             child: const Text('Save')),

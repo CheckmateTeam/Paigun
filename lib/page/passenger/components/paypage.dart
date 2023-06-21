@@ -163,15 +163,17 @@ class _PaymentPageState extends State<PaymentPage> {
                                           Text(
                                             widget.driver.isEmpty
                                                 ? 'Loading...'
-                                                : widget.driver['full_name'] ??
-                                                    '',
+                                                : widget.driver['full_name']
+                                                            .length >
+                                                        13
+                                                    ? widget.driver['full_name']
+                                                            .toString()
+                                                            .substring(0, 12) +
+                                                        '...'
+                                                    : widget
+                                                        .driver['full_name'],
                                             style: GoogleFonts.nunito(
-                                              fontSize: widget
-                                                          .driver['full_name']
-                                                          .length >
-                                                      15
-                                                  ? 14
-                                                  : 16,
+                                              fontSize: 20,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),

@@ -1,5 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:paigun/page/authentication/login.dart';
 import 'package:paigun/page/chatroom/component/room.dart';
 import 'package:paigun/page/components/loading_screen.dart';
@@ -33,6 +35,7 @@ Future<void> main() async {
     url: dotenv.env['SUPABASE_URL'] ?? '',
     anonKey: dotenv.env['SUPABASE_KEY'] ?? '',
   );
+
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => UserInfo()),
     ChangeNotifierProvider(create: (_) => PassDB()),

@@ -6,6 +6,7 @@ import 'package:paigun/page/components/loading_screen.dart';
 import 'package:paigun/page/components/splash_screen.dart';
 import 'package:paigun/page/driver/component/createroute.dart';
 import 'package:paigun/page/driver/component/requestpage.dart';
+import 'package:paigun/page/passenger/components/chatmessage.dart';
 import 'package:paigun/page/passenger/components/docverify.dart';
 import 'package:paigun/page/passenger/components/historypage.dart';
 import 'package:paigun/page/passenger/components/chat.dart';

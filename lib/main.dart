@@ -12,6 +12,7 @@ import 'package:paigun/page/passenger/components/docverify.dart';
 import 'package:paigun/page/passenger/components/historypage.dart';
 import 'package:paigun/page/passenger/components/chat.dart';
 import 'package:paigun/page/passenger/components/chatroom.dart';
+import 'package:paigun/page/passenger/components/howtouse.dart';
 import 'package:paigun/page/passenger/components/journeyboard.dart';
 import 'package:paigun/page/driver/home.dart';
 import 'package:paigun/page/passenger/components/notification.dart';
@@ -78,6 +79,7 @@ class MainApp extends StatelessWidget {
         '/driver/request': (context) => const RequestPage(),
         '/history': (context) => const HistoryPage(),
         '/docverify': (context) => const DocVerify(),
+        '/howtouse': (context) => const TutorialPage(),
       },
     );
   }

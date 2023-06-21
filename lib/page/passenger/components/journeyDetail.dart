@@ -21,7 +21,6 @@ class JourneyDetail extends StatefulWidget {
 }
 
 class _JourneyDetailState extends State<JourneyDetail> {
-  final int _rating = 3;
   @override
   void initState() {
     super.initState();
@@ -53,7 +52,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                       height: 80,
                       child: CircleAvatar(
                           backgroundImage:
-                              NetworkImage(widget.profile['avatar_url']))),
+                              NetworkImage(widget.profile['avatar_url'] ?? ''))),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -93,7 +92,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                       Row(
                         children: [
                           for (int i = 0; i < 5; i++)
-                            i < widget.profile['rating']
+                            i < (widget.profile['rating'] ?? 0)
                                 ? const Icon(
                                     Icons.star,
                                     color: Colors.amber,

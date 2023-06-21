@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "572604870596",
+    "project_id": "paigun-42c98",
+    "storage_bucket": "paigun-42c98.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:572604870596:android:1efe82c4fe08bb5b8d7e91",
+        "android_client_info": {
+          "package_name": "com.example.paigun"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "572604870596-g0epnfo44eqqpbdacbo99l9ek54aj4uj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBJ_iAvGZnZcFTaD3gtLxS1xZRC8jTauo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "572604870596-g0epnfo44eqqpbdacbo99l9ek54aj4uj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

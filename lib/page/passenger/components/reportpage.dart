@@ -71,8 +71,25 @@ class _ReportPageState extends State<ReportPage> {
                                     context: context,
                                     builder: (ctx) {
                                       return Padding(
-                                          padding: const EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.all(20.0),
                                           child: MultiSelectBottomSheet(
+                                            title: const Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Report Driver',
+                                                  style: TextStyle(
+                                                      color: Colors.red,
+                                                      fontSize: 20),
+                                                ),
+                                              ],
+                                            ),
+                                            confirmText: const Text(
+                                              'Confirm',
+                                              style:
+                                                  TextStyle(color: Colors.red),
+                                            ),
                                             items: _reportString
                                                 .map((e) =>
                                                     MultiSelectItem(e, e))
@@ -87,6 +104,66 @@ class _ReportPageState extends State<ReportPage> {
                                                     .map((e) => e.toString())
                                                     .toList());
                                               });
+
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return AlertDialog(
+                                                      titlePadding:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 20,
+                                                              vertical: 20),
+                                                      title: Text(
+                                                        'Report Driver',
+                                                        style: TextStyle(
+                                                            color: Colors.red,
+                                                            fontSize: 20),
+                                                      ),
+                                                      content: Text(
+                                                          'Are you sure you want to report this driver?'),
+                                                      actions: [
+                                                        TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                    context),
+                                                            child: const Text(
+                                                                'Cancel')),
+                                                        TextButton(
+                                                            onPressed:
+                                                                () async {
+                                                              loadingDialog(
+                                                                  context,
+                                                                  true,
+                                                                  'Sending...');
+                                                              await Provider.of<
+                                                                          PassDB>(
+                                                                      context,
+                                                                      listen:
+                                                                          false)
+                                                                  .passengerReport(
+                                                                      _reportList,
+                                                                      widget.info[
+                                                                          'journey_id']);
+                                                              ScaffoldMessenger
+                                                                      .of(
+                                                                          context)
+                                                                  .showSnackBar(
+                                                                      SnackBar(
+                                                                          content:
+                                                                              Text('Report sent')));
+                                                              Navigator.pop(
+                                                                  context);
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                            child: const Text(
+                                                                'Confirm',
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .red))),
+                                                      ],
+                                                    );
+                                                  });
                                             },
                                             maxChildSize: 0.8,
                                           ));
@@ -184,13 +261,15 @@ class _ReportPageState extends State<ReportPage> {
                                     Text(
                                       widget.driver.isEmpty
                                           ? 'Loading...'
-                                          : widget.driver['full_name'] ?? '',
+                                          : widget.driver['full_name'].length >
+                                                  24
+                                              ? widget.driver['full_name']
+                                                      .toString()
+                                                      .substring(0, 23) +
+                                                  '...'
+                                              : widget.driver['full_name'],
                                       style: GoogleFonts.nunito(
-                                        fontSize:
-                                            widget.driver['full_name'].length >
-                                                    15
-                                                ? 16
-                                                : 18,
+                                        fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -301,11 +380,11 @@ class _ReportPageState extends State<ReportPage> {
                           });
                           loadingDialog(context, _isLoading, 'Sending review');
                           await context.read<PassDB>().passengerFinishJourney(
-                              widget.info['journey_id'],
-                              _controller.text,
-                              widget.driver['id'],
-                              _rating,
-                              _reportList);
+                                widget.info['journey_id'],
+                                _controller.text,
+                                widget.driver['id'],
+                                _rating,
+                              );
                           setState(() {
                             _isLoading = false;
                           });

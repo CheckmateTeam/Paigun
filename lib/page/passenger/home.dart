@@ -3,15 +3,18 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:faker/faker.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:paigun/page/components/loadingdialog.dart';
 import 'package:paigun/page/components/styledialog.dart';
 import 'package:paigun/page/passenger/components/drawer.dart';
@@ -47,11 +50,22 @@ class _PassengerHomeState extends State<PassengerHome> {
   void initState() {
     super.initState();
     Provider.of<UserInfo>(context, listen: false).getUserInfo();
+    initOnesignal();
   }
 
-  // Future<void> _fetchRoute() async {
-  //   await Provider.of<PassDB>(context, listen: false).getJourney(1000);
-  // }
+  void initOnesignal() async {
+    await OneSignal.shared.setLogLevel(OSLogLevel.debug, OSLogLevel.none);
+    await OneSignal.shared.setAppId(dotenv.env['ONESIGNAL_APP_ID'] ?? '');
+    await Firebase.initializeApp();
+// The promptForPushNotificationsWithUserResponse function will show the iOS or Android push notification prompt. We recommend removing the following code and instead using an In-App Message to prompt for notification permission
+    await OneSignal.shared
+        .promptUserForPushNotificationPermission()
+        .then((accepted) {
+      print("Accepted permission: $accepted");
+    });
+    final externalUserId = await context.read<UserInfo>().userinfo['id'];
+    await OneSignal.shared.setExternalUserId(externalUserId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,6 +182,77 @@ class _PassengerHomeState extends State<PassengerHome> {
               child: ListView(
                 reverse: false,
                 children: [
+                  context.watch<PassDB>().isSearching
+                      ? Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 100,
+                                child: TextButton(
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all<Color>(
+                                                Colors.white),
+                                        shape: MaterialStateProperty.all<
+                                                RoundedRectangleBorder>(
+                                            RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20.0),
+                                        ))),
+                                    onPressed: () async {
+                                      setState(() {
+                                        _isSearching = true;
+                                        _searchController.text = '';
+                                      });
+                                      loadingDialog(context, _isSearching,
+                                          'Searching...');
+                                      context
+                                          .read<PassDB>()
+                                          .setisSearching(false);
+                                      await context
+                                          .read<PassDB>()
+                                          .getJourney(10);
+                                      setState(() {
+                                        _isSearching = false;
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.restore,
+                                          color: Colors.black45,
+                                        ),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                          'Reset',
+                                          style: GoogleFonts.nunito(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16),
+                                        ),
+                                      ],
+                                    )),
+                              ),
+                            ],
+                          ))
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          height: 20,
+                        ),
                   Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary,
@@ -205,10 +290,11 @@ class _PassengerHomeState extends State<PassengerHome> {
                                 onPressed: () async {
                                   setState(() {
                                     _isSearching = true;
+                                    _searchController.text = '';
                                   });
                                   loadingDialog(
                                       context, _isSearching, 'Searching...');
-                                  // await _fetchRoute();
+                                  await context.read<PassDB>().getJourney(10);
                                   setState(() {
                                     _isSearching = false;
                                   });
@@ -416,7 +502,9 @@ class _PassengerHomeState extends State<PassengerHome> {
                                   .read<PassDB>()
                                   .getJourneyByProvince(destination['Current'],
                                       destination['Destination']);
+
                               if (res.isEmpty) {
+                                context.read<PassDB>().setisSearching(true);
                                 setState(() {
                                   _isSearching = false;
                                 });
@@ -428,21 +516,20 @@ class _PassengerHomeState extends State<PassengerHome> {
                                           'No route',
                                           'There is no route between selected province. You can post in journey board to find the route',
                                           'OK', () async {
-                                        loadingDialog(
-                                            context, _isSearching, 'Searching');
-                                        final res = await context
-                                            .read<PassDB>()
-                                            .getJourney(1000);
                                         Navigator.pop(context);
                                         Navigator.pop(context);
                                       });
                                     });
                               } else {
+                                context.read<PassDB>().setisSearching(true);
                                 setState(() {
                                   _isSearching = false;
                                   Navigator.pop(context);
                                 });
                               }
+                            } else {
+                              context.read<PassDB>().setisSearching(false);
+                              context.read<PassDB>().getJourney(10);
                             }
                           },
                           textAlign: TextAlign.center,
@@ -502,6 +589,7 @@ class _MapComponentState extends State<MapComponent> {
   BitmapDescriptor markerIcon2 = BitmapDescriptor.defaultMarker;
   String _GpsError = '';
   MapType _currentMapType = MapType.normal;
+  bool _isTrafficEnabled = false;
   LatLng cameraPos = const LatLng(0, 0);
 
   void _addCustomMarker1() async {
@@ -574,18 +662,15 @@ class _MapComponentState extends State<MapComponent> {
 
   Future<void> _changeTerrain() async {
     final GoogleMapController controller = await _MapController.future;
-    setState(() {
-      if (_currentMapType == MapType.normal) {
-        _currentMapType = MapType.satellite;
-      } else
-        _currentMapType = MapType.normal;
-    });
-    await controller.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(
-        target: _currentLocation,
-        zoom: 16,
-      ),
-    ));
+    if (_isTrafficEnabled) {
+      setState(() {
+        _isTrafficEnabled = false;
+      });
+    } else {
+      setState(() {
+        _isTrafficEnabled = true;
+      });
+    }
   }
 
   Future<void> _fetchRouteAll(int dis) async {
@@ -644,27 +729,36 @@ class _MapComponentState extends State<MapComponent> {
               onMapCreated: (GoogleMapController controller) {
                 _MapController.complete(controller);
                 controller.showMarkerInfoWindow(const MarkerId('current'));
-                for (var marker in Provider.of<PassDB>(context).journeyMarker) {
+                for (var marker in Provider.of<PassDB>(context, listen: false)
+                    .journeyMarker) {
                   controller.showMarkerInfoWindow(marker['markerId']);
                 }
               },
+              trafficEnabled: _isTrafficEnabled,
               initialCameraPosition: CameraPosition(
                 target: _currentLocation,
                 zoom: 15,
               ),
               onCameraIdle: () async {
-                GoogleMapController mapController = await _MapController.future;
-                LatLngBounds bounds = await mapController.getVisibleRegion();
+                bool isSearching = context.read<PassDB>().isSearching;
+                if (isSearching) {
+                  return;
+                } else {
+                  GoogleMapController mapController =
+                      await _MapController.future;
+                  LatLngBounds bounds = await mapController.getVisibleRegion();
 
-                LatLng edge = bounds.northeast;
-                double dis = calculateDistance(cameraPos.latitude,
-                    cameraPos.longitude, edge.latitude, edge.longitude);
-                _fetchRoute(dis.toInt());
+                  LatLng edge = bounds.northeast;
+                  double dis = calculateDistance(cameraPos.latitude,
+                      cameraPos.longitude, edge.latitude, edge.longitude);
+                  _fetchRoute(dis.toInt());
+                }
               },
               onCameraMove: (position) {
                 setState(() {
                   cameraPos = position.target;
                 });
+                context.read<PassDB>().updateCameraPosition(position.target);
               },
               myLocationButtonEnabled: true,
               markers: {

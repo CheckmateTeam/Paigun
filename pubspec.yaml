@@ -38,6 +38,9 @@ dependencies:
   bottom_sheet_scaffold: ^0.1.6
   google_fonts: ^4.0.4
   intl_phone_field: ^3.1.0
+  onesignal_flutter: ^3.5.0
+  firebase_core: ^2.14.0
+  cloud_firestore: ^4.8.1
 
 dev_dependencies:
   flutter_test:

@@ -42,7 +42,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
   List<LatLng> polylineCoordinates = [];
   bool _isStart = false;
   bool _isFinish = false;
-  bool _isDone = true;
+  bool _isDone = false;
   bool _isLoading = false;
   Map _driverProfile = {};
   void createRoutePoint() async {
@@ -71,27 +71,54 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
       for (var point in result.points) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
       }
+      GoogleMapController controller = await _MapController.future;
+      controller.animateCamera(CameraUpdate.newLatLngBounds(
+          LatLngBounds(
+            southwest: LatLng(
+                _FromPosition.latitude < _ToPosition.latitude
+                    ? _FromPosition.latitude
+                    : _ToPosition.latitude,
+                _FromPosition.longitude < _ToPosition.longitude
+                    ? _FromPosition.longitude
+                    : _ToPosition.longitude),
+            northeast: LatLng(
+                _FromPosition.latitude > _ToPosition.latitude
+                    ? _FromPosition.latitude
+                    : _ToPosition.latitude,
+                _FromPosition.longitude > _ToPosition.longitude
+                    ? _FromPosition.longitude
+                    : _ToPosition.longitude),
+          ),
+          80));
     }
+
+    setState(() {});
+  }
+
+  void zoomout() async {
+    LatLng _FromPosition = LatLng(double.parse(widget.info['origin_lat']),
+        double.parse(widget.info['origin_lng']));
+    LatLng _ToPosition = LatLng(double.parse(widget.info['destination_lat']),
+        double.parse(widget.info['destination_lng']));
     GoogleMapController controller = await _MapController.future;
+    double minLat = _FromPosition.latitude < _ToPosition.latitude
+        ? _FromPosition.latitude
+        : _ToPosition.latitude;
+    double maxLat = _FromPosition.latitude > _ToPosition.latitude
+        ? _FromPosition.latitude
+        : _ToPosition.latitude;
+    double minLng = _FromPosition.longitude < _ToPosition.longitude
+        ? _FromPosition.longitude
+        : _ToPosition.longitude;
+    double maxLng = _FromPosition.longitude > _ToPosition.longitude
+        ? _FromPosition.longitude
+        : _ToPosition.longitude;
     controller.animateCamera(CameraUpdate.newLatLngBounds(
         LatLngBounds(
-          southwest: LatLng(
-              _FromPosition.latitude < _ToPosition.latitude
-                  ? _FromPosition.latitude
-                  : _ToPosition.latitude,
-              _FromPosition.longitude < _ToPosition.longitude
-                  ? _FromPosition.longitude
-                  : _ToPosition.longitude),
-          northeast: LatLng(
-              _FromPosition.latitude > _ToPosition.latitude
-                  ? _FromPosition.latitude
-                  : _ToPosition.latitude,
-              _FromPosition.longitude > _ToPosition.longitude
-                  ? _FromPosition.longitude
-                  : _ToPosition.longitude),
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
         ),
         80));
-    setState(() {});
   }
 
   void getStatus() async {
@@ -236,18 +263,20 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                               Row(
                                 children: [
                                   Text(
-                                    widget.passenger[index]['user_id']
-                                        ['full_name'],
-                                    style: GoogleFonts.nunito(
-                                        fontSize: widget
+                                    widget.passenger[index]['user_id'].isEmpty
+                                        ? 'Loading...'
+                                        : widget
                                                     .passenger[index]['user_id']
                                                         ['full_name']
                                                     .length >
-                                                15
-                                            ? 16
-                                            : 18,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.grey[800]),
+                                                18
+                                            ? '${widget.passenger[index]['user_id']['full_name'].toString().substring(0, 17)}...'
+                                            : widget.passenger[index]['user_id']
+                                                ['full_name'],
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -355,6 +384,19 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                     )
                   }),
             ),
+            Positioned(
+                right: 7,
+                top: 55,
+                child: IconButton.filled(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      elevation: 5,
+                    ),
+                    onPressed: () {
+                      zoomout();
+                    },
+                    icon: Icon(Icons.zoom_out_map_outlined,
+                        color: Colors.grey[700]))),
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -392,7 +434,19 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                                         BorderRadius.circular(
                                                             15)),
                                               ),
-                                              onPressed: () async {},
+                                              onPressed: () async {
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return StyleDialog(
+                                                          context,
+                                                          'Completed route',
+                                                          'This route has been completed',
+                                                          'OK', () {
+                                                        Navigator.pop(context);
+                                                      });
+                                                    });
+                                              },
                                               child: Container(
                                                 width: double.infinity,
                                                 padding:
@@ -613,51 +667,70 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                                 BorderRadius.circular(15)),
                                       ),
                                       onPressed: () {
-                                        showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title:
-                                                    const Text('Start Route?'),
-                                                content: const Text(
-                                                    'Are you sure you want to start this trip?'),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: const Text('Cancel'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () async {
-                                                      setState(() {
-                                                        _isLoading = true;
-                                                      });
-                                                      loadingDialog(
-                                                          context,
-                                                          _isLoading,
-                                                          'Starting...');
-                                                      final res = await context
-                                                          .read<DriveDB>()
-                                                          .changeJourneyStatus(
-                                                              widget.info[
-                                                                  'journey_id'],
-                                                              'going');
-                                                      setState(() {
-                                                        _isStart = true;
-                                                      });
-                                                      setState(() {
-                                                        _isLoading = false;
-                                                      });
-                                                      Navigator.pop(context);
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child:
-                                                        const Text('Confirm'),
-                                                  ),
-                                                ],
-                                              );
-                                            });
+                                        if (widget.passenger.isEmpty) {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return StyleDialog(
+                                                    context,
+                                                    'Oops!',
+                                                    'There is no passenger in this trip. The system will automatically cancel this trip.',
+                                                    'OK', () {
+                                                  context
+                                                      .read<DriveDB>()
+                                                      .deleteRoute(widget
+                                                          .info['journey_id']);
+                                                  Navigator.of(context).pop();
+                                                });
+                                              });
+                                        } else {
+                                          showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text(
+                                                      'Start Route?'),
+                                                  content: const Text(
+                                                      'Are you sure you want to start this trip?'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child:
+                                                          const Text('Cancel'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () async {
+                                                        setState(() {
+                                                          _isLoading = true;
+                                                        });
+                                                        loadingDialog(
+                                                            context,
+                                                            _isLoading,
+                                                            'Starting...');
+                                                        final res = await context
+                                                            .read<DriveDB>()
+                                                            .changeJourneyStatus(
+                                                                widget.info[
+                                                                    'journey_id'],
+                                                                'going');
+                                                        setState(() {
+                                                          _isStart = true;
+                                                        });
+                                                        setState(() {
+                                                          _isLoading = false;
+                                                        });
+                                                        Navigator.pop(context);
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child:
+                                                          const Text('Confirm'),
+                                                    ),
+                                                  ],
+                                                );
+                                              });
+                                        }
                                       },
                                       child: Container(
                                         width: double.infinity,

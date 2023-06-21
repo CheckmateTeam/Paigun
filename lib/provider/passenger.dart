@@ -14,16 +14,20 @@ class PassDB extends ChangeNotifier {
   User? user = supabase.auth.currentUser;
 
   LatLng _currentPosition = const LatLng(0, 0);
-
+  LatLng _cameraPosition = const LatLng(0, 0);
   LatLng get currentPosition => _currentPosition;
+  LatLng get cameraPosition => _cameraPosition;
   List get journey => _journey;
   List get board => _board;
   List get journeyMarker => _journeyMarker;
   List get journeyRequest => _journeyRequest;
+  bool get isSearching => _isSearching;
+
   List _journey = [];
   List _journeyMarker = [];
   List _journeyRequest = [];
   List _board = [];
+  bool _isSearching = false;
 
   double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
@@ -75,8 +79,8 @@ class PassDB extends ChangeNotifier {
         int distance = calculateDistance(
                 LatLng(double.parse(i['origin_lat']), 0).latitude,
                 LatLng(0, double.parse(i['origin_lng'])).longitude,
-                LatLng(double.parse(i['destination_lat']), 0).latitude,
-                LatLng(0, double.parse(i['destination_lng'])).longitude)
+                cameraPosition.latitude,
+                cameraPosition.longitude)
             .round();
         if (distance <= fetchDistance) {
           _journey.add({
@@ -245,7 +249,9 @@ class PassDB extends ChangeNotifier {
       } else if (type == "accept") {
         final response = await supabase
             .from('user_journey')
-            .update({'status': "accepted"}).eq('journey_id', journeyId);
+            .update({'status': "accepted"})
+            .eq('journey_id', journeyId)
+            .eq('user_id', user!.id);
 
         //reduce available seat
         final response2 = await supabase
@@ -269,8 +275,19 @@ class PassDB extends ChangeNotifier {
     }
   }
 
-  Future<void> passengerFinishJourney(String jid, String comment, String driver,
-      double rating, List<String> report) async {
+  Future<void> passengerReport(List<String> reportList, String jid) async {
+    try {
+      await supabase.from('journey_report').upsert({
+        'journey': jid,
+        'report': reportList,
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> passengerFinishJourney(
+      String jid, String comment, String driver, double rating) async {
     try {
       await supabase
           .from('user_journey')
@@ -298,11 +315,10 @@ class PassDB extends ChangeNotifier {
           .update({'rating': newrating}).eq('id', driver);
 
       //save report
-      await supabase.from('journey_report').insert([
+      await supabase.from('journey_report').upsert([
         {
           'journey': jid,
           'comment': comment,
-          'report': report,
         }
       ]);
     } catch (e) {
@@ -312,6 +328,11 @@ class PassDB extends ChangeNotifier {
 
   Future<void> updatePosition(LatLng position) async {
     _currentPosition = position;
+    notifyListeners();
+  }
+
+  void updateCameraPosition(LatLng position) {
+    _cameraPosition = position;
     notifyListeners();
   }
 
@@ -342,6 +363,11 @@ class PassDB extends ChangeNotifier {
     } catch (e) {
       print(e);
     }
+    notifyListeners();
+  }
+
+  void setisSearching(bool bool) {
+    _isSearching = bool;
     notifyListeners();
   }
 }

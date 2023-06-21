@@ -96,6 +96,8 @@ class _LoginState extends State<Login> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IntlPhoneField(
+                                showDropdownIcon: true,
+                                disableLengthCheck: true,
                                 decoration: const InputDecoration(
                                     labelText: 'Phone Number',
                                     border: OutlineInputBorder(
@@ -160,7 +162,13 @@ class _LoginState extends State<Login> {
                                         content: Text('Password required')));
                               } else {
                                 //login process
-                                String phone = phoneNo;
+
+                                String phone = "";
+                                if (phoneNo.startsWith("+660")) {
+                                  phone = phoneNo.replaceFirst("+660", "+66");
+                                } else {
+                                  phone = phoneNo;
+                                }
                                 String password = _passwordController.text;
                                 try {
                                   final AuthResponse res =
@@ -275,6 +283,7 @@ class _SmsLoginState extends State<SmsLogin> {
                 ),
               ),
               IntlPhoneField(
+                disableLengthCheck: true,
                 decoration: const InputDecoration(
                   labelText: 'Phone Number',
                   border: OutlineInputBorder(
@@ -304,8 +313,14 @@ class _SmsLoginState extends State<SmsLogin> {
                                 const SnackBar(
                                     content: Text('Invalid phone number')));
                           } else {
+                            String phone = "";
+                            if (phoneNo.startsWith("+660")) {
+                              phone = phoneNo.replaceFirst("+660", "+66");
+                            } else {
+                              phone = phoneNo;
+                            }
                             await supabase.auth.signInWithOtp(
-                              phone: phoneNo,
+                              phone: phone,
                             );
                             setState(() {
                               _isLoading = false;
@@ -315,7 +330,7 @@ class _SmsLoginState extends State<SmsLogin> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        Verification(phoneNo: phoneNo)));
+                                        Verification(phoneNo: phone)));
                           }
                           // ignore: use_build_context_synchronously
                         },

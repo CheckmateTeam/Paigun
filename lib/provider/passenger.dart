@@ -440,6 +440,66 @@ class PassDB extends ChangeNotifier {
     }
   }
 
+
+  Future<String> gotoRoom(String user1, String user2) async {
+    var room;
+    var finalRoom;
+    var room1;
+    var room2;
+    List uRoom1 = [];
+    List uRoom2 = [];
+    final isExist = await supabase
+        .rpc('is_room_exist', params: {'user1': user1, 'user2': user2});
+
+    if (!isExist) {
+      room = await Supabase.instance.client.from('rooms').insert({}).select();
+      await 
+      supabase
+      .from('room_participants')
+      .insert({
+        'profile_id':user1,
+        'room_id': room[0]['id'],
+      });
+
+      await 
+      supabase
+      .from('room_participants')
+      .insert({
+        'profile_id':user2,
+        'room_id': room[0]['id'],
+      });
+
+      finalRoom = room[0]['id'];
+    } else {
+      room1 = await supabase
+          .from('room_participants')
+          .select('room_id')
+          .eq('profile_id', user1);
+
+      room2 = await supabase
+          .from('room_participants')
+          .select('room_id')
+          .eq('profile_id', user2);
+
+      for (var item in room1) {
+        uRoom1.add(item['room_id']);
+      }
+      for (var item in room2) {
+        uRoom2.add(item['room_id']);
+      }
+
+      for (var item in uRoom1) {
+        if (uRoom2.contains(item)) {
+          finalRoom = item;
+        }
+      }
+    }
+    return finalRoom;
+  }
+
+
+  
+
   Future<dynamic> getBoard() async {
     try {
       final fetch =

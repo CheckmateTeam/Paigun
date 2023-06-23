@@ -3,14 +3,14 @@ class Message {
   final String profile_id;
   final String content;
   final DateTime createdAt;
-  final String roomId;
+  final String roomid;
   
 
   Message({
     required this.id,
     required this.createdAt,
     required this.profile_id,
-    required this.roomId,
+    required this.roomid,
     required this.content,
   });
 
@@ -18,6 +18,6 @@ class Message {
       : id = map['id'],
         createdAt = DateTime.parse(map['created_at']),
         profile_id = map['profile_id'],
-        roomId = map['roomId'],
+        roomid = map['roomid'],
         content = map['content'];
 }

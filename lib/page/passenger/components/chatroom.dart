@@ -16,7 +16,7 @@ class ChatRoom extends StatefulWidget {
 class _ChatRoom extends State<ChatRoom> {
   int prevChange = 0;
   Map<int, List> _participantsList = {};
-  
+
   Future<String> getparticipants(String roomId, int index) async {
     final data = await supabase
         .rpc('get_chatroom_participants', params: {'roomid': roomId});
@@ -34,6 +34,7 @@ class _ChatRoom extends State<ChatRoom> {
     return opponent;
   }
 
+  
   @override
   void initState() {
     super.initState();
@@ -108,19 +109,19 @@ class _ChatRoom extends State<ChatRoom> {
             }));
   }
 
-
   Widget roomBox(
       {required Room room, required String title, required String avatar}) {
     return title == "loading..." || avatar == "loading"
         ? Container()
         : InkWell(
-            onTap: () =>
-                {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) {
-                      return ChatRoomMessage(room: room,title: title,);
-                    }))
-                },
+            onTap: () => {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                return ChatRoomMessage(
+                  room_id: room.room_id,
+                  title: title,
+                );
+              }))
+            },
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
               margin: EdgeInsets.only(bottom: 10.0),

@@ -11,7 +11,6 @@ import 'package:paigun/page/driver/component/requestpage.dart';
 import 'package:paigun/page/passenger/components/chatmessage.dart';
 import 'package:paigun/page/passenger/components/docverify.dart';
 import 'package:paigun/page/passenger/components/historypage.dart';
-import 'package:paigun/page/passenger/components/chat.dart';
 import 'package:paigun/page/passenger/components/chatroom.dart';
 import 'package:paigun/page/passenger/components/journeyboard.dart';
 import 'package:paigun/page/driver/home.dart';

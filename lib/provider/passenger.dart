@@ -138,16 +138,13 @@ class PassDB extends ChangeNotifier {
                 snippet: i['date'].toString().substring(0, 10),
                 onTap: () async {
                   setLoading(true);
-                  List driver = await getOwner(i['owner']);
+                  Map driver = await getOwner(i['owner']);
                   String status = await getJourneyStatus(i['journey_id']);
                   setLoading(false);
                   navigatorKey.currentState!
                       .push(MaterialPageRoute(builder: (context) {
                     return RouteDetail(
-                        driver: driver[0],
-                        info: i,
-                        status: status,
-                        from: 'home');
+                        driver: driver, info: i, status: status, from: 'home');
                   }));
                 }),
           });
@@ -204,16 +201,13 @@ class PassDB extends ChangeNotifier {
                     .format(DateTime.parse(i['date'])),
                 onTap: () async {
                   setLoading(true);
-                  List driver = await getOwner(i['owner']);
+                  Map driver = await getOwner(i['owner']);
                   String status = await getJourneyStatus(i['journey_id']);
                   setLoading(false);
                   navigatorKey.currentState!
                       .push(MaterialPageRoute(builder: (context) {
                     return RouteDetail(
-                        driver: driver[0],
-                        info: i,
-                        status: status,
-                        from: 'home');
+                        driver: driver, info: i, status: status, from: 'home');
                   }));
                 }),
           });
@@ -256,13 +250,13 @@ class PassDB extends ChangeNotifier {
               snippet: i['date'].toString().substring(0, 10),
               onTap: () async {
                 setLoading(true);
-                List driver = await getOwner(i['owner']);
+                Map driver = await getOwner(i['owner']);
                 String status = await getJourneyStatus(i['journey_id']);
                 setLoading(false);
                 navigatorKey.currentState!
                     .push(MaterialPageRoute(builder: (context) {
                   return RouteDetail(
-                      driver: driver[0], info: i, status: status, from: 'home');
+                      driver: driver, info: i, status: status, from: 'home');
                 }));
               }),
         });
@@ -280,6 +274,7 @@ class PassDB extends ChangeNotifier {
         queryParameters: {'type': 'getuserprofile', 'userid': id},
       );
       final response = fetch.data;
+      print(response);
       // final response = await supabase.from('profile').select().eq('id', id);
       return response;
     } catch (e) {

@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey",
 };
-
+await pool.connect();
 serve(async (req) => {
   const { url, method } = req;
   const u = new URL(url);
@@ -39,7 +39,7 @@ serve(async (req) => {
       try {
         const connection = await pool.connect();
         try {
-          const result = await connection.queryobject(
+          const result = await connection.queryObject(
             "select * from journey where owner=$1 order by id desc",
             params.get("userid")
           );
@@ -57,11 +57,11 @@ serve(async (req) => {
       try {
         const connection = await pool.connect();
         try {
-          const result = await connection.queryobject(
-            "select * from journey where owner=$1 limit 1",
+          const result = await connection.queryObject(
+            "select * from profile where id=$1",
             params.get("userid")
           );
-          return new Response(JSON.stringify(result.rows), {
+          return new Response(JSON.stringify(result.rows[0]), {
             headers: { "content-type": "application/json" },
           });
         } finally {
@@ -75,12 +75,12 @@ serve(async (req) => {
       try {
         const connection = await pool.connect();
         try {
-          const result = await connection.queryobject(
+          const result = await connection.queryObject(
             "select status from user_journey where user_id=$1 and journey_id=$2 limit 1",
             params.get("userid"),
             params.get("journeyid")
           );
-          return new Response(JSON.stringify(result.rows[0]), {
+          return new Response(JSON.stringify(result.rows), {
             headers: { "content-type": "application/json" },
           });
         } finally {

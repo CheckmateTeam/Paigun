@@ -127,12 +127,14 @@ serve(async (req) => {
         );
       }
     } else if (table === "journey") {
-      if(record.status == 'done'){
+      if (record.status == "done") {
         const notification = new OneSignal.Notification();
         notification.app_id = _OnesignalAppId_;
         notification.include_external_user_ids = [record.owner];
         notification.headings = { en: `Thank you!` };
-        notification.contents = { en: `The journey is done, thank you for sharing.` };
+        notification.contents = {
+          en: `The journey is done, thank you for sharing.`,
+        };
         const onesignalApiRes = await onesignal.createNotification(
           notification
         );
@@ -149,30 +151,33 @@ serve(async (req) => {
         );
       }
     } else if (table === "messages") {
-      const result =
-          await connection.queryObject`SELECT id, full_name FROM profile, (SELECT profile_id as x FROM messages WHERE messages.roomId = ${record.roomid} and profile_id != ${record.profile_id}) as reciver WHERE x = profile.id`;
-        const selected = result.rows[0];
-        
-        const notification = new OneSignal.Notification();
-        notification.app_id = _OnesignalAppId_;
-        notification.include_external_user_ids = [selected.id];
-        notification.headings = { en: `${selected.full_name} sent you a message.` };
-        notification.contents = { en: `${record.content}` };
-        const onesignalApiRes = await onesignal.createNotification(
-          notification
-        );
+      const from =
+        await connection.queryObject`SELECT id, full_name FROM profile, (SELECT profile_id as x FROM messages WHERE messages.roomId = ${record.roomid} and profile_id = ${record.profile_id}) as reciver WHERE x = profile.id`;
+      const selected = from.rows[0];
+      const to =
+        await connection.queryObject`SELECT id, full_name FROM profile, (SELECT profile_id as x FROM messages WHERE messages.roomId = ${record.roomid} and profile_id != ${record.profile_id}) as reciver WHERE x = profile.id`;
+      const selected2 = to.rows[0];
 
-        return new Response(
-          JSON.stringify({ onesignalResponse: onesignalApiRes }),
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization:
-                "Basic N2VkMmM1NjUtZTkyMy00ZTVkLTlhZTMtZDY2YTkzODI0YmMw",
-            },
-          }
-        );
-      }
+      const notification = new OneSignal.Notification();
+      notification.app_id = _OnesignalAppId_;
+      notification.include_external_user_ids = [selected2.id];
+      notification.headings = {
+        en: `${selected.full_name} sent you a message.`,
+      };
+      notification.contents = { en: `${record.content}` };
+      const onesignalApiRes = await onesignal.createNotification(notification);
+
+      return new Response(
+        JSON.stringify({ onesignalResponse: onesignalApiRes }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Basic N2VkMmM1NjUtZTkyMy00ZTVkLTlhZTMtZDY2YTkzODI0YmMw",
+          },
+        }
+      );
+    }
   } catch (err) {
     console.error("Failed to create OneSignal notification", err);
     return new Response("Server error.", {

@@ -394,6 +394,9 @@ class PassDB extends ChangeNotifier {
     return finalRoom;
   }
 
+
+  
+
   Future<dynamic> getBoard() async {
     try {
       final response = await supabase.from('board').select(

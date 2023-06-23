@@ -378,7 +378,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                                                   MaterialPageRoute(
                                                       builder: (context) {
                                                 return RouteDetail(
-                                                    driver: res[0],
+                                                    driver: res,
                                                     info: context
                                                         .read<PassDB>()
                                                         .journey[index],

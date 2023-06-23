@@ -1,165 +1,183 @@
 import 'package:flutter/material.dart';
+import 'package:paigun/provider/userinfo.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../provider/driver.dart';
-import '../../components/sizeappbar.dart';
-import '../../chatroom/component/message.dart';
+import '../../../function/show_snackbar.dart';
 import '../../chatroom/component/room.dart';
-import 'package:provider/provider.dart';
-
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(
-    url: 'db.rnkpkbfkrscmxfhjxlcs.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJua3BrYmZrcnNjbXhmaGp4bGNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODU2MDcxMDgsImV4cCI6MjAwMTE4MzEwOH0.KiHk8j-KZgFeDgn1eMUCs1-xPQimPcTpNBkJ9p5Trzg',
-  );
-
-}
-
+import '../../components/sizeappbar.dart';
+import 'chatmessage.dart';
+import 'chatroom.dart';
 
 class ChatRoom extends StatefulWidget {
-  const ChatRoom({super.key, required this.room});
-
-  final Room room;
-
-
+  const ChatRoom({Key? key}) : super(key: key);
   @override
   State<ChatRoom> createState() => _ChatRoom();
 }
 
 class _ChatRoom extends State<ChatRoom> {
-  List _messages = [];
-
-  void getMessage(Room room) async {
-    _messages = await context.read<DriveDB>().getMessage(room.roomId);
+  int prevChange = 0;
+  Map<int, List> _participantsList = {};
+  
+  Future<String> getparticipants(String roomId, int index) async {
+    final data = await supabase
+        .rpc('get_chatroom_participants', params: {'roomid': roomId});
+    String currentUser = UserInfo().user!.id;
+    String opponent = "";
+    String avatar = "";
+    for (var item in data) {
+      if (item['id'] != currentUser) {
+        opponent = item['full_name'];
+        avatar = item['avatar_url'];
+        _participantsList[index] = [opponent, avatar];
+      }
+    }
     setState(() {});
+    return opponent;
   }
 
-  void sendMessage(Message message) async{
-    
-    
-    _messages = await context.read<DriveDB>().getMessage("user");
-    
-    
+  @override
+  void initState() {
+    super.initState();
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SizeAppbar(context, "Username",
-      () => Navigator.pushReplacementNamed(context, '/home')),
-      body: Padding(
-        padding: EdgeInsets.all(10.0),
-        child: Column(
-          children: [
+        appBar: SizeAppbar(context, "Chat",
+            () => Navigator.pushReplacementNamed(context, '/home')),
+        body: StreamBuilder<List>(
+            stream: supabase
+                .from('room_participants')
+                .stream(primaryKey: ['room_id', 'profile_id'])
+                .order('created_at')
+                .eq('profile_id', UserInfo().user!.id)
+                .map((maps) => maps.map(Room.fromMap).toList()),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: Text('loading...'),
+                );
+              }
 
-          ],
-        ),
-      ),
-    );
-    }
+              final rooms = snapshot.data!;
+              if (prevChange != rooms.length) {
+                for (var item in rooms) {
+                  getparticipants(item.room_id, rooms.indexOf(item));
+                }
+                setState(() {
+                  prevChange = rooms.length;
+                });
+              }
+              if (rooms.isEmpty) {
+                return const Center(
+                  child: Text("no room"),
+                );
+              }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // Widget _messageList() {
-  //     if (_messages == null) {
-  //       return const Center(
-  //         child: Text('Loading...'),
-  //       );
-  //     }
-  //     if (_messages!.isEmpty) {
-  //       return const Center(
-  //         child: Text('No one has started talking yet...'),
-  //       );
-  //     }
-  //     // final userId = Supabase.instance.client.auth.user()?.id;
-
-  //     return ListView.builder(
-  //       padding: const EdgeInsets.symmetric(
-  //         horizontal: 12,
-  //         vertical: 8,
-  //       ),
-  //       reverse: true,
-  //       itemCount: _messages!.length,
-  //       itemBuilder: ((context, index) {
-  //         final message = _messages![index];
-  //         return Align(
-  //           alignment: Alignment.centerRight,
-  //           child: Padding(
-  //             padding: const EdgeInsets.symmetric(vertical: 8),
-  //             child: ChatBubble(
-  //               userId: userId,
-  //               message: message,
-  //               profileCache: _profileCache,
-  //             ),
-  //           ),
-  //         );
-  //       }),
-  //     );
-  //   }
-
-  
-
-    
-
+              return Padding(
+                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 0),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Expanded(
+                            child: Container(
+                          child: ListView.builder(
+                              padding: EdgeInsets.all(10),
+                              itemCount: rooms.length,
+                              itemBuilder: (context, index) {
+                                final room = rooms[index];
+                                return roomBox(
+                                  room: room,
+                                  title: _participantsList[index] == null
+                                      ? "loading..."
+                                      : _participantsList[index]!.toList()[0],
+                                  avatar: _participantsList[index] == null
+                                      ? "loading"
+                                      : _participantsList[index]!.toList()[1],
+                                );
+                              }),
+                        ))
+                      ]));
+            }));
   }
 
 
+  Widget roomBox(
+      {required Room room, required String title, required String avatar}) {
+    return title == "loading..." || avatar == "loading"
+        ? Container()
+        : InkWell(
+            onTap: () =>
+                {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) {
+                      return ChatRoomMessage(room: room,title: title,);
+                    }))
+                },
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+              margin: EdgeInsets.only(bottom: 10.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Color.fromARGB(139, 221, 221, 221)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color.fromARGB(255, 193, 193, 193),
+                    blurRadius: 4,
+                    offset: Offset(0, 0), // Shadow position
+                  ),
+                ],
+              ),
 
-  class ChatBubble extends StatelessWidget {
-  const ChatBubble({
-    Key? key,
-    required this.userId,
-    required this.message,
-  }) : super(key: key);
+              //list start here
 
-  final String? userId;
-  final Message message;
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      elevation: 4,
-      borderRadius: BorderRadius.circular(4),
-      color: userId == message.profileId ? Colors.grey[300] : Colors.blue[200],
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'username',
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 14,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                      width: 50,
+                      height: 50,
+                      margin: EdgeInsets.only(right: 10),
+                      child: avatar == "loading"
+                          ? Text("loading")
+                          : Image.network(avatar, loadingBuilder:
+                              (BuildContext context, Widget child,
+                                  ImageChunkEvent? loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }, errorBuilder: (context, error, stackTrace) {
+                              return Center(
+                                child:
+                                    Image.asset('assets/images/avatarmock.png'),
+                              );
+                            })),
+                  Expanded(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ]),
+                  )
+                ],
               ),
             ),
-            Text(
-              message.content,
-              style: const TextStyle(
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+          );
   }
 }

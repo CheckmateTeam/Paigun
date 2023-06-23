@@ -1,16 +1,16 @@
 class Room {
-  final String roomId;
-  final String userId;
+  final String room_id;
+  final String profile_id;
   final DateTime createdAt;
 
   Room({
-    required this.roomId,
-    required this.userId,
+    required this.room_id,
+    required this.profile_id,
     required this.createdAt,
   });
 
   Room.fromMap(Map<String, dynamic> map)
-      : roomId = map['roomId'],
-        userId = map['userId'] ?? 'Unknown',
+      : room_id = map['room_id'],
+        profile_id = map['profile_id'] ?? 'Unknown',
         createdAt = DateTime.parse(map['created_at']);
 }

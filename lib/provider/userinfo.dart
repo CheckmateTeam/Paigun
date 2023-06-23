@@ -19,6 +19,11 @@ class UserInfo extends ChangeNotifier {
   get username async =>
       await supabase.from('profile').select('username').eq('id', user!.id);
 
+  get listRoom async => 
+      await supabase.from('room_participants').select('room_id').eq('profile_id', user!.id);
+
+      
+  
   get phone => user!.phone;
   get userinfo => _userinfo;
 

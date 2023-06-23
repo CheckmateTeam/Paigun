@@ -8,6 +8,7 @@ import 'package:paigun/page/components/loading_screen.dart';
 import 'package:paigun/page/components/splash_screen.dart';
 import 'package:paigun/page/driver/component/createroute.dart';
 import 'package:paigun/page/driver/component/requestpage.dart';
+import 'package:paigun/page/passenger/components/chatmessage.dart';
 import 'package:paigun/page/passenger/components/docverify.dart';
 import 'package:paigun/page/passenger/components/historypage.dart';
 import 'package:paigun/page/passenger/components/chat.dart';
@@ -72,8 +73,8 @@ class MainApp extends StatelessWidget {
         '/journeyboard/create': (context) => const CreateJourney(),
         '/loading': (context) => const Loading(),
         '/driver': (context) => const DriverHome(),
-        '/notification': (context) => const PaiNotification(),
-        '/chat': (context) => const DriverChat(),
+        '/notification' : (context) => const PaiNotification(),
+        '/chat' : (context) => const ChatRoom(),
         '/driver/create': (context) => const CreateRoute(),
         '/driver/request': (context) => const RequestPage(),
         '/history': (context) => const HistoryPage(),

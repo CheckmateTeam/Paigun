@@ -71,13 +71,11 @@ class DriveDB extends ChangeNotifier {
     }
   }
 
-
-  Future<dynamic> sendMessage(String content,String roomId) async{
-     try {
-      final res = await supabase.from('message').
-      insert({
-        'roomId':roomId, // How to get roomId
-        'content':content,
+  Future<dynamic> sendMessage(String content, String roomId) async {
+    try {
+      final res = await supabase.from('message').insert({
+        'roomId': roomId, // How to get roomId
+        'content': content,
         'profileId': user,
       });
       return res;
@@ -86,44 +84,42 @@ class DriveDB extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> chatCreate() async{
-     try {
-      final res = await supabase.from('message').
-      insert({
+  Future<dynamic> chatCreate() async {
+    try {
+      final res = await supabase.from('message').insert({
         'userId': user,
-      })
-      ;
+      });
       return res;
     } catch (e) {
       print(e);
     }
   }
-  
-  Future<dynamic> getMessage(String roomId) async{
-     try {
-      Message res = await supabase.from('message').
-      select('messageId, roomId, date, created_at, content, profileId')
-      .match({'roomId' : roomId});[
-      ];
-      return res;
-    } catch (e) {
-      print(e);
-    }
 
-    
-  }
-  
-  Future<dynamic> getRoom() async {
-      try {
-      final res = await supabase.from('chat').
-      select('roomId, userId, created_at')
-      .match({'userId' : user});[
-      ];
+  Future<dynamic> getMessage(String roomId) async {
+    try {
+      Message res = await supabase
+          .from('message')
+          .select('messageId, roomId, date, created_at, content, profileId')
+          .match({'roomId': roomId});
+      [];
       return res;
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<dynamic> getRoom() async {
+    try {
+      final res = await supabase
+          .from('chat')
+          .select('roomId, userId, created_at')
+          .match({'userId': user});
+      [];
+      return res;
+    } catch (e) {
+      print(e);
     }
+  }
 
   Future<String> getDriverJourneyStatus(String jid) async {
     try {
@@ -262,6 +258,21 @@ class DriveDB extends ChangeNotifier {
     } catch (e) {
       print(e);
       return false;
+    }
+  }
+
+  Future<dynamic> getPassengerFinishJourney(String jid) async {
+    try {
+      final response = await supabase
+          .from('user_journey')
+          .select()
+          .eq('journey_id', jid)
+          .eq('status', 'finished');
+
+      return response.length;
+    } catch (e) {
+      print(e);
+      return 0;
     }
   }
 }

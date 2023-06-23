@@ -11,7 +11,6 @@ import 'package:paigun/page/driver/component/requestpage.dart';
 import 'package:paigun/page/passenger/components/chatmessage.dart';
 import 'package:paigun/page/passenger/components/docverify.dart';
 import 'package:paigun/page/passenger/components/historypage.dart';
-import 'package:paigun/page/passenger/components/chat.dart';
 import 'package:paigun/page/passenger/components/chatroom.dart';
 import 'package:paigun/page/passenger/components/howtouse.dart';
 import 'package:paigun/page/passenger/components/journeyboard.dart';
@@ -29,6 +28,7 @@ import 'page/passenger/components/routedetail.dart';
 import 'provider/driver.dart';
 import 'provider/passenger.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: 'assets/.env');
@@ -41,17 +41,18 @@ Future<void> main() async {
     ChangeNotifierProvider(create: (_) => UserInfo()),
     ChangeNotifierProvider(create: (_) => PassDB()),
     ChangeNotifierProvider(create: (_) => DriveDB()),
-  ], child: const MainApp()));
+  ], child: MainApp()));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Paigun',
+      navigatorKey: navigatorKey,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -74,8 +75,8 @@ class MainApp extends StatelessWidget {
         '/journeyboard/create': (context) => const CreateJourney(),
         '/loading': (context) => const Loading(),
         '/driver': (context) => const DriverHome(),
-        '/notification' : (context) => const PaiNotification(),
-        '/chat' : (context) => const ChatRoom(),
+        '/notification': (context) => const PaiNotification(),
+        '/chat': (context) => const ChatRoom(),
         '/driver/create': (context) => const CreateRoute(),
         '/driver/request': (context) => const RequestPage(),
         '/history': (context) => const HistoryPage(),

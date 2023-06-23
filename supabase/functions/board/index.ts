@@ -22,13 +22,32 @@ serve(async (req) => {
         const connection = await pool.connect();
         try {
           const result = await connection.queryObject(
-            "select * from board inner join profile on owner = id",
+            "select * from board inner join profile on owner = id"
           );
           console.log(result);
-          
+
           return new Response(JSON.stringify(result.rows), {
             headers: { "content-type": "application/json" },
           });
+        } finally {
+          await connection.release();
+        }
+      } catch (err) {
+        console.error(err);
+        return new Response(String(err?.message ?? err), { status: 500 });
+      }
+    }
+  } else if (method == "POST") {
+    if (params.get("type") == "postboard") {
+      try {
+        const connection = await pool.connect();
+        try {
+          const result =
+            await connection.queryArray`INSERT INTO board (owner, origin, destination, note, date) VALUES (${params.get(
+              "owner"
+            )}, ${params.get("origin")}, ${params.get(
+              "destination"
+            )}, ${params.get("note")}, ${params.get("date")})`;
         } finally {
           await connection.release();
         }

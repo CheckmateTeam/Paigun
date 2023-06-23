@@ -426,15 +426,14 @@ class PassDB extends ChangeNotifier {
 
   Future<dynamic> createBoard(Board board) async {
     try {
-      final response = await supabase.from('board').insert([
-        {
-          'owner': user!.id,
-          'origin': board.origin,
-          'destination': board.destination,
-          'note': board.note,
-          'date': board.date,
-        }
-      ]);
+      await dio.post('/board', queryParameters: {
+        'type': 'postboard',
+        'owner': user!.id,
+        'origin': board.origin,
+        'destination': board.destination,
+        'note': board.note,
+        'date': board.date
+      });
       return 'success';
     } catch (e) {
       return 'failed';

@@ -366,6 +366,22 @@ class PassDB extends ChangeNotifier {
 
     if (!isExist) {
       room = await Supabase.instance.client.from('rooms').insert({}).select();
+      await 
+      supabase
+      .from('room_participants')
+      .insert({
+        'profile_id':user1,
+        'room_id': room[0]['id'],
+      });
+
+      await 
+      supabase
+      .from('room_participants')
+      .insert({
+        'profile_id':user2,
+        'room_id': room[0]['id'],
+      });
+
       finalRoom = room[0]['id'];
     } else {
       room1 = await supabase

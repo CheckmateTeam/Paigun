@@ -448,10 +448,9 @@ class PassDB extends ChangeNotifier {
 
   Future<dynamic> getBoard() async {
     try {
-      final response = await supabase.from('board').select(
-          'board_id, owner, date, origin, destination, note, profile(id, username, full_name, avatar_url, rating)');
-      _board = response;
-      //print(response);
+      final fetch =
+          await dio.get('/board', queryParameters: {'type': 'getboard'});
+      final response = fetch.data;
       return response;
     } catch (e) {
       print(e);

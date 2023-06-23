@@ -125,6 +125,7 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _PriceController.text = 'Free';
+    _NoteController.text = '';
   }
 
   @override
@@ -426,7 +427,7 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                         controller: _NoteController,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          labelText: 'Note',
+                          labelText: 'Note (Optional)',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           suffixIcon: Icon(Icons.note_outlined),
                         ),
@@ -446,8 +447,7 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                       _AvailableController.text.isEmpty ||
                       _PriceController.text.isEmpty ||
                       _CarbrandController.text.isEmpty ||
-                      _CarmodelController.text.isEmpty ||
-                      _NoteController.text.isEmpty) {
+                      _CarmodelController.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Please fill all field')));
                     return;
@@ -515,7 +515,9 @@ class _RouteMapState extends State<RouteMap> with TickerProviderStateMixin {
                                         ? fromProvince = fromProvince
                                             .replaceAll('Chang Wat ', '')
                                         : fromProvince = fromProvince;
-
+                                    if (_PriceController.text == 'Free') {
+                                      _PriceController.text = '0';
+                                    }
                                     var res = await Provider.of<DriveDB>(
                                             context,
                                             listen: false)

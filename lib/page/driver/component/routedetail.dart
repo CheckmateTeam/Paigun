@@ -489,6 +489,11 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                                     .isPassengerAllCompleted(
                                                         widget.info[
                                                             'journey_id']);
+                                                int passreviewnum = await context
+                                                    .read<DriveDB>()
+                                                    .getPassengerFinishJourney(
+                                                        widget.info[
+                                                            'journey_id']);
                                                 if (isPassdone) {
                                                   await context
                                                       .read<DriveDB>()
@@ -535,7 +540,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                                         return StyleDialog(
                                                             context,
                                                             'Oops!',
-                                                            'Please wait for all passengers to complete the journey.',
+                                                            'Please wait for ${widget.passenger.length - passreviewnum} passenger to complete the journey.',
                                                             'Ok', () {
                                                           Navigator.of(context)
                                                               .pop();

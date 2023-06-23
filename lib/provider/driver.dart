@@ -235,4 +235,19 @@ class DriveDB extends ChangeNotifier {
       return false;
     }
   }
+
+  Future<dynamic> getPassengerFinishJourney(String jid) async {
+    try {
+      final response = await supabase
+          .from('user_journey')
+          .select()
+          .eq('journey_id', jid)
+          .eq('status', 'finished');
+
+      return response.length;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
+  }
 }

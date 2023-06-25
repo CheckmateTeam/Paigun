@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:paigun/page/components/sizeappbar.dart';
+import 'package:paigun/provider/userinfo.dart';
+import 'package:provider/provider.dart';
+
+import '../../../provider/passenger.dart';
+import 'chatmessage.dart';
 
 class JourneyDetail extends StatefulWidget {
   const JourneyDetail(
@@ -109,7 +114,18 @@ class _JourneyDetailState extends State<JourneyDetail> {
                   ),
                   IconButton.filled(
                       style: ElevatedButton.styleFrom(elevation: 1),
-                      onPressed: () {},
+                      onPressed: () async {
+                        String user1 = UserInfo().user!.id;
+                        String user2 = widget.profile['id'];
+                        String room_id = await context.read<PassDB>().gotoRoom(user1,user2);
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                            return ChatRoomMessage(
+                            room_id: room_id,
+                            title: widget.profile['full_name'],
+                          );
+                        }));
+                      }
+                      ,
                       icon: const Icon(Icons.chat))
                 ],
               )),

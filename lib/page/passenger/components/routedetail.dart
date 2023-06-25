@@ -16,6 +16,9 @@ import 'package:paigun/page/passenger/components/reportpage.dart';
 import 'package:paigun/provider/passenger.dart';
 import 'package:provider/provider.dart';
 
+import '../../../provider/userinfo.dart';
+import 'chatmessage.dart';
+
 class RouteDetail extends StatefulWidget {
   final Map driver;
   final Map info;
@@ -388,7 +391,17 @@ class _RouteDetailState extends State<RouteDetail> {
                                 IconButton.filled(
                                     style:
                                         ElevatedButton.styleFrom(elevation: 1),
-                                    onPressed: () {},
+                                    onPressed: () async {
+                                        String user1 = UserInfo().user!.id;
+                                        String user2 = widget.driver['id'];
+                                        String room_id = await context.read<PassDB>().gotoRoom(user1,user2);
+                                            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                                            return ChatRoomMessage(
+                                            room_id: room_id,
+                                            title: widget.driver['full_name'],
+                                          );
+                                        }));
+                                      },
                                     icon: const Icon(Icons.chat))
                               ],
                             )),

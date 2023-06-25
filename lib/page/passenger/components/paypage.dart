@@ -16,6 +16,9 @@ import 'package:paigun/page/components/sizeappbar.dart';
 import 'package:provider/provider.dart';
 import 'package:widgets_to_image/widgets_to_image.dart';
 
+import '../../../provider/userinfo.dart';
+import 'chatmessage.dart';
+
 class PaymentPage extends StatefulWidget {
   String promptPayId;
   int amount;
@@ -196,7 +199,17 @@ class _PaymentPageState extends State<PaymentPage> {
                                   IconButton.filled(
                                       style: ElevatedButton.styleFrom(
                                           elevation: 1),
-                                      onPressed: () {},
+                                      onPressed: () async {
+                                        String user1 = UserInfo().user!.id;
+                                        String user2 = widget.driver['id'];
+                                        String room_id = await context.read<PassDB>().gotoRoom(user1,user2);
+                                            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                                            return ChatRoomMessage(
+                                            room_id: room_id,
+                                            title: widget.driver['full_name'],
+                                          );
+                                        }));
+                                      },
                                       icon: const Icon(Icons.chat))
                                 ],
                               )),

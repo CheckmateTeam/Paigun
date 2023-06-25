@@ -471,7 +471,8 @@ class PassDB extends ChangeNotifier {
       });
 
       finalRoom = room[0]['id'];
-    } else {
+    } 
+    else {
       room1 = await supabase
           .from('room_participants')
           .select('room_id')

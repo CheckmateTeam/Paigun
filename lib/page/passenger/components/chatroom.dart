@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -16,25 +18,44 @@ class ChatRoom extends StatefulWidget {
 class _ChatRoom extends State<ChatRoom> {
   int prevChange = 0;
   Map<int, List> _participantsList = {};
-
+  
+  
   Future<String> getparticipants(String roomId, int index) async {
     final data = await supabase
         .rpc('get_chatroom_participants', params: {'roomid': roomId});
     String currentUser = UserInfo().user!.id;
     String opponent = "";
     String avatar = "";
+    String id = "";
     for (var item in data) {
       if (item['id'] != currentUser) {
         opponent = item['full_name'];
         avatar = item['avatar_url'];
-        _participantsList[index] = [opponent, avatar];
+        id = item['id'];
+        _participantsList[index] = [opponent, avatar, id];
       }
     }
     setState(() {});
     return opponent;
   }
 
+  Future<int> getUnRead(
+    String roomid
+  ) async{
+    print('for once');
+    int x;
+    final unRead = await supabase
+              .from('messages')
+              .select()
+              .eq('roomid', roomid)
+              .eq('is_read', false);
+    x = unRead.length;
+    print('for once 2');
+    return x;
+  }
+
   
+
   @override
   void initState() {
     super.initState();
@@ -63,7 +84,7 @@ class _ChatRoom extends State<ChatRoom> {
                   child: Text('loading...'),
                 );
               }
-
+              
               final rooms = snapshot.data!;
               if (prevChange != rooms.length) {
                 for (var item in rooms) {
@@ -102,6 +123,9 @@ class _ChatRoom extends State<ChatRoom> {
                                   avatar: _participantsList[index] == null
                                       ? "loading"
                                       : _participantsList[index]!.toList()[1],
+                                  id: _participantsList[index] == null
+                                      ? "loading"
+                                      : _participantsList[index]!.toList()[2],
                                 );
                               }),
                         ))
@@ -109,8 +133,12 @@ class _ChatRoom extends State<ChatRoom> {
             }));
   }
 
-  Widget roomBox(
-      {required Room room, required String title, required String avatar}) {
+  Widget roomBox({
+    required Room room, 
+    required String title, 
+    required String avatar,
+    required String id
+    }) {
     return title == "loading..." || avatar == "loading"
         ? Container()
         : InkWell(
@@ -174,8 +202,35 @@ class _ChatRoom extends State<ChatRoom> {
                               fontSize: 16,
                             ),
                           ),
+                          const Text(
+                            'Recently message',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                          ),
                         ]),
-                  )
+                  ),
+                  
+                  Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(10)
+                            ),
+                            
+                            child: Center(child: 
+                            Text('20',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800
+                            ),
+                            textAlign: TextAlign.center,
+                            ),
+                          ))
                 ],
               ),
             ),

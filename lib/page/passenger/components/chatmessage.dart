@@ -29,8 +29,17 @@ class _ChatRoomMessage extends State<ChatRoomMessage> {
   final Map<String, Profile> _profileCache = {};
   StreamSubscription<List<Message>>? _messagesListener;
 
+
+  Future<void> readMessage(String roomid) async {
+    await supabase
+  .from('messages')
+  .update({ 'is_read': true})
+  .eq('roomid', roomid);
+  }
+
   @override
   void initState() {
+    readMessage(widget.room_id);
     _messagesListener = supabase
         .from('messages')
         .stream(primaryKey: ['id'])
@@ -131,7 +140,7 @@ class _ChatRoomMessage extends State<ChatRoomMessage> {
                         size: 30,
                       ),
                       onPressed: () =>
-                          Navigator.pushReplacementNamed(context, '/home')),
+                          Navigator.pushReplacementNamed(context, '/chat')),
                   title: Text(widget.title,
                       style: GoogleFonts.nunito(
                           fontSize: 20,
@@ -186,13 +195,17 @@ class ChatBubble extends StatelessWidget {
           mainAxisAlignment: userId == message.profile_id
               ? MainAxisAlignment.end
               : MainAxisAlignment.start,
+              
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
               userId == message.profile_id
                   ? '${message.createdAt.hour}:${message.createdAt.minute}'
                   : '',
-              style: const TextStyle(fontSize: 12, height: 2),
+              style: const TextStyle(
+                fontSize: 12, 
+                height: 2,
+              ),
             ),
             SizedBox(width: 5),
             Material(
@@ -204,9 +217,12 @@ class ChatBubble extends StatelessWidget {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
-                child: Column(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Container(
+                    constraints: BoxConstraints(maxWidth: 200),
+                    child: 
                     Text(
                       message.content,
                       style: TextStyle(
@@ -215,7 +231,11 @@ class ChatBubble extends StatelessWidget {
                               : Colors.black,
                           fontSize: 17,
                           fontWeight: FontWeight.w500),
-                    ),
+
+                      softWrap:true,
+                      maxLines: 200,
+
+                    ),)
                   ],
                 ),
               ),

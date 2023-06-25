@@ -43,10 +43,36 @@ serve(async (req) => {
           };
           notification.headings = { en: `Request accepted!` };
         } else if (record.status === "paid") {
+          // notification.contents = {
+          //   en: `You have paid for the journey from ${selected.full_name}, your journey request is confirmed.`,
+          // };
+          // notification.headings = { en: `Payment succeed!` };
+          // const onesignalApiRes1 = await onesignal.createNotification(
+          //   notification
+          // );
+
+          // return new Response(
+          //   JSON.stringify({ onesignalResponse: onesignalApiRes1 }),
+          //   {
+          //     headers: {
+          //       "Content-Type": "application/json",
+          //       Authorization:
+          //         "Basic N2VkMmM1NjUtZTkyMy00ZTVkLTlhZTMtZDY2YTkzODI0YmMw",
+          //     },
+          //   }
+          // );
+          const result2 =
+            await connection.queryObject`SELECT owner FROM user_journey, journey WHERE journey.journey_id = ${record.journey_id}`;
+          const owner = result2.rows[0];
+          const result3 =
+            await connection.queryObject`SELECT profile.id, full_name from profile WHERE profile.id = ${record.user_id}`;
+          const pass = result3.rows[0];
+
+          notification.include_external_user_ids = [owner.owner];
           notification.contents = {
-            en: `You have paid for the journey from ${selected.full_name}, your journey request is confirmed.`,
+            en: `${pass.full_name} has paid for the journey to confirm the request.`,
           };
-          notification.headings = { en: `Payment succeed!` };
+          notification.headings = { en: `Passenger confirmed the request!` };
         } else if (record.status === "going") {
           notification.contents = {
             en: `The journey from ${selected.full_name} is just started, have a safe trip!.`,
@@ -134,6 +160,28 @@ serve(async (req) => {
         notification.headings = { en: `Thank you!` };
         notification.contents = {
           en: `The journey is done, thank you for sharing.`,
+        };
+        const onesignalApiRes = await onesignal.createNotification(
+          notification
+        );
+
+        return new Response(
+          JSON.stringify({ onesignalResponse: onesignalApiRes }),
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization:
+                "Basic N2VkMmM1NjUtZTkyMy00ZTVkLTlhZTMtZDY2YTkzODI0YmMw",
+            },
+          }
+        ); 
+      } else if (record.status == "finished") {
+        const notification = new OneSignal.Notification();
+        notification.app_id = _OnesignalAppId_;
+        notification.include_external_user_ids = [record.owner];
+        notification.headings = { en: `The journey finished!` };
+        notification.contents = {
+          en: `The journey is finished, please wait for all passenger reviews to complete.`,
         };
         const onesignalApiRes = await onesignal.createNotification(
           notification

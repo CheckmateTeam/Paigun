@@ -50,7 +50,7 @@ class _ChatRoomMessage extends State<ChatRoomMessage> {
         .eq('roomid', widget.room_id)
         .map((maps) => maps.map(Message.fromMap).toList())
         .listen((messages) {
-          readMessage(widget.room_id);
+          
           setState(() {
             _messages = messages;
           });

@@ -97,7 +97,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                       Row(
                         children: [
                           for (int i = 0; i < 5; i++)
-                            i < (widget.profile['rating'] ?? 0)
+                            i < ((double.parse(widget.profile['rating'] ?? '0')).round())
                                 ? const Icon(
                                     Icons.star,
                                     color: Colors.amber,

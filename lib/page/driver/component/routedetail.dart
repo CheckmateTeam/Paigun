@@ -18,6 +18,10 @@ import 'package:paigun/page/driver/component/summarypage.dart';
 import 'package:paigun/provider/driver.dart';
 import 'package:provider/provider.dart';
 
+import '../../../provider/passenger.dart';
+import '../../../provider/userinfo.dart';
+import '../../passenger/components/chatmessage.dart';
+
 class DriverRouteDetail extends StatefulWidget {
   final Map driver;
   final List passenger;
@@ -310,7 +314,17 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                           ),
                           trailing: IconButton.filled(
                               style: ElevatedButton.styleFrom(elevation: 1),
-                              onPressed: () {},
+                              onPressed: () async {
+                                        String user1 = UserInfo().user!.id;
+                                        String user2 = widget.passenger[index]['user_id']['id'];
+                                        String room_id = await context.read<PassDB>().gotoRoom(user1,user2);
+                                            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                                            return ChatRoomMessage(
+                                            room_id: room_id,
+                                            title: widget.passenger[index]['user_id']['full_name']
+                                          );
+                                        }));
+                                      },
                               icon: const Icon(Icons.mail_rounded,
                                   color: Colors.white)),
                         ),

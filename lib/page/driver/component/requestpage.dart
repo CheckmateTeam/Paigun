@@ -191,12 +191,12 @@ class _RequestPageState extends State<RequestPage> {
                                 style: ElevatedButton.styleFrom(elevation: 1),
                                 onPressed: () async {
                                   String user1 = UserInfo().user!.id;
-                                  String user2 = item[index]['id'];
+                                  String user2 = item[index]['user_id']['id'];
                                   String room_id = await context.read<PassDB>().gotoRoom(user1,user2);
                                       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                                       return ChatRoomMessage(
                                       room_id: room_id,
-                                      title: item[index]['full_name'],
+                                      title: item[index]['user_id']['full_name'],
                                     );
                                   }));
                                 },

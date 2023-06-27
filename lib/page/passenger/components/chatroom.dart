@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:paigun/provider/userinfo.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../function/show_snackbar.dart';
 import '../../chatroom/component/room.dart';
 import '../../components/sizeappbar.dart';
 import 'chatmessage.dart';
-import 'chatroom.dart';
 
 class ChatRoom extends StatefulWidget {
   const ChatRoom({Key? key}) : super(key: key);
@@ -15,7 +13,9 @@ class ChatRoom extends StatefulWidget {
 
 class _ChatRoom extends State<ChatRoom> {
   int prevChange = 0;
+  int unRead = 0;
   Map<int, List> _participantsList = {};
+  Map<String, List> _roominfo = {};
 
   Future<String> getparticipants(String roomId, int index) async {
     final data = await supabase
@@ -23,20 +23,58 @@ class _ChatRoom extends State<ChatRoom> {
     String currentUser = UserInfo().user!.id;
     String opponent = "";
     String avatar = "";
+    String id = "";
     for (var item in data) {
       if (item['id'] != currentUser) {
         opponent = item['full_name'];
         avatar = item['avatar_url'];
-        _participantsList[index] = [opponent, avatar];
+        id = item['id'];
+        _participantsList[index] = [opponent, avatar, id];
       }
     }
     setState(() {});
     return opponent;
   }
 
-  
+// 0 = unRead
+// 1 = lastSend
+
+  Future<int> getRoomInfo() async {
+    final room = await supabase
+        .from('room_participants')
+        .select()
+        .eq('profile_id', UserInfo().user!.id);
+
+    for (var item in room) {
+      String roomid = item['room_id'];
+      final unRead = await supabase
+          .from('messages')
+          .select()
+          .eq('roomid', roomid)
+          .eq('is_read', false)
+          .neq('profile_id', UserInfo().user!.id);
+
+      final lastSend = await supabase
+          .from('messages')
+          .select()
+          .eq('roomid', roomid)
+          .order('created_at');
+
+      setState(() {
+        _roominfo[roomid] = [unRead.length, lastSend[0]['content']];
+      });
+
+      print(_roominfo);
+    }
+
+    return 0;
+  }
+
   @override
   void initState() {
+    getRoomInfo();
+    print("this is what we got after function");
+    print(_roominfo);
     super.initState();
   }
 
@@ -102,6 +140,9 @@ class _ChatRoom extends State<ChatRoom> {
                                   avatar: _participantsList[index] == null
                                       ? "loading"
                                       : _participantsList[index]!.toList()[1],
+                                  id: _participantsList[index] == null
+                                      ? "loading"
+                                      : _participantsList[index]!.toList()[2],
                                 );
                               }),
                         ))
@@ -110,7 +151,10 @@ class _ChatRoom extends State<ChatRoom> {
   }
 
   Widget roomBox(
-      {required Room room, required String title, required String avatar}) {
+      {required Room room,
+      required String title,
+      required String avatar,
+      required String id}) {
     return title == "loading..." || avatar == "loading"
         ? Container()
         : InkWell(
@@ -149,19 +193,22 @@ class _ChatRoom extends State<ChatRoom> {
                       margin: EdgeInsets.only(right: 10),
                       child: avatar == "loading"
                           ? Text("loading")
-                          : Image.network(avatar, loadingBuilder:
-                              (BuildContext context, Widget child,
-                                  ImageChunkEvent? loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }, errorBuilder: (context, error, stackTrace) {
-                              return Center(
-                                child:
-                                    Image.asset('assets/images/avatarmock.png'),
-                              );
-                            })),
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(100.0),
+                              
+                              child: Image.network(avatar, loadingBuilder:
+                                  (BuildContext context, Widget child,
+                                      ImageChunkEvent? loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }, errorBuilder: (context, error, stackTrace) {
+                                return Center(
+                                  child: Image.asset(
+                                      'assets/images/avatarmock.png'),
+                                );
+                              }))),
                   Expanded(
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,8 +221,34 @@ class _ChatRoom extends State<ChatRoom> {
                               fontSize: 16,
                             ),
                           ),
+                          Text(
+                            _roominfo[room.room_id]?[1] ?? '',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w200,
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                          ),
                         ]),
-                  )
+                  ),
+                  _roominfo[room.room_id]![0] == 0
+                      ? Container()
+                      : Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 57, 54, 244),
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Center(
+                            child: Text(
+                              _roominfo[room.room_id]![0].toString(),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800),
+                              textAlign: TextAlign.center,
+                            ),
+                          ))
                 ],
               ),
             ),

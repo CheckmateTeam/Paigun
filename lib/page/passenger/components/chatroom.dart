@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:paigun/provider/userinfo.dart';
 import '../../../function/show_snackbar.dart';
+import '../../chatroom/component/message.dart';
 import '../../chatroom/component/room.dart';
 import '../../components/sizeappbar.dart';
 import 'chatmessage.dart';
@@ -40,6 +41,7 @@ class _ChatRoom extends State<ChatRoom> {
 // 1 = lastSend
 
   Future<int> getRoomInfo() async {
+    
     final room = await supabase
         .from('room_participants')
         .select()
@@ -64,7 +66,7 @@ class _ChatRoom extends State<ChatRoom> {
         _roominfo[roomid] = [unRead.length, lastSend[0]['content']];
       });
 
-      print(_roominfo);
+
     }
 
     return 0;
@@ -73,8 +75,13 @@ class _ChatRoom extends State<ChatRoom> {
   @override
   void initState() {
     getRoomInfo();
-    print("this is what we got after function");
-    print(_roominfo);
+    supabase
+        .from('messages')
+        .stream(primaryKey: ['id'])
+        .order('created_at')
+        .listen((messages) {
+          getRoomInfo();
+    });
     super.initState();
   }
 
@@ -223,15 +230,18 @@ class _ChatRoom extends State<ChatRoom> {
                           ),
                           Text(
                             _roominfo[room.room_id]?[1] ?? '',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w200,
-                              color: Colors.black,
-                              fontSize: 16,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontWeight: (_roominfo[room.room_id]?[0] ?? 0) == 0 ? FontWeight.w400 : FontWeight.w600,
+                              color: (_roominfo[room.room_id]?[0] ?? 0) == 0 ? Color.fromARGB(255, 77, 77, 77) : Colors.black,
+                              fontSize: 15,
                             ),
+                            
                           ),
                         ]),
                   ),
-                  _roominfo[room.room_id]![0] == 0
+                  (_roominfo[room.room_id]?[0] ?? 0)  == 0
                       ? Container()
                       : Container(
                           width: 30,
@@ -241,7 +251,7 @@ class _ChatRoom extends State<ChatRoom> {
                               borderRadius: BorderRadius.circular(10)),
                           child: Center(
                             child: Text(
-                              _roominfo[room.room_id]![0].toString(),
+                              _roominfo[room.room_id]?[0].toString() ?? '',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,

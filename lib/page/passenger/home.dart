@@ -69,506 +69,546 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = context.watch<PassDB>().isLoading;
+
     return SafeArea(
       child: Scaffold(
           key: _scaffoldKey,
           resizeToAvoidBottomInset: false,
           drawer: const HomeDrawer(),
-          body: SnappingSheet(
-            lockOverflowDrag: true,
-            snappingPositions: const [
-              SnappingPosition.factor(
-                positionFactor: 0.0,
-                snappingCurve: Curves.easeOutExpo,
-                snappingDuration: Duration(seconds: 1),
-                grabbingContentOffset: GrabbingContentOffset.top,
-              ),
-              SnappingPosition.factor(
-                positionFactor: 0.4,
-                snappingCurve: Curves.easeInOut,
-                snappingDuration: Duration(seconds: 1),
-                grabbingContentOffset: GrabbingContentOffset.bottom,
-              ),
-              SnappingPosition.factor(
-                positionFactor: 1.0,
-                snappingCurve: Curves.easeInOut,
-                snappingDuration: Duration(seconds: 1),
-                grabbingContentOffset: GrabbingContentOffset.bottom,
-              ),
-            ],
-            grabbingHeight: MediaQuery.of(context).size.height * 0.1,
-            grabbing: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 1,
-                      blurRadius: 5,
-                      offset: const Offset(0, 3), // changes position of shadow
+          body: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SnappingSheet(
+                  lockOverflowDrag: true,
+                  snappingPositions: const [
+                    SnappingPosition.factor(
+                      positionFactor: 0.0,
+                      snappingCurve: Curves.easeOutExpo,
+                      snappingDuration: Duration(seconds: 1),
+                      grabbingContentOffset: GrabbingContentOffset.top,
+                    ),
+                    SnappingPosition.factor(
+                      positionFactor: 0.4,
+                      snappingCurve: Curves.easeInOut,
+                      snappingDuration: Duration(seconds: 1),
+                      grabbingContentOffset: GrabbingContentOffset.bottom,
+                    ),
+                    SnappingPosition.factor(
+                      positionFactor: 1.0,
+                      snappingCurve: Curves.easeInOut,
+                      snappingDuration: Duration(seconds: 1),
+                      grabbingContentOffset: GrabbingContentOffset.bottom,
                     ),
                   ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 1),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.drag_handle_rounded,
-                          color: Colors.black45, size: 30),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                  grabbingHeight: MediaQuery.of(context).size.height * 0.1,
+                  grabbing: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(
+                                0, 3), // changes position of shadow
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 1),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.12,
-                            ),
-                            Text(
-                              'Nearby routes',
-                              style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
+                            const Icon(Icons.drag_handle_rounded,
+                                color: Colors.black45, size: 30),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.12,
+                                  ),
+                                  Text(
+                                    'Nearby routes',
+                                    style: GoogleFonts.nunito(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.05,
+                                    width: MediaQuery.of(context).size.width *
+                                        0.12,
+                                    child: FloatingActionButton(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.white,
+                                      onPressed: () {
+                                        if (context
+                                            .read<UserInfo>()
+                                            .userinfo['driver_verified']) {
+                                          Navigator.pushNamed(
+                                              context, '/driver/create');
+                                        } else {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return StyleDialog(
+                                                    context,
+                                                    'This feture is lock.',
+                                                    'Your profile need to verify more documents to unlock the Driver mode',
+                                                    'Verify now', () {
+                                                  Navigator.pushNamed(
+                                                      context, '/docverify');
+                                                });
+                                              });
+                                        }
+                                      },
+                                      child: Icon(
+                                        Icons.add_rounded,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        size: 30,
+                                      ),
+                                    ),
+                                  )
+                                ],
                               ),
                             ),
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.05,
-                              width: MediaQuery.of(context).size.width * 0.12,
-                              child: FloatingActionButton(
-                                foregroundColor: Colors.white,
-                                backgroundColor: Colors.white,
-                                onPressed: () {
-                                  if (context
-                                      .read<UserInfo>()
-                                      .userinfo['driver_verified']) {
-                                    Navigator.pushNamed(
-                                        context, '/driver/create');
-                                  } else {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return StyleDialog(
-                                              context,
-                                              'This feture is lock.',
-                                              'Your profile need to verify more documents to unlock the Driver mode',
-                                              'Verify now', () {
-                                            Navigator.pushNamed(
-                                                context, '/docverify');
-                                          });
+                          ],
+                        ),
+                      )),
+                  sheetBelow: SnappingSheetContent(
+                    draggable: true,
+                    child: ListView(
+                      reverse: false,
+                      children: [
+                        context.watch<PassDB>().isSearching
+                            ? Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 100,
+                                      child: TextButton(
+                                          style: ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStateProperty.all<
+                                                      Color>(Colors.white),
+                                              shape: MaterialStateProperty.all<
+                                                      RoundedRectangleBorder>(
+                                                  RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20.0),
+                                              ))),
+                                          onPressed: () async {
+                                            setState(() {
+                                              _isSearching = true;
+                                              _searchController.text = '';
+                                            });
+                                            loadingDialog(context, _isSearching,
+                                                'Searching...');
+                                            context
+                                                .read<PassDB>()
+                                                .setisSearching(false);
+                                            await context
+                                                .read<PassDB>()
+                                                .getJourney(10);
+                                            setState(() {
+                                              _isSearching = false;
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              const Icon(
+                                                Icons.restore,
+                                                color: Colors.black45,
+                                              ),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                'Reset',
+                                                style: GoogleFonts.nunito(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16),
+                                              ),
+                                            ],
+                                          )),
+                                    ),
+                                  ],
+                                ))
+                            : Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                height: 20,
+                              ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          height: MediaQuery.of(context).size.height,
+                          child: context.watch<PassDB>().journey.isEmpty
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(
+                                      height: 50,
+                                    ),
+                                    Text(
+                                      'No route available right now.',
+                                      style: GoogleFonts.nunito(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 20,
+                                    ),
+                                    IconButton.filled(
+                                      style: ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStateProperty.all<Color>(
+                                                  Colors.white),
+                                          shape: MaterialStateProperty.all<
+                                                  RoundedRectangleBorder>(
+                                              RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20.0),
+                                          ))),
+                                      onPressed: () async {
+                                        setState(() {
+                                          _isSearching = true;
+                                          _searchController.text = '';
                                         });
+                                        loadingDialog(context, _isSearching,
+                                            'Searching...');
+                                        await context
+                                            .read<PassDB>()
+                                            .getJourney(10);
+                                        setState(() {
+                                          _isSearching = false;
+                                        });
+                                        Navigator.pop(context);
+                                      },
+                                      icon: const Icon(Icons.refresh_rounded),
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    )
+                                  ],
+                                )
+                              : ListView.builder(
+                                  itemCount:
+                                      context.watch<PassDB>().journey.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 5, horizontal: 15),
+                                      child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey
+                                                    .withOpacity(0.5),
+                                                spreadRadius: 1,
+                                                blurRadius: 5,
+                                                offset: const Offset(0,
+                                                    3), // changes position of shadow
+                                              ),
+                                            ],
+                                          ),
+                                          child: ListTile(
+                                            onTap: () async {
+                                              setState(() {
+                                                _profileLoading = true;
+                                              });
+                                              loadingDialog(
+                                                  context,
+                                                  _profileLoading,
+                                                  'Loading...');
+                                              final res =
+                                                  await Provider.of<PassDB>(
+                                                          context,
+                                                          listen: false)
+                                                      .getJourneyDriver(context
+                                                              .read<PassDB>()
+                                                              .journey[index]
+                                                          ['owner']);
+
+                                              final String status =
+                                                  await Provider.of<PassDB>(
+                                                          context,
+                                                          listen: false)
+                                                      .getJourneyStatus(context
+                                                              .read<PassDB>()
+                                                              .journey[index]
+                                                          ['journey_id']);
+                                              setState(() {
+                                                _profileLoading = false;
+                                              });
+                                              Navigator.pop(context);
+                                              Navigator.push(context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) {
+                                                return RouteDetail(
+                                                    driver: res,
+                                                    info: context
+                                                        .read<PassDB>()
+                                                        .journey[index],
+                                                    status: status,
+                                                    from: 'home');
+                                              }));
+                                            },
+                                            leading: const Icon(
+                                                Icons.call_split_rounded),
+                                            title: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Text(
+                                                  context
+                                                          .read<PassDB>()
+                                                          .journey[index][
+                                                              'origin_province']
+                                                          .toString()
+                                                          .contains('Chang Wat')
+                                                      ? context
+                                                          .read<PassDB>()
+                                                          .journey[index][
+                                                              'origin_province']
+                                                          .toString()
+                                                          .split(
+                                                              "Chang Wat ")[1]
+                                                      : context
+                                                          .read<PassDB>()
+                                                          .journey[index][
+                                                              'origin_province']
+                                                          .toString(),
+                                                  style: GoogleFonts.nunito(
+                                                    color: Colors.black,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                const Icon(
+                                                    Icons
+                                                        .arrow_right_alt_rounded,
+                                                    color: Colors.black),
+                                                Text(
+                                                  context
+                                                          .read<PassDB>()
+                                                          .journey[index][
+                                                              'destination_province']
+                                                          .toString()
+                                                          .contains('Chang Wat')
+                                                      ? context
+                                                          .read<PassDB>()
+                                                          .journey[index][
+                                                              'destination_province']
+                                                          .toString()
+                                                          .split(
+                                                              "Chang Wat ")[1]
+                                                      : context
+                                                          .read<PassDB>()
+                                                          .journey[index][
+                                                              'destination_province']
+                                                          .toString(),
+                                                  style: GoogleFonts.nunito(
+                                                    color: Colors.black,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            subtitle: Center(
+                                              child: Text(
+                                                DateFormat('dd/MM/yyyy hh:mm a')
+                                                    .format(DateTime.parse(
+                                                        context
+                                                                .read<PassDB>()
+                                                                .journey[index]
+                                                            ['date'])),
+                                                style: GoogleFonts.nunito(
+                                                  color:
+                                                      const ui.Color.fromARGB(
+                                                          255, 138, 138, 138),
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                            trailing: const Icon(
+                                                Icons.arrow_forward_ios),
+                                          )),
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  //Content behind snapping sheet
+                  child: Stack(children: <Widget>[
+                    //MAP
+                    const MapComponent(),
+                    //SEARCH BAR
+                    Positioned(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 40, horizontal: 5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  _scaffoldKey.currentState!.openDrawer();
+                                },
+                                icon: const Icon(
+                                  Icons.menu,
+                                  size: 40,
+                                )),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(40),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    spreadRadius: 1,
+                                    blurRadius: 5,
+                                    offset: const Offset(
+                                        0, 3), // changes position of shadow
+                                  ),
+                                ],
+                              ),
+                              width: MediaQuery.of(context).size.width * 0.8,
+                              height: 60,
+                              child: TextField(
+                                controller: _searchController,
+                                showCursor: false,
+                                readOnly: true,
+                                onTap: () async {
+                                  destination = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const SearchPage()),
+                                  );
+                                  _searchController.text =
+                                      destination['Destination'];
+                                  if (destination['Current'] != '' &&
+                                      destination['Destination'] != '') {
+                                    setState(() {
+                                      _isSearching = true;
+                                    });
+                                    loadingDialog(
+                                        context, _isSearching, 'Searching');
+                                    final res = await context
+                                        .read<PassDB>()
+                                        .getJourneyByProvince(
+                                            destination['Current'],
+                                            destination['Destination']);
+
+                                    if (res.isEmpty) {
+                                      context
+                                          .read<PassDB>()
+                                          .setisSearching(true);
+                                      setState(() {
+                                        _isSearching = false;
+                                      });
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return StyleDialog(
+                                                context,
+                                                'No route',
+                                                'There is no route between selected province. You can post in journey board to find the route',
+                                                'OK', () async {
+                                              Navigator.pop(context);
+                                              Navigator.pop(context);
+                                            });
+                                          });
+                                    } else {
+                                      context
+                                          .read<PassDB>()
+                                          .setisSearching(true);
+                                      setState(() {
+                                        _isSearching = false;
+                                        Navigator.pop(context);
+                                      });
+                                    }
+                                  } else {
+                                    context
+                                        .read<PassDB>()
+                                        .setisSearching(false);
+                                    context.read<PassDB>().getJourney(10);
                                   }
                                 },
-                                child: Icon(
-                                  Icons.add_rounded,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 30,
+                                textAlign: TextAlign.center,
+                                textAlignVertical: TextAlignVertical.center,
+                                keyboardType: TextInputType.text,
+                                decoration: InputDecoration(
+                                  fillColor: Colors.white,
+                                  hintText: 'Where to go?',
+                                  hintStyle: GoogleFonts.nunito(
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                  floatingLabelAlignment:
+                                      FloatingLabelAlignment.center,
+                                  border: InputBorder.none,
+                                  filled: true,
+                                  suffixIcon: const Icon(Icons.search),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(40),
+                                    borderSide: const BorderSide(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(40),
+                                    borderSide: const BorderSide(
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
                               ),
                             )
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                )),
-            sheetBelow: SnappingSheetContent(
-              draggable: true,
-              child: ListView(
-                reverse: false,
-                children: [
-                  context.watch<PassDB>().isSearching
-                      ? Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 100,
-                                child: TextButton(
-                                    style: ButtonStyle(
-                                        backgroundColor:
-                                            MaterialStateProperty.all<Color>(
-                                                Colors.white),
-                                        shape: MaterialStateProperty.all<
-                                                RoundedRectangleBorder>(
-                                            RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ))),
-                                    onPressed: () async {
-                                      setState(() {
-                                        _isSearching = true;
-                                        _searchController.text = '';
-                                      });
-                                      loadingDialog(context, _isSearching,
-                                          'Searching...');
-                                      context
-                                          .read<PassDB>()
-                                          .setisSearching(false);
-                                      await context
-                                          .read<PassDB>()
-                                          .getJourney(10);
-                                      setState(() {
-                                        _isSearching = false;
-                                      });
-                                      Navigator.pop(context);
-                                    },
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.restore,
-                                          color: Colors.black45,
-                                        ),
-                                        const SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          'Reset',
-                                          style: GoogleFonts.nunito(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16),
-                                        ),
-                                      ],
-                                    )),
-                              ),
-                            ],
-                          ))
-                      : Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          height: 20,
-                        ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
                     ),
-                    height: MediaQuery.of(context).size.height,
-                    child: context.watch<PassDB>().journey.isEmpty
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(
-                                height: 50,
-                              ),
-                              Text(
-                                'No route available right now.',
-                                style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              IconButton.filled(
-                                style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Colors.white),
-                                    shape: MaterialStateProperty.all<
-                                            RoundedRectangleBorder>(
-                                        RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                    ))),
-                                onPressed: () async {
-                                  setState(() {
-                                    _isSearching = true;
-                                    _searchController.text = '';
-                                  });
-                                  loadingDialog(
-                                      context, _isSearching, 'Searching...');
-                                  await context.read<PassDB>().getJourney(10);
-                                  setState(() {
-                                    _isSearching = false;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                                icon: const Icon(Icons.refresh_rounded),
-                                color: Theme.of(context).colorScheme.primary,
-                              )
-                            ],
-                          )
-                        : ListView.builder(
-                            itemCount: context.watch<PassDB>().journey.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 5, horizontal: 15),
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(20),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          spreadRadius: 1,
-                                          blurRadius: 5,
-                                          offset: const Offset(0,
-                                              3), // changes position of shadow
-                                        ),
-                                      ],
-                                    ),
-                                    child: ListTile(
-                                      onTap: () async {
-                                        setState(() {
-                                          _profileLoading = true;
-                                        });
-                                        loadingDialog(context, _profileLoading,
-                                            'Loading...');
-                                        final res = await Provider.of<PassDB>(
-                                                context,
-                                                listen: false)
-                                            .getJourneyDriver(context
-                                                .read<PassDB>()
-                                                .journey[index]['owner']);
-
-                                        final String status =
-                                            await Provider.of<PassDB>(context,
-                                                    listen: false)
-                                                .getJourneyStatus(context
-                                                        .read<PassDB>()
-                                                        .journey[index]
-                                                    ['journey_id']);
-                                        setState(() {
-                                          _profileLoading = false;
-                                        });
-                                        Navigator.pop(context);
-                                        Navigator.push(context,
-                                            MaterialPageRoute(
-                                                builder: (context) {
-                                          return RouteDetail(
-                                              driver: res[0],
-                                              info: context
-                                                  .read<PassDB>()
-                                                  .journey[index],
-                                              status: status,
-                                              from: 'home');
-                                        }));
-                                      },
-                                      leading:
-                                          const Icon(Icons.call_split_rounded),
-                                      title: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Text(
-                                            context
-                                                    .read<PassDB>()
-                                                    .journey[index]
-                                                        ['origin_province']
-                                                    .toString()
-                                                    .contains('Chang Wat')
-                                                ? context
-                                                    .read<PassDB>()
-                                                    .journey[index]
-                                                        ['origin_province']
-                                                    .toString()
-                                                    .split("Chang Wat ")[1]
-                                                : context
-                                                    .read<PassDB>()
-                                                    .journey[index]
-                                                        ['origin_province']
-                                                    .toString(),
-                                            style: GoogleFonts.nunito(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          const Icon(
-                                              Icons.arrow_right_alt_rounded,
-                                              color: Colors.black),
-                                          Text(
-                                            context
-                                                    .read<PassDB>()
-                                                    .journey[index]
-                                                        ['destination_province']
-                                                    .toString()
-                                                    .contains('Chang Wat')
-                                                ? context
-                                                    .read<PassDB>()
-                                                    .journey[index]
-                                                        ['destination_province']
-                                                    .toString()
-                                                    .split("Chang Wat ")[1]
-                                                : context
-                                                    .read<PassDB>()
-                                                    .journey[index]
-                                                        ['destination_province']
-                                                    .toString(),
-                                            style: GoogleFonts.nunito(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      subtitle: Center(
-                                        child: Text(
-                                          DateFormat('dd/MM/yyyy hh:mm a')
-                                              .format(DateTime.parse(context
-                                                  .read<PassDB>()
-                                                  .journey[index]['date'])),
-                                          style: GoogleFonts.nunito(
-                                            color: const ui.Color.fromARGB(
-                                                255, 138, 138, 138),
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                      ),
-                                      trailing:
-                                          const Icon(Icons.arrow_forward_ios),
-                                    )),
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              ),
-            ),
-            //Content behind snapping sheet
-            child: Stack(children: <Widget>[
-              //MAP
-              const MapComponent(),
-              //SEARCH BAR
-              Positioned(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 40, horizontal: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            _scaffoldKey.currentState!.openDrawer();
-                          },
-                          icon: const Icon(
-                            Icons.menu,
-                            size: 40,
-                          )),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(40),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 1,
-                              blurRadius: 5,
-                              offset: const Offset(
-                                  0, 3), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: 60,
-                        child: TextField(
-                          controller: _searchController,
-                          showCursor: false,
-                          readOnly: true,
-                          onTap: () async {
-                            destination = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const SearchPage()),
-                            );
-                            _searchController.text = destination['Destination'];
-                            if (destination['Current'] != '' &&
-                                destination['Destination'] != '') {
-                              setState(() {
-                                _isSearching = true;
-                              });
-                              loadingDialog(context, _isSearching, 'Searching');
-                              final res = await context
-                                  .read<PassDB>()
-                                  .getJourneyByProvince(destination['Current'],
-                                      destination['Destination']);
-
-                              if (res.isEmpty) {
-                                context.read<PassDB>().setisSearching(true);
-                                setState(() {
-                                  _isSearching = false;
-                                });
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return StyleDialog(
-                                          context,
-                                          'No route',
-                                          'There is no route between selected province. You can post in journey board to find the route',
-                                          'OK', () async {
-                                        Navigator.pop(context);
-                                        Navigator.pop(context);
-                                      });
-                                    });
-                              } else {
-                                context.read<PassDB>().setisSearching(true);
-                                setState(() {
-                                  _isSearching = false;
-                                  Navigator.pop(context);
-                                });
-                              }
-                            } else {
-                              context.read<PassDB>().setisSearching(false);
-                              context.read<PassDB>().getJourney(10);
-                            }
-                          },
-                          textAlign: TextAlign.center,
-                          textAlignVertical: TextAlignVertical.center,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                            fillColor: Colors.white,
-                            hintText: 'Where to go?',
-                            hintStyle: GoogleFonts.nunito(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                            floatingLabelAlignment:
-                                FloatingLabelAlignment.center,
-                            border: InputBorder.none,
-                            filled: true,
-                            suffixIcon: const Icon(Icons.search),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: const BorderSide(
-                                color: Colors.white,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: const BorderSide(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ]),
-          )),
+                  ]),
+                )),
     );
   }
 }

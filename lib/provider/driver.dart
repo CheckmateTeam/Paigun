@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../function/show_snackbar.dart';
 import '../model/journey_model.dart';
+import '../page/chatroom/component/room.dart';
 
 class DriveDB extends ChangeNotifier {
   Session? session = supabase.auth.currentSession;
@@ -45,6 +46,27 @@ class DriveDB extends ChangeNotifier {
     }
   }
 
+  Future<String> gotoRoom(String user1,String user2) async{
+    final isExist = await supabase
+        .rpc('is_room_exist', params: {'user1': user1,'user2': user2});
+
+    if(!isExist){
+      var room = await Supabase.instance.client.from('rooms').insert({}).select();
+      String newRoom = room[0]['id'];
+      return newRoom;
+    }
+    else{
+      var room =  await supabase
+                        .from('room_participants')
+                        .select()
+                        .eq('profile_id', user1)
+                        .eq('profile_id', user2);
+      String newRoom = room[0]['id'];
+      return newRoom;  
+    }
+
+  }
+
   Future<dynamic> getDriverJourney() async {
     try {
       //journey list
@@ -71,58 +93,8 @@ class DriveDB extends ChangeNotifier {
     }
   }
 
-
-  Future<dynamic> sendMessage(String content,String roomId) async{
-     try {
-      final res = await supabase.from('message').
-      insert({
-        'roomId':roomId, // How to get roomId
-        'content':content,
-        'profileId': user,
-      });
-      return res;
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  Future<dynamic> chatCreate(User customer) async{
-     try {
-      final res = await supabase.from('message').
-      insert({
-        'ownerId': user,
-        'userId':customer,
-      })
-      ;
-      return res;
-    } catch (e) {
-      print(e);
-    }
-  }
   
-  Future<dynamic> getMessage(String roomId) async{
-     try {
-      Message res = await supabase.from('message').
-      select('messageId, roomId, date, created_at, content, profileId')
-      .match({'roomId' : roomId});[
-      ];
-      return res;
-    } catch (e) {
-      print(e);
-    }
 
-    Future<dynamic> getChat() async {
-      try {
-      final res = await supabase.from('chat').
-      select('roomId, userId, ownerId, created_at')
-      .match({'ownerId' : user});[
-      ];
-      return res;
-    } catch (e) {
-      print(e);
-    }
-    }
-  }
 
   Future<String> getDriverJourneyStatus(String jid) async {
     try {
@@ -261,6 +233,21 @@ class DriveDB extends ChangeNotifier {
     } catch (e) {
       print(e);
       return false;
+    }
+  }
+
+  Future<dynamic> getPassengerFinishJourney(String jid) async {
+    try {
+      final response = await supabase
+          .from('user_journey')
+          .select()
+          .eq('journey_id', jid)
+          .eq('status', 'finished');
+
+      return response.length;
+    } catch (e) {
+      print(e);
+      return 0;
     }
   }
 }

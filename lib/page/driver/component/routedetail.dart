@@ -18,6 +18,10 @@ import 'package:paigun/page/driver/component/summarypage.dart';
 import 'package:paigun/provider/driver.dart';
 import 'package:provider/provider.dart';
 
+import '../../../provider/passenger.dart';
+import '../../../provider/userinfo.dart';
+import '../../passenger/components/chatmessage.dart';
+
 class DriverRouteDetail extends StatefulWidget {
   final Map driver;
   final List passenger;
@@ -310,7 +314,17 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                           ),
                           trailing: IconButton.filled(
                               style: ElevatedButton.styleFrom(elevation: 1),
-                              onPressed: () {},
+                              onPressed: () async {
+                                        String user1 = UserInfo().user!.id;
+                                        String user2 = widget.passenger[index]['user_id']['id'];
+                                        String room_id = await context.read<PassDB>().gotoRoom(user1,user2);
+                                            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                                            return ChatRoomMessage(
+                                            room_id: room_id,
+                                            title: widget.passenger[index]['user_id']['full_name']
+                                          );
+                                        }));
+                                      },
                               icon: const Icon(Icons.mail_rounded,
                                   color: Colors.white)),
                         ),
@@ -489,6 +503,11 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                                     .isPassengerAllCompleted(
                                                         widget.info[
                                                             'journey_id']);
+                                                int passreviewnum = await context
+                                                    .read<DriveDB>()
+                                                    .getPassengerFinishJourney(
+                                                        widget.info[
+                                                            'journey_id']);
                                                 if (isPassdone) {
                                                   await context
                                                       .read<DriveDB>()
@@ -535,7 +554,7 @@ class _DriverRouteDetailState extends State<DriverRouteDetail> {
                                                         return StyleDialog(
                                                             context,
                                                             'Oops!',
-                                                            'Please wait for all passengers to complete the journey.',
+                                                            'Please wait for ${widget.passenger.length - passreviewnum} passenger to complete the journey.',
                                                             'Ok', () {
                                                           Navigator.of(context)
                                                               .pop();

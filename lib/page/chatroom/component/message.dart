@@ -1,22 +1,23 @@
 class Message {
   final String id;
-  final DateTime createdAt;
-  final String profileId;
-  final String roomId;
+  final String profile_id;
   final String content;
+  final DateTime createdAt;
+  final String roomid;
+  
 
   Message({
     required this.id,
     required this.createdAt,
-    required this.profileId,
-    required this.roomId,
+    required this.profile_id,
+    required this.roomid,
     required this.content,
   });
 
   Message.fromMap(Map<String, dynamic> map)
       : id = map['id'],
         createdAt = DateTime.parse(map['created_at']),
-        profileId = map['profile_id'],
-        roomId = map['room_id'],
+        profile_id = map['profile_id'],
+        roomid = map['roomid'],
         content = map['content'];
 }

@@ -9,7 +9,7 @@ import 'package:paigun/provider/userinfo.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:paigun/page/passenger/components/howtouse.dart';
 import '../../function/show_snackbar.dart';
 
 class Signup extends StatefulWidget {
@@ -396,7 +396,9 @@ class _VerificationState extends State<Verification> {
                                       ),
                                       onPressed: () {
                                         Navigator.pushNamedAndRemoveUntil(
-                                            context, '/home', (route) => false);
+                                            context,
+                                            '/howtouse',
+                                            (route) => false);
                                       },
                                       child: const Text('Let\'s start'),
                                     ),

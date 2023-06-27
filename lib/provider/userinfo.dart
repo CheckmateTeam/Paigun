@@ -16,14 +16,16 @@ class UserInfo extends ChangeNotifier {
     'avatar_url': '',
     'verified': false
   };
-  get username async =>
-      await supabase.from('profile').select('username').eq('id', user!.id);
+  get username async => await supabase
+      .from('profile')
+      .select('username')
+      .eq('id', supabase.auth.currentUser!.id);
 
-  get listRoom async => 
-      await supabase.from('room_participants').select('room_id').eq('profile_id', user!.id);
+  get listRoom async => await supabase
+      .from('room_participants')
+      .select('room_id')
+      .eq('profile_id', supabase.auth.currentUser!.id);
 
-      
-  
   get phone => user!.phone;
   get userinfo => _userinfo;
 
@@ -81,12 +83,12 @@ class UserInfo extends ChangeNotifier {
   Future<void> updateProfileImage(String path) async {
     try {
       File image = File(path);
-      String fileName = 'avatar_${user!.id}';
+      String fileName = 'avatar_${supabase.auth.currentUser!.id}';
       String signedUrl = "";
       final avatar = await supabase
           .from('profile')
           .select('avatar_url')
-          .eq('id', user!.id);
+          .eq('id', supabase.auth.currentUser!.id);
       if (avatar[0]['avatar_url'].toString().isEmpty) {
         final res = await supabase.storage.from('avatar').upload(
               fileName,
@@ -133,7 +135,7 @@ class UserInfo extends ChangeNotifier {
   Future<void> addDocument(String path, String type) async {
     try {
       File image = File(path);
-      String fileName = '${user!.id}_$type';
+      String fileName = '${supabase.auth.currentUser!.id}_$type';
       String signedUrl = "";
 
       await supabase.storage.from('document').upload(
@@ -173,8 +175,10 @@ class UserInfo extends ChangeNotifier {
   get doc => _doc;
   Future<dynamic> getDocument() async {
     try {
-      final res =
-          await supabase.from('document').select().eq('owner', user!.id);
+      final res = await supabase
+          .from('document')
+          .select()
+          .eq('owner', supabase.auth.currentUser!.id);
       //print(res[0]);
       _doc = res[0];
       return res[0];

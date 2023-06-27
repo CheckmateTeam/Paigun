@@ -392,16 +392,19 @@ class _RouteDetailState extends State<RouteDetail> {
                                     style:
                                         ElevatedButton.styleFrom(elevation: 1),
                                     onPressed: () async {
-                                        String user1 = UserInfo().user!.id;
-                                        String user2 = widget.driver['id'];
-                                        String room_id = await context.read<PassDB>().gotoRoom(user1,user2);
-                                            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                                            return ChatRoomMessage(
-                                            room_id: room_id,
-                                            title: widget.driver['full_name'],
-                                          );
-                                        }));
-                                      },
+                                      String user1 = UserInfo().user!.id;
+                                      String user2 = widget.driver['id'];
+                                      String room_id = await context
+                                          .read<PassDB>()
+                                          .gotoRoom(user1, user2);
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(builder: (context) {
+                                        return ChatRoomMessage(
+                                          room_id: room_id,
+                                          title: widget.driver['full_name'],
+                                        );
+                                      }));
+                                    },
                                     icon: const Icon(Icons.chat))
                               ],
                             )),

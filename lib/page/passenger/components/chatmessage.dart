@@ -1,6 +1,5 @@
 import 'dart:async';
 
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +9,6 @@ import 'package:paigun/provider/userinfo.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../chatroom/component/message.dart';
 import '../../chatroom/component/profile.dart';
-
 
 class ChatRoomMessage extends StatefulWidget {
   const ChatRoomMessage({
@@ -30,19 +28,17 @@ class _ChatRoomMessage extends State<ChatRoomMessage> {
   final Map<String, Profile> _profileCache = {};
   StreamSubscription<List<Message>>? _messagesListener;
 
-
   Future<void> readMessage(String roomid) async {
     await supabase
-  .from('messages')
-  .update({ 'is_read': true})
-  .eq('roomid', roomid)
-  .neq('profile_id', UserInfo().user!.id);
+        .from('messages')
+        .update({'is_read': true})
+        .eq('roomid', roomid)
+        .neq('profile_id', UserInfo().user!.id);
   }
-
 
   @override
   void initState() {
-    readMessage(widget.room_id);
+    // readMessage(widget.room_id);
     _messagesListener = supabase
         .from('messages')
         .stream(primaryKey: ['id'])
@@ -50,7 +46,7 @@ class _ChatRoomMessage extends State<ChatRoomMessage> {
         .eq('roomid', widget.room_id)
         .map((maps) => maps.map(Message.fromMap).toList())
         .listen((messages) {
-          
+          // readMessage(widget.room_id);
           setState(() {
             _messages = messages;
           });
@@ -139,8 +135,10 @@ class _ChatRoomMessage extends State<ChatRoomMessage> {
                         color: Theme.of(context).primaryColor,
                         size: 30,
                       ),
-                      onPressed: () =>
-                          Navigator.pop(context, '/chat')),
+                      onPressed: () async {
+                        await readMessage(widget.room_id);
+                        Navigator.pop(context, '/chat');
+                      }),
                   title: Text(widget.title,
                       style: GoogleFonts.nunito(
                           fontSize: 20,
@@ -195,15 +193,15 @@ class ChatBubble extends StatelessWidget {
           mainAxisAlignment: userId == message.profile_id
               ? MainAxisAlignment.end
               : MainAxisAlignment.start,
-              
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
               userId == message.profile_id
-                  ? DateFormat('hh:mm a').format(DateTime.parse(message.createdAt.toLocal().toString()))
+                  ? DateFormat('hh:mm a').format(
+                      DateTime.parse(message.createdAt.toLocal().toString()))
                   : '',
               style: const TextStyle(
-                fontSize: 12, 
+                fontSize: 12,
                 height: 2,
               ),
             ),
@@ -221,21 +219,19 @@ class ChatBubble extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                    constraints: BoxConstraints(maxWidth: 200),
-                    child: 
-                    Text(
-                      message.content,
-                      style: TextStyle(
-                          color: userId == message.profile_id
-                              ? Color.fromARGB(255, 255, 255, 255)
-                              : Colors.black,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500),
-
-                      softWrap:true,
-                      maxLines: 200,
-
-                    ),)
+                      constraints: BoxConstraints(maxWidth: 200),
+                      child: Text(
+                        message.content,
+                        style: TextStyle(
+                            color: userId == message.profile_id
+                                ? Color.fromARGB(255, 255, 255, 255)
+                                : Colors.black,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500),
+                        softWrap: true,
+                        maxLines: 200,
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -243,7 +239,8 @@ class ChatBubble extends StatelessWidget {
             SizedBox(width: 5),
             Text(
               !(userId == message.profile_id)
-                  ? DateFormat('hh:mm a').format(DateTime.parse(message.createdAt.toLocal().toString()))
+                  ? DateFormat('hh:mm a').format(
+                      DateTime.parse(message.createdAt.toLocal().toString()))
                   : '',
               style: const TextStyle(fontSize: 12, height: 2),
             ),
@@ -272,70 +269,69 @@ class _ChatFormState extends State<ChatForm> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(0.0),
-        child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Color.fromARGB(139, 221, 221, 221)),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color.fromARGB(255, 193, 193, 193),
-                  blurRadius: 4,
-                  offset: Offset(0, 0), // Shadow position
-                ),
-              ],
-            ),
-            child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _textController,
-                        decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                width: 0,
-                                color: Color.fromARGB(0, 255, 255, 255)),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          hintText: 'Type something',
-                          fillColor: Color.fromARGB(255, 228, 228, 228),
-                          filled: true,
+      child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Color.fromARGB(139, 221, 221, 221)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color.fromARGB(255, 193, 193, 193),
+                blurRadius: 4,
+                offset: Offset(0, 0), // Shadow position
+              ),
+            ],
+          ),
+          child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _textController,
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              width: 0,
+                              color: Color.fromARGB(0, 255, 255, 255)),
+                          borderRadius: BorderRadius.circular(10),
                         ),
+                        hintText: 'Type something',
+                        fillColor: Color.fromARGB(255, 228, 228, 228),
+                        filled: true,
                       ),
                     ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    SizedBox(
-                        height: 50.0,
-                        width: 50.0,
-                        child: IconButton.filled(
-                            style: ElevatedButton.styleFrom(elevation: 3),
-                            onPressed: () async {
-                              final text = _textController.text;
-                              if (text.isEmpty) {
-                                return;
-                              }
-                              _textController.clear();
-                              final res = await Supabase.instance.client
-                                  .from('messages')
-                                  .insert({
-                                'roomid': widget.roomid,
-                                'profile_id': UserInfo().user!.id,
-                                'content': text,
-                                
-                              });
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  SizedBox(
+                      height: 50.0,
+                      width: 50.0,
+                      child: IconButton.filled(
+                          style: ElevatedButton.styleFrom(elevation: 3),
+                          onPressed: () async {
+                            final text = _textController.text;
+                            if (text.isEmpty) {
+                              return;
+                            }
+                            _textController.clear();
+                            final res = await Supabase.instance.client
+                                .from('messages')
+                                .insert({
+                              'roomid': widget.roomid,
+                              'profile_id': UserInfo().user!.id,
+                              'content': text,
+                            });
 
-                              final error = res.error;
-                              if (error != null && mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(error.message)));
-                              }
-                            },
-                            icon: const Icon(Icons.send))),
-                  ],
-                ))),
+                            final error = res.error;
+                            if (error != null && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(error.message)));
+                            }
+                          },
+                          icon: const Icon(Icons.send))),
+                ],
+              ))),
     );
   }
 

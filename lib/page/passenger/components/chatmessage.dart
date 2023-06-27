@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,8 +8,7 @@ import 'package:paigun/provider/userinfo.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../chatroom/component/message.dart';
 import '../../chatroom/component/profile.dart';
-import '../../chatroom/component/room.dart';
-import '../../components/sizeappbar.dart';
+
 
 class ChatRoomMessage extends StatefulWidget {
   const ChatRoomMessage({
@@ -140,7 +139,7 @@ class _ChatRoomMessage extends State<ChatRoomMessage> {
                         size: 30,
                       ),
                       onPressed: () =>
-                          Navigator.pushReplacementNamed(context, '/chat')),
+                          Navigator.pop(context, '/chat')),
                   title: Text(widget.title,
                       style: GoogleFonts.nunito(
                           fontSize: 20,
@@ -272,7 +271,6 @@ class _ChatFormState extends State<ChatForm> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(0.0),
-      child: Expanded(
         child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -336,7 +334,6 @@ class _ChatFormState extends State<ChatForm> {
                             icon: const Icon(Icons.send))),
                   ],
                 ))),
-      ),
     );
   }
 

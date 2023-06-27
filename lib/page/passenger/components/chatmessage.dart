@@ -3,7 +3,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:paigun/function/show_snackbar.dart';
+import 'package:paigun/page/passenger/components/chatroom.dart';
 import 'package:paigun/provider/userinfo.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../chatroom/component/message.dart';
@@ -33,8 +35,10 @@ class _ChatRoomMessage extends State<ChatRoomMessage> {
     await supabase
   .from('messages')
   .update({ 'is_read': true})
-  .eq('roomid', roomid);
+  .eq('roomid', roomid)
+  .neq('profile_id', UserInfo().user!.id);
   }
+
 
   @override
   void initState() {
@@ -46,15 +50,12 @@ class _ChatRoomMessage extends State<ChatRoomMessage> {
         .eq('roomid', widget.room_id)
         .map((maps) => maps.map(Message.fromMap).toList())
         .listen((messages) {
-          print(messages);
+          readMessage(widget.room_id);
           setState(() {
             _messages = messages;
           });
         });
 
-    print(widget.title);
-    print(_messages);
-    print('fetch done bro');
     super.initState();
   }
 
@@ -199,7 +200,7 @@ class ChatBubble extends StatelessWidget {
           children: [
             Text(
               userId == message.profile_id
-                  ? '${message.createdAt.hour}:${message.createdAt.minute}'
+                  ? DateFormat('hh:mm a').format(DateTime.parse(message.createdAt.toLocal().toString()))
                   : '',
               style: const TextStyle(
                 fontSize: 12, 
@@ -242,7 +243,7 @@ class ChatBubble extends StatelessWidget {
             SizedBox(width: 5),
             Text(
               !(userId == message.profile_id)
-                  ? '${message.createdAt.hour}:${message.createdAt.minute}'
+                  ? DateFormat('hh:mm a').format(DateTime.parse(message.createdAt.toLocal().toString()))
                   : '',
               style: const TextStyle(fontSize: 12, height: 2),
             ),
@@ -323,6 +324,7 @@ class _ChatFormState extends State<ChatForm> {
                                 'roomid': widget.roomid,
                                 'profile_id': UserInfo().user!.id,
                                 'content': text,
+                                
                               });
 
                               final error = res.error;

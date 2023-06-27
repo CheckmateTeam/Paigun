@@ -66,22 +66,22 @@ class PassDB extends ChangeNotifier {
 
   Future<String> getJourneyStatus(String jid) async {
     try {
-      final fetch = await dio.get(
-        '/journey',
-        queryParameters: {
-          'type': 'getjourneystatus',
-          'userid': user!.id,
-          'journeyid': jid
-        },
-      );
-      final response = fetch.data;
-      // final response = await supabase
-      //     .from('user_journey')
-      //     .select('status')
-      //     .eq('user_id', user!.id)
-      //     .eq('journey_id', jid)
-      //     .limit(1)
-      //     .single();
+      // final fetch = await dio.get(
+      //   '/journey',
+      //   queryParameters: {
+      //     'type': 'getjourneystatus',
+      //     'userid': user!.id,
+      //     'journeyid': jid
+      //   },
+      // );
+      // final response = fetch.data;
+      final response = await supabase
+          .from('user_journey')
+          .select('status')
+          .eq('user_id', user!.id)
+          .eq('journey_id', jid)
+          .limit(1)
+          .single();
       return response['status'];
     } catch (e) {
       print(e);
@@ -440,7 +440,6 @@ class PassDB extends ChangeNotifier {
     }
   }
 
-
   Future<String> gotoRoom(String user1, String user2) async {
     var room;
     var finalRoom;
@@ -453,25 +452,18 @@ class PassDB extends ChangeNotifier {
 
     if (!isExist) {
       room = await Supabase.instance.client.from('rooms').insert({}).select();
-      await 
-      supabase
-      .from('room_participants')
-      .insert({
-        'profile_id':user1,
+      await supabase.from('room_participants').insert({
+        'profile_id': user1,
         'room_id': room[0]['id'],
       });
 
-      await 
-      supabase
-      .from('room_participants')
-      .insert({
-        'profile_id':user2,
+      await supabase.from('room_participants').insert({
+        'profile_id': user2,
         'room_id': room[0]['id'],
       });
 
       finalRoom = room[0]['id'];
-    } 
-    else {
+    } else {
       room1 = await supabase
           .from('room_participants')
           .select('room_id')
@@ -497,9 +489,6 @@ class PassDB extends ChangeNotifier {
     }
     return finalRoom;
   }
-
-
-  
 
   Future<dynamic> getBoard() async {
     try {

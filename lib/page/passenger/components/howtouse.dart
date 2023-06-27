@@ -38,29 +38,30 @@ class _TutorialPageState extends State<TutorialPage> {
       totalPage: 6,
       headerBackgroundColor: Colors.white,
       pageBackgroundColor: Colors.white,
+      centerBackground: true,
       background: [
         Image.asset(
-          'assets/images/slide1.png',
+          'assets/images/logo.png',
           height: 600,
         ),
         Image.asset(
-          'assets/images/slide2.png',
+          'assets/images/search.png',
           height: 600,
         ),
         Image.asset(
-          'assets/images/slide3.png',
+          'assets/images/hitchhiker.png',
           height: 600,
         ),
         Image.asset(
-          'assets/images/slide4.png',
+          'assets/images/immigration.png',
           height: 600,
         ),
         Image.asset(
-          'assets/images/slide5.png',
+          'assets/images/marker3.png',
           height: 600,
         ),
         Image.asset(
-          'assets/images/slide6.png',
+          'assets/images/talking.png',
           height: 600,
         ),
       ],
@@ -78,7 +79,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 480,
               ),
               Text(
-                'Welcome to checkmate!',
+                'Welcome to PaiGun',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
@@ -90,7 +91,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 20,
               ),
               const Text(
-                'A calendar style app that helps you to manage your tasks.',
+                'A ride-sharing platform for cross-city travel',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.black26,
@@ -113,7 +114,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 500,
               ),
               Text(
-                'Fun with challenges!',
+                'Search for destination',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
@@ -125,7 +126,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 20,
               ),
               const Text(
-                'You can enter challenge only after you completed all tasks in a day.',
+                'Near by routes show their destination',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.black26,
@@ -148,7 +149,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 480,
               ),
               Text(
-                'Adding your own tasks!',
+                'Join a ride',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
@@ -160,7 +161,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 20,
               ),
               const Text(
-                'You can add your own tasks by clicking the add button on the middle bottom navigation.',
+                'View the detail of the ride and request to join the ride',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.black26,
@@ -183,7 +184,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 480,
               ),
               Text(
-                'Coming with reminder!',
+                'Verification',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
@@ -195,7 +196,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 20,
               ),
               const Text(
-                'Reminder will be sent to you when you have a task to do.',
+                'Easy to identify their identity by using citizen id and driver license',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.black26,
@@ -218,7 +219,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 480,
               ),
               Text(
-                'Keeping all your stats!',
+                'Create a ride',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
@@ -230,7 +231,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 20,
               ),
               const Text(
-                'You can see your task stats in the stats page in week month or year.',
+                'Driver can create the ride with the detail of the trip like origin, destination, etc.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.black26,
@@ -253,7 +254,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 480,
               ),
               Text(
-                'Start now!',
+                'Chat',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
@@ -265,7 +266,7 @@ class _TutorialPageState extends State<TutorialPage> {
                 height: 20,
               ),
               const Text(
-                'Start using checkmate to manage your tasks.',
+                'Paigun application allows user message to each other between driver and joiner',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.black26,
